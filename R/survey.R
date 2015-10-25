@@ -1,13 +1,31 @@
-#' @import data.table
-#' @import stringi
+#' @import data.table stringi
 
-survey <- function(srv) {
+survey <- function(x) {
 
-  srv <- as.data.table(srv)
-  setattr(srv, "class", c("survey", "data.table", "data.frame"))
-  srv
+  x <- data.table::copy(x)
+
+  data.table::setDT(x)
+  data.table::setattr(x, "class", c("survey", "data.table", "data.frame"))
+  data.table::setattr(x, "labels", vector("character", length = ncol(x)))
+
+  x
 
 }
+
+#' @export
+"[.survey" <- function(x, ...) {
+
+  x <- data.table:::"[.data.table"(x, ...)
+
+  # Update labels
+  lbls <- attr(x, "labels"); nms <- names(x)
+  setattr(x, "labels", ifelse(lbls == "", nms, lbls))
+  x
+
+}
+
+#' @export
+"[[.survey" <- function(...) NextMethod()
 
 set_association <- function(srv, ...) {
 
@@ -52,9 +70,3 @@ get_association <- function(srv, associations) {
 
 #' @export
 .datatable.aware <- TRUE
-
-#' @export
-"[.survey" <- function(...) NextMethod()
-
-#' @export
-"[[.survey" <- function(...) NextMethod()
