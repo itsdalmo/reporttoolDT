@@ -8,6 +8,9 @@ survey <- function(x) {
   data.table::setattr(x, "class", c("survey", "data.table", "data.frame"))
   data.table::setattr(x, "labels", vector("character", length = ncol(x)))
 
+  # Additional attributes
+
+
   x
 
 }
