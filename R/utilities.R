@@ -62,6 +62,17 @@ intranet_link <- function(https) {
 
 }
 
+#' @export
+join_strings <- function(x, conjunction = "and") {
+
+  stopifnot(is.character(x))
+  if (length(x) == 1L) {
+    x
+  } else {
+    stri_c(stri_c(x[1:(length(x)-1)], collapse = ", "), conjunction, x[length(x)], sep = " ")
+  }
+}
+
 # MISC -------------------------------------------------------------------------
 
 clean_path <- function(path) {

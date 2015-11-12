@@ -1,22 +1,37 @@
-#' @import data.table stringi
-
 survey <- function(x) {
 
   x <- data.table::copy(x)
+  tmp <- rep(NA_character_, ncol(x))
 
   data.table::setDT(x)
   data.table::setattr(x, "class", c("survey", "data.table", "data.frame"))
 
   # Additional attributes
-  fill_char <- setNames(rep(NA_character_, length = ncol(x)), names(x))
-
-  data.table::setattr(x, "labels", fill_char)
-  data.table::setattr(x, "associations", fill_char)
-  data.table::setattr(x, "marketshares", NULL)
+  setattr(x, "associations", setNames(tmp, names(x)))
+  setattr(x, "labels", setNames(tmp, names(x)))
+  setattr(x, "marketshares", NA)
+  setattr(x, "config", NA)
+  setattr(x, "translations", NA)
 
   x
 
 }
+
+# is/as ------------------------------------------------------------------------
+
+#' @export
+is.survey <- function(x) inherits(x, "survey")
+
+#' @export
+as.survey <- function(x) UseMethod("as.survey")
+
+#' @export
+as.survey.survey <- function(x) x
+
+#' @export
+as.survey.default <- function(x) survey(x)
+
+# Basic operations -------------------------------------------------------------
 
 #' @export
 "[.survey" <- function(x, ...) {
@@ -33,44 +48,26 @@ survey <- function(x) {
 #' @export
 "[[.survey" <- function(...) NextMethod()
 
-set_association <- function(srv, ...) {
-
-  dots <- list(...)
-  asso <- attr(srv, "associations")
-
-  missing <- setdiff(unlist(dots), names(asso))
-  if (length(missing)) {
-    missing <- stri_c(missing, collapse = ", ")
-    stop("The following variables were not found in the data:\n", missing, call. = FALSE)
-  }
-
-  for (i in names(dots)) {
-    asso[names(asso) %in% dots[[i]]] <- i
-  }
-
-  setattr(srv, "associations", asso)
-
-}
-
-get_association <- function(srv, associations) {
-
-  res <- attr(srv, "associations")
-  if (is.null(res) || all(is.na(res))) return(NULL)
-
-  missing <- setdiff(associations, unique(res))
-  if (length(missing)) {
-    associations <- setdiff(associations, missing)
-    if (!length(associations)) {
-      stop("None of the associations were found.", call. = FALSE)
-    } else {
-      missing <- stri_c(missing, collapse = ", ")
-      warning("The following associations were not found:\n", missing, call. = FALSE)
-    }
-  }
-
-  names(res)[res %in% associations]
-
-}
+#' @export
+"$<-.survey" <- function(...) NextMethod()
 
 #' @export
-.datatable.aware <- TRUE
+"names<-.survey" <- function(x, value) {
+  data.table::setnames(x, value)
+}
+
+# Split/join -------------------------------------------------------------------
+
+rbind.survey <- function(..., use.names = TRUE, fill = FALSE, idcol = NULL) {
+
+  x <- list(...)
+  print("survey")
+#   # Keep attributes
+#   is_survey <- vapply(x, is.survey, logical(1))
+#   if (any(is_survey)) {
+#     att <- lapply(x[is_survey], attributes)
+#   }
+
+  data.table::rbindlist(x, use.names, fill, idcol)
+
+}
