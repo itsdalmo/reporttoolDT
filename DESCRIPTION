@@ -9,5 +9,7 @@ License: What license is it under?
 LazyData: TRUE
 Depends:
   data.table
+Imports:
+  stringi
 Suggests:
   testthat

@@ -6,10 +6,13 @@ survey <- function(x) {
 
   data.table::setDT(x)
   data.table::setattr(x, "class", c("survey", "data.table", "data.frame"))
-  data.table::setattr(x, "labels", vector("character", length = ncol(x)))
 
   # Additional attributes
+  fill_char <- setNames(rep(NA_character_, length = ncol(x)), names(x))
 
+  data.table::setattr(x, "labels", fill_char)
+  data.table::setattr(x, "associations", fill_char)
+  data.table::setattr(x, "marketshares", NULL)
 
   x
 
@@ -33,41 +36,39 @@ survey <- function(x) {
 set_association <- function(srv, ...) {
 
   dots <- list(...)
+  asso <- attr(srv, "associations")
 
-  missing <- setdiff(unlist(dots), names(srv))
+  missing <- setdiff(unlist(dots), names(asso))
   if (length(missing)) {
     missing <- stri_c(missing, collapse = ", ")
     stop("The following variables were not found in the data:\n", missing, call. = FALSE)
   }
 
-  res <- vector("character", ncol(srv))
-  res <- NA
-
   for (i in names(dots)) {
-    res[names(srv) %in% dots[[i]]] <- i
+    asso[names(asso) %in% dots[[i]]] <- i
   }
 
-  setattr(srv, "association", unname(res))
-
+  setattr(srv, "associations", asso)
 
 }
 
 get_association <- function(srv, associations) {
 
-  res <- attr(srv, "association")
+  res <- attr(srv, "associations")
   if (is.null(res) || all(is.na(res))) return(NULL)
 
   missing <- setdiff(associations, unique(res))
   if (length(missing)) {
     associations <- setdiff(associations, missing)
-    missing <- stri_c(missing, collapse = ", ")
-    warning("The following associations were not found:\n", missing, call. = FALSE)
+    if (!length(associations)) {
+      stop("None of the associations were found.", call. = FALSE)
+    } else {
+      missing <- stri_c(missing, collapse = ", ")
+      warning("The following associations were not found:\n", missing, call. = FALSE)
+    }
   }
 
-  res <- names(srv)[res %in% associations]
-  if (!length(res)) return(NULL)
-
-  res
+  names(res)[res %in% associations]
 
 }
 
