@@ -1,4 +1,35 @@
 #' @export
+replace <- function(x, replacement, ignore_case = TRUE) {
+
+  if (is.character(replacement)) {
+    replacement <- as.list(replacement)
+  }
+
+  if (!is.list2(replacement)) {
+    stop("Expecting a named list or character vector.", call. = FALSE)
+  } else if (is.null(names(replacement)) || any(names(replacement) == "")) {
+    stop("All replacement arguments must be named.", call. = FALSE)
+  }
+
+  for (i in names(replacement)) {
+    old <- replacement[[i]]
+    new <- i
+
+    if (ignore_case) {
+      old_id <- stri_trans_tolower(x) %in% stri_trans_tolower(old)
+    } else {
+      old_id <- x %in% old
+    }
+
+    x[old_id] <- new
+
+  }
+
+  x
+
+}
+
+#' @export
 clean_score <- function(var) {
   if (is.factor(var)) var <- as.character(var)
   var <- stri_replace(var, replacement = "$1", regex = "([0-1]+).*$")
@@ -9,36 +40,6 @@ clean_score <- function(var) {
 rescale_score <- function(var) {
   stopifnot(!is.factor(var)); if (is.character(var)) var <- as.numeric(var)
   suppressWarnings(ifelse(var %in% 1:10, (as.numeric(var)-1)*(100/9), NA))
-}
-
-#' @export
-ordered_replace <- function(x, match_by, replacement = NULL) {
-
-  # Make sure a named vector is used if replacement is not specified
-  if (is.null(replacement)) {
-
-    if (is.null(attr(match_by, "names"))) {
-      stop("'match_by' must be a named vector or replacement must be specified.", call. = FALSE)
-    } else {
-      y <- match_by
-    }
-
-  } else {
-
-    if (length(match_by) == length(replacement)) {
-      y <- setNames(match_by, replacement)
-    } else {
-      stop("'match' and 'replace' must have same length.", call. = FALSE)
-    }
-  }
-
-  # Replace x with values from replace (based on 'match')
-  if (any(x %chin% y)) {
-    x[x %chin% y] <- names(y)[chmatch(x, y, nomatch = 0)]
-  }
-
-  x
-
 }
 
 #' @export
@@ -64,21 +65,21 @@ intranet_link <- function(https) {
 
 #' @export
 join_strings <- function(x, conjunction = "and") {
-
   stopifnot(is.character(x))
-  if (length(x) == 1L) {
-    x
-  } else {
-    stri_c(stri_c(x[1:(length(x)-1)], collapse = ", "), conjunction, x[length(x)], sep = " ")
-  }
+  if (length(x) == 1L) return(x)
+  stri_c(stri_c(x[1:(length(x)-1)], collapse = ", "), conjunction, x[length(x)], sep = " ")
 }
 
 # MISC -------------------------------------------------------------------------
+isFALSE <- function(x) identical(x, FALSE)
+is.string <- function(x) is.character(x) && length(x) == 1
+is.spss <- function(x) any(vapply(x, inherits, what = "labelled", logical(1)))
+is.list2 <- function(x) inherits(x, "list")
 
 clean_path <- function(path) {
 
   if (!is.string(path)) {
-    stop("Path is not a string (character(1)):\n", path, call. = FALSE)
+    stop("Path must be a string.", call. = FALSE)
   }
 
   # Normalize
@@ -95,7 +96,3 @@ filename_no_ext <- function(file)  {
   stri_replace(basename(file), "$1", regex = stri_c("(.*)\\.", tools::file_ext(file), "$"))
 }
 
-isFALSE <- function(x) identical(x, FALSE)
-is.string <- function(x) is.character(x) && length(x) == 1
-is.spss <- function(x) any(vapply(x, inherits, what = "labelled", logical(1)))
-is.list2 <- function(x) inherits(x, "list")
