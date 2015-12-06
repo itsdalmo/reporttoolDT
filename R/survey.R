@@ -1,18 +1,17 @@
 survey <- function(x) {
 
   x <- data.table::copy(x)
-  tmp <- rep(NA_character_, ncol(x))
-
-  data.table::setDT(x)
-  data.table::setattr(x, "class", c("survey", "data.table", "data.frame"))
+  x <- if (is.labelled(x)) as.data.table(from_labelled(x)) else as.data.table(x)
 
   # Additional attributes
-  setattr(x, "associations", setNames(tmp, names(x)))
-  setattr(x, "labels", setNames(tmp, names(x)))
+  setattr(x, "associations", update_associations(x))
+  setattr(x, "labels", update_labels(x))
   setattr(x, "marketshares", NA)
-  setattr(x, "config", NA)
-  setattr(x, "translations", NA)
+  setattr(x, "translations", with(default$translation, setNames(norwegian, required)))
+  setattr(x, "config", with(default$config, setNames(value, setting)))
 
+  # Return
+  setattr(x, "class", c("survey", "data.table", "data.frame"))
   x
 
 }
@@ -46,10 +45,16 @@ as.survey.default <- function(x) survey(x)
 }
 
 #' @export
-"[[.survey" <- function(...) NextMethod()
+"[[.survey" <- function(x, i, j, ...) {
+  x <- NextMethod()
+  update_survey_attributes(x)
+}
 
 #' @export
-"$<-.survey" <- function(...) NextMethod()
+"$<-.survey" <- function(x, i, j, ...) {
+  x <- NextMethod()
+  update_survey_attributes(x)
+}
 
 #' @export
 "names<-.survey" <- function(x, value) {
@@ -57,17 +62,47 @@ as.survey.default <- function(x) survey(x)
 }
 
 # Split/join -------------------------------------------------------------------
-
+#' @export
+rbind <- function(...) UseMethod("rbind")
+#' @export
+cbind <- function(...) UseMethod("cbind")
+#' @export
+rbind.default <- function(..., use.names = TRUE, fill = FALSE, idcol = NULL) {
+  base::rbind(..., use.names = use.names, fill = fill, idcol = idcol)
+}
+#' @export
+cbind.default <- function(...) {
+  base::cbind(...)
+}
+#' @export
 rbind.survey <- function(..., use.names = TRUE, fill = FALSE, idcol = NULL) {
+  dots <- list(...); atts <- merge_attributes(dots)
+  s <- survey(data.table::rbindlist(dots, use.names = use.names, fill = fill, idcol = idcol))
+  attributes(s) <- atts
+}
+#' @export
+cbind.survey <- function(...) {
 
-  x <- list(...)
-  print("survey")
-#   # Keep attributes
-#   is_survey <- vapply(x, is.survey, logical(1))
-#   if (any(is_survey)) {
-#     att <- lapply(x[is_survey], attributes)
-#   }
+  s <- survey(base::cbind.data.frame(...))
+}
 
-  data.table::rbindlist(x, use.names, fill, idcol)
+merge_attributes <- function(...) {
+  old <- lapply(list(...), get_attributes, which = c("associations", "labels", "marketshares"))
+  old <- old[!vapply(old, is.null, logical(1))]
+  if (length(old) == 1L) return(old)
 
+  res <- old[[1]]; old <- old[[-1]]
+  for (x in old) {
+    res <- suppressWarnings(Map(function(n, o) { c(n, o[setdiff(names(o), names(n))]) }, res, x))
+  }
+  res
+}
+
+get_attributes <- function(x, which) {
+  if (is.survey(x)) {
+    a <- attributes(x)
+    a[names(a) %in% which]
+  } else {
+    NULL
+  }
 }
