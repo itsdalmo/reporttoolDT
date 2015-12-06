@@ -10,6 +10,10 @@ LazyData: TRUE
 Depends:
     data.table
 Imports:
+    haven,
+    openxlsx,
+    readr,
+    readxl,
     stringi
 Suggests:
     testthat
