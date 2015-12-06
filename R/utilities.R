@@ -67,11 +67,11 @@ join_strings <- function(x, conjunction = "and") {
   stri_c(stri_c(x[1:(length(x)-1)], collapse = ", "), conjunction, x[length(x)], sep = " ")
 }
 
-# MISC -------------------------------------------------------------------------
-isFALSE <- function(x) identical(x, FALSE)
-is.string <- function(x) is.character(x) && length(x) == 1
-is.labelled <- function(x) any(vapply(x, inherits, what = "labelled", logical(1)))
-is.list2 <- function(x) inherits(x, "list")
+# ------------------------------------------------------------------------------
+
+match_all <- function(x, table) {
+  unlist(lapply(x, function(x) which(table == x)))
+}
 
 clean_path <- function(path) {
 
@@ -92,3 +92,7 @@ clean_path <- function(path) {
 filename_no_ext <- function(file)  {
   stri_replace(basename(file), "$1", regex = stri_c("(.*)\\.", tools::file_ext(file), "$"))
 }
+
+is.string <- function(x) is.character(x) && length(x) == 1
+is.labelled <- function(x) any(vapply(x, inherits, what = "labelled", logical(1)))
+is.list2 <- function(x) inherits(x, "list")
