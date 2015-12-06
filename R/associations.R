@@ -1,5 +1,3 @@
-
-
 #' @export
 set_association <- function(srv, ...) {
 
@@ -20,10 +18,10 @@ set_association <- function(srv, ...) {
 }
 
 #' @export
-get_association <- function(srv, associations) {
+get_association <- function(srv, associations, order = TRUE) {
 
+  stopifnot(is.survey(srv))
   res <- attr(srv, "associations")
-  if (is.null(res) || all(is.na(res))) return()
 
   missing <- setdiff(associations, unique(res))
   if (length(missing)) {
@@ -35,6 +33,11 @@ get_association <- function(srv, associations) {
     }
   }
 
-  names(res)[res %in% associations]
+  # Return
+  if (order) {
+    names(res)[match_all(associations, res)]
+  } else {
+    names(res)[res %in% associations]
+  }
 
 }
