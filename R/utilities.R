@@ -38,23 +38,20 @@ clean_score <- function(var) {
 
 #' @export
 rescale_score <- function(var) {
-  stopifnot(!is.factor(var)); if (is.character(var)) var <- as.numeric(var)
+  if (is.factor(var)) stop("Cannot coerce factor to numeric.", call. = FALSE)
   suppressWarnings(ifelse(var %in% 1:10, (as.numeric(var)-1)*(100/9), NA))
 }
 
 #' @export
 intranet_link <- function(https) {
 
-
   if (Sys.info()["sysname"] != "Windows") {
-    warning("This function only works with a network drive on windows.", call. = FALSE)
+    stop("This function only works with a network drive on windows.", call. = FALSE)
   } else {
-
     # If you are on windows and a http(s) link ends with .se
     if (stri_detect(https, regex = "^https?://.*[^/]\\.se/.*")) {
       domain <- stri_replace(https, "$1", regex = "^https?://(.[^/]*)/.*")
-      folder <- stri_replace(https, "$1", regex = paste0(".*", domain, "(.*)"))
-
+      folder <- stri_replace(https, "$1", regex = stri_c(".*", domain, "(.*)"))
       https <- stri_c("\\\\", domain, "@SSL/DavWWWRoot", folder)
     }
   }
@@ -73,7 +70,7 @@ join_strings <- function(x, conjunction = "and") {
 # MISC -------------------------------------------------------------------------
 isFALSE <- function(x) identical(x, FALSE)
 is.string <- function(x) is.character(x) && length(x) == 1
-is.spss <- function(x) any(vapply(x, inherits, what = "labelled", logical(1)))
+is.labelled <- function(x) any(vapply(x, inherits, what = "labelled", logical(1)))
 is.list2 <- function(x) inherits(x, "list")
 
 clean_path <- function(path) {
@@ -95,4 +92,3 @@ clean_path <- function(path) {
 filename_no_ext <- function(file)  {
   stri_replace(basename(file), "$1", regex = stri_c("(.*)\\.", tools::file_ext(file), "$"))
 }
-
