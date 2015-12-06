@@ -58,7 +58,7 @@ default <- list(
   "config" = list(
     "setting" = c("reporttool", "study", "segment", "year", "period", "method",
                   "language", "cutoff", "latents", "marketshares"),
-    "value" = c("1.4", "Barnehage", "", "2015", "fall", "web", "norwegian", .3, "mean", "no")
+    "value" = c("1.4", "Example", "", "2015", "fall", "web", "norwegian", .3, "mean", "no")
   ),
 
   "template" = list(
