@@ -3,7 +3,7 @@ survey <- function(x) {
   x <- as.data.table(x)
 
   # Attributes and return
-  update_attributes(x)
+  set_survey_attr(x)
   x
 
 }
@@ -28,21 +28,21 @@ as.survey.default <- function(x) survey(x)
 #' @export
 "[.survey" <- function(x, ...) {
   x <- data.table:::"[.data.table"(x, ...)
-  update_attributes(x)
+  set_survey_attr(x)
   x
 }
 
 #' @export
 "[<-.survey" <- function(x, i, j, ...) {
   x <- NextMethod()
-  update_attributes(x)
+  set_survey_attr(x)
   x
 }
 
 #' @export
 "$<-.survey" <- function(x, i, j, ...) {
   x <- NextMethod()
-  update_attributes(x)
+  set_survey_attr(x)
   x
 }
 
@@ -73,28 +73,25 @@ cbind.default <- function(...) {
 
 #' @export
 rbind.survey <- function(..., use.names = TRUE, fill = FALSE, idcol = NULL) {
-  d <- list(...)
-  a <- merge_attributes(lapply(d, function(x) if (is.survey(x)) attributes(x)))
-  x <- data.table::rbindlist(d, use.names = use.names, fill = fill, idcol = idcol)
-  x <- structure(x, class = c("survey", "data.table", "data.frame"))
-  update_attributes(x, old = a)
+  dots <- list(...); oa <- lapply(dots, get_survey_attr)
+  x <- data.table::rbindlist(dots, use.names = use.names, fill = fill, idcol = idcol)
+  set_survey_attr(x, old = oa)
   x
 }
 
 #' @export
 cbind.survey <- function(...) {
-  a <- merge_attributes(lapply(list(...), function(x) if (is.survey(x)) attributes(x)))
-  x <- data.table::data.table(...)
-  x <- structure(x, class = c("survey", "data.table", "data.frame"))
-  update_attributes(x, old = a)
+  dots <- list(...); oa <- lapply(dots, get_survey_attr)
+  x <- data.table::data.table(dots)
+  set_survey_attr(x, old = oa)
   x
 }
 
 # Merge/join -------------------------------------------------------------------
 #' @export
 merge.survey <- function(x, y, ...) {
-  a <- merge_attributes(lapply(list(x, y), function(x) if (is.survey(x)) attributes(x)))
+  dots <- list(x, y); oa <- lapply(dots, get_survey_attr)
   x <- NextMethod()
-  update_attributes(x, old = a)
-  structure(x, class = c("survey", "data.table", "data.frame"))
+  set_survey_attr(x, old = oa)
+  x
 }
