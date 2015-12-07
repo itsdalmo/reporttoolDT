@@ -1,6 +1,11 @@
 set_survey_attr <- function(x, old = NULL) {
   setattr(x, "class", c("survey", "data.table", "data.frame"))
-  old <- merge_attributes(list(old, get_survey_attr(x)))
+
+  if (is.null(old)) {
+    old <- get_survey_attr(x)
+  } else {
+    old <- merge_attributes(list(old, get_survey_attr(x)))
+  }
 
   setattr(x, "labels", update_named_attr(names(x), old[["labels"]]))
   setattr(x, "associations", update_named_attr(names(x), old[["associations"]]))
