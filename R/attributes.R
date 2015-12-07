@@ -28,7 +28,9 @@ merge_attributes <- function(x) {
 
   for (a in old) {
     nms <- intersect(names(new), names(a))
-    new[nms] <- suppressWarnings(Map(function(na, oa) { c(na, oa[setdiff(names(oa), names(na))]) }, new[nms], a[nms]))
+    new[nms] <- suppressWarnings(Map(function(na, oa) {
+      c(na[!is.na(na)], oa[setdiff(names(oa), names(na))])
+      }, new[nms], a[nms]))
   }
 
   new
