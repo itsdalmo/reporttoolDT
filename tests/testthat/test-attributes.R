@@ -1,10 +1,11 @@
-context("set/get associations")
+context("update/merge attributes")
 
-x <- data.frame("Q1" = c("Example 1", "Example 2"), "Score" = c(8, 9), stringsAsFactors = FALSE)
+x <- list("config" = setNames(c("yes", "no", NA), c("foo", "bar", "zoo")))
+y <- list("config" = setNames(c("no", NA, "new"), c("foo", "bar", "zoo")))
 
-test_that("Setting association works", {
+test_that("Merging attributes works", {
 
-  y <- survey(x)
+  z <- merge_attributes(list(x, y))
   y <- set_association(y, mainentity = "Q1")
 
   expect_true(inherits(y, "survey"))

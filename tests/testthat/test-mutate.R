@@ -8,7 +8,7 @@ test_that("Creating a new survey", {
   y <- survey(x)
   z <- rbind(y, x)
   expect_true(is.survey(z))
-  expect_true(all(default$attributes %in% names(attributes(z))))
+  expect_true(all(c("labels", "associations", "translations", "config") %in% names(attributes(z))))
 
   # New columns in first DT
   y[, d := "test"]

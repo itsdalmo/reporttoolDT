@@ -1,6 +1,6 @@
 #' @export
 set_association <- function(srv, ...) {
-
+  stopifnot(is.survey(srv))
   dots <- list(...)
   asso <- attr(srv, "associations")
 
@@ -19,7 +19,6 @@ set_association <- function(srv, ...) {
 
 #' @export
 get_association <- function(srv, associations, order = TRUE) {
-
   stopifnot(is.survey(srv))
   res <- attr(srv, "associations")
 
@@ -27,7 +26,7 @@ get_association <- function(srv, associations, order = TRUE) {
   if (length(missing)) {
     associations <- setdiff(associations, missing)
     if (!length(associations)) {
-      stop("None of the associations were found.")
+      return()
     } else {
       warning("The following associations were not found:\n", join_strings(missing))
     }
