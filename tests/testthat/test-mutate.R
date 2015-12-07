@@ -7,9 +7,20 @@ test_that("Creating a new survey", {
   # Same columns
   y <- survey(x)
   z <- rbind(y, x)
+  expect_true(is.survey(z))
+  expect_true(all(default$attributes %in% names(attributes(z))))
 
-  # New columns
-  expect_error(rbind(z, y[, d := "test"]))
-  z <- rbind(z, y, fill = TRUE)
+  # New columns in first DT
+  y[, d := "test"]
+  y <- set_association(y, "test" = "d")
+  z <- rbind(y, x, fill = TRUE)
+  expect_identical(unname(attr(z, "associations")), c(NA, NA, "test"))
+
+  # New columns in second DT
+  z <- rbind(survey(x), y, fill = TRUE)
+  expect_identical(unname(attr(z, "associations")), c(NA, NA, "test"))
+
+  # Joins
+  z <- merge(y, x, by = c("Q1", "Score"))
 
 })

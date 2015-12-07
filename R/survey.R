@@ -83,10 +83,10 @@ cbind.default <- function(...) {
 
 #' @export
 rbind.survey <- function(..., use.names = TRUE, fill = FALSE, idcol = NULL) {
-
-  dots <- list(...); atts <- merge_attributes(dots)
-  s <- survey(data.table::rbindlist(dots, use.names = use.names, fill = fill, idcol = idcol))
-  attributes(s) <- atts
+  dots <- list(...); oa <- merge_attributes(lapply(dots, get_attributes))
+  res <- data.table::rbindlist(dots, use.names = use.names, fill = fill, idcol = idcol)
+  attributes(res) <- append(attributes(res), oa[setdiff(names(oa), names(attributes(res)))])
+  structure(res, class = c("survey", "data.table", "data.frame"))
 }
 
 #' @export
@@ -95,16 +95,24 @@ cbind.survey <- function(...) {
   s
 }
 
-merge_attributes <- function(...) {
-  old <- lapply(list(...), get_attributes)
-  old <- old[!vapply(old, is.null, logical(1))]
-  if (length(old) == 1L) return(old)
+#' @export
+merge.survey <- function(x, y, ...) {
+  dots <- list(x, y); oa <- merge_attributes(lapply(dots, get_attributes))
+  res <- NextMethod()
+  attributes(res) <- append(attributes(res), oa[setdiff(names(oa), names(attributes(res)))])
+  structure(res, class = c("survey", "data.table", "data.frame"))
+}
 
-  res <- old[[1]]; old <- old[[-1]]
+merge_attributes <- function(old) {
+  old <- old[!vapply(old, is.null, logical(1))]
+  if (length(old) == 1L) return(old[[1]])
+
+  new <- old[[1]]; old <- old[-1]
   for (x in old) {
-    res <- suppressWarnings(Map(function(n, o) { c(n, o[setdiff(names(o), names(n))]) }, res, x))
+    new <- suppressWarnings(Map(function(n, o) { c(n, o[setdiff(names(o), names(n))]) }, new, x))
   }
-  res
+  new
+
 }
 
 get_attributes <- function(x, which = default$attributes) {
