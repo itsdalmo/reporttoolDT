@@ -74,19 +74,11 @@ match_all <- function(x, table) {
 }
 
 clean_path <- function(path) {
-
-  if (!is.string(path)) {
-    stop("Path must be a string.", call. = FALSE)
-  }
-
-  # Normalize
+  if (!is.string(path)) stop("Path must be a string.", call. = FALSE)
   if (!stri_detect(path, regex = "^(/|[A-Za-z]:|\\\\|~)")) {
     path <- normalizePath(path, "/", mustWork = FALSE)
   }
-
-  # Remove trailing slashes and return
   stri_replace(path, "", regex = "/$")
-
 }
 
 filename_no_ext <- function(file)  {

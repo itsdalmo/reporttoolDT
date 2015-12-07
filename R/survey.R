@@ -34,60 +34,69 @@ as.survey.default <- function(x) survey(x)
 
 #' @export
 "[.survey" <- function(x, ...) {
-
   x <- data.table:::"[.data.table"(x, ...)
-
-  # Update labels
-  lbls <- attr(x, "labels"); nms <- names(x)
-  setattr(x, "labels", ifelse(lbls == "", nms, lbls))
+  setattr(x, "labels", update_labels(x))
+  setattr(x, "associations", update_associations(x))
   x
-
 }
 
 #' @export
-"[[.survey" <- function(x, i, j, ...) {
+"[<-.survey" <- function(x, i, j, ...) {
   x <- NextMethod()
-  update_survey_attributes(x)
+  setattr(x, "labels", update_labels(x))
+  setattr(x, "associations", update_associations(x))
+  x
 }
 
 #' @export
 "$<-.survey" <- function(x, i, j, ...) {
   x <- NextMethod()
-  update_survey_attributes(x)
+  setattr(x, "labels", update_labels(x))
+  setattr(x, "associations", update_associations(x))
+  x
 }
 
 #' @export
 "names<-.survey" <- function(x, value) {
-  data.table::setnames(x, value)
+  x <- NextMethod()
+  setattr(x, "labels", setNames(attr(x, "labels"), names(x)))
+  setattr(x, "associations", setNames(attr(x, "labels"), names(x)))
+  x
 }
 
 # Split/join -------------------------------------------------------------------
 #' @export
 rbind <- function(...) UseMethod("rbind")
+
 #' @export
 cbind <- function(...) UseMethod("cbind")
+
 #' @export
 rbind.default <- function(..., use.names = TRUE, fill = FALSE, idcol = NULL) {
   base::rbind(..., use.names = use.names, fill = fill, idcol = idcol)
 }
+
 #' @export
 cbind.default <- function(...) {
   base::cbind(...)
 }
+
 #' @export
 rbind.survey <- function(..., use.names = TRUE, fill = FALSE, idcol = NULL) {
+
   dots <- list(...); atts <- merge_attributes(dots)
   s <- survey(data.table::rbindlist(dots, use.names = use.names, fill = fill, idcol = idcol))
   attributes(s) <- atts
 }
+
 #' @export
 cbind.survey <- function(...) {
-
   s <- survey(base::cbind.data.frame(...))
+  s
 }
 
 merge_attributes <- function(...) {
-  old <- lapply(list(...), get_attributes, which = c("associations", "labels", "marketshares"))
+  old <- lapply(list(...), get_attributes)
   old <- old[!vapply(old, is.null, logical(1))]
   if (length(old) == 1L) return(old)
 
@@ -98,10 +107,10 @@ merge_attributes <- function(...) {
   res
 }
 
-get_attributes <- function(x, which) {
+get_attributes <- function(x, which = default$attributes) {
   if (is.survey(x)) {
     a <- attributes(x)
-    a[names(a) %in% which]
+    a[names(a) %in% default$attributes]
   } else {
     NULL
   }

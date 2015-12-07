@@ -14,6 +14,7 @@ get_default <- function(string) {
 
 default <- list(
 
+  "attributes" = c("associations", "labels", "marketshares", "translations", "config"),
   "palette" =  c("#F8766D", "#00BFC4", "#808080", "#00BF7D", "#9590FF", "#A3A500", "#EA8331"),
   "latents" = c("image", "expect", "prodq", "servq", "value", "epsi", "loyal"),
   "na_strings" = c("NA", " ", "", "#DIV/0!", "#NULL!", "#NAVN?", "#NAME?"),

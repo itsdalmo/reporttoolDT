@@ -17,15 +17,11 @@ test_that("Getting associations work", {
   y <- survey(x)
 
   # No associations (NULL)
-  res <- get_association(y, "mainentity")
-  expect_true(is.null(res))
+  expect_error(get_association(y, "mainentity"))
 
   # Found association
   y <- set_association(y, mainentity = "Q1")
   res <- get_association(y, "mainentity")
   expect_identical(res, "Q1")
-
-  # Non existing association (NULL)
-  expect_error(get_association(y, "test"))
 
 })
