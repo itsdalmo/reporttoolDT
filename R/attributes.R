@@ -71,3 +71,59 @@ update_marketshares <- function(x, old = NULL) {
   update_attr(entities, old)
 
 }
+
+get_attr <- function(srv, which, matches = NULL,  arrange = TRUE, match_names = TRUE) {
+  stopifnot(is.survey(srv))
+  res <- attr(srv, which)
+
+  # Return early if matches is NULL
+  if (is.null(res)) {
+    stop("Attribute '", which, "' is not set.")
+  } else if (is.null(matches)) {
+    return(res)
+  }
+
+  # Return NULL if no matches and give warning if not everything 'matches'
+  missing <- setdiff(matches, unique(res))
+  if (length(missing)) {
+    matches <- setdiff(matches, missing)
+    if (!length(matches)) return()
+    warning("The following ", which, " were not found:\n", join_strings(missing))
+  }
+
+  # Match values or names
+  m <- if (match_names) names(res) else unname(res)
+
+  # Return
+  if (arrange) {
+    res[match_all(matches, m)]
+  } else {
+    res[m %in% matches]
+  }
+}
+
+set_attr <- function(srv, which, dots, match_names = TRUE) {
+  stopifnot(is.survey(srv))
+  res <- attr(srv, which)
+
+  # Set matches and replacements
+  if (match_names) {
+    m <- as.list(names(dots))
+    v <- unname(dots)
+  } else {
+    m <- unname(dots)
+    v <- as.list(names(dots))
+  }
+
+  missing <- setdiff(unlist(m), names(res))
+  if (length(missing)) {
+    stop("The following arguments were not found in the data:\n", join_strings(missing))
+  }
+
+  for (i in seq_along(m)) {
+    res[names(res) %in% m[[i]]] <- v[[i]]
+  }
+
+  setattr(srv, which, res)
+
+}
