@@ -1,29 +1,29 @@
-set_survey_attr <- function(x, old = NULL) {
+set_survey_attributes <- function(x, old = NULL) {
   setattr(x, "class", c("survey", "data.table", "data.frame"))
 
   if (is.null(old)) {
-    old <- get_survey_attr(x)
+    old <- get_survey_attributes(x)
   } else {
     stopifnot(is.list2(old))
-    old <- merge_attributes(c(old, get_survey_attr(x)))
+    old <- merge_survey_attributes(c(old, get_survey_attributes(x)))
   }
 
-  setattr(x, "labels", update_named_attr(names(x), old[["labels"]]))
-  setattr(x, "associations", update_named_attr(names(x), old[["associations"]]))
-  setattr(x, "marketshares", update_marketshares(x, old[["marketshares"]]))
-  setattr(x, "translations", update_named_attr(default$translation$required, old[["translations"]]))
-  setattr(x, "config", update_named_attr(default$config$setting, old[["config"]]))
+  setattr(x, "labels",       update_attr(names(x), old$labels))
+  setattr(x, "associations", update_attr(names(x), old$associations))
+  setattr(x, "translations", update_attr(default$translation$required, old$translations))
+  setattr(x, "config",       update_attr(default$config$setting, old$config))
+  setattr(x, "marketshares", update_marketshares(x, old$marketshares))
 
 }
 
-get_survey_attr <- function(x) {
+get_survey_attributes <- function(x) {
   if (!is.survey(x)) return()
   a <- attributes(x)
   a <- a[names(a) %in% default$attributes]
   a[!vapply(a, is.null, logical(1))]
 }
 
-merge_attributes <- function(x) {
+merge_survey_attributes <- function(x) {
   stopifnot(is.list2(x))
   x <- x[!vapply(x, is.null, logical(1))]
 
@@ -37,7 +37,7 @@ merge_attributes <- function(x) {
 
   for (a in old) {
     nms <- intersect(names(new), names(a))
-    new[nms] <- suppressWarnings(Map(update_named_attr, new[nms], a[nms]))
+    new[nms] <- suppressWarnings(Map(update_attr, new[nms], a[nms]))
     new <- c(new, a[setdiff(names(a), names(new))])
   }
 
@@ -45,7 +45,7 @@ merge_attributes <- function(x) {
 
 }
 
-update_named_attr <- function(x, y) {
+update_attr <- function(x, y) {
   if (is.null(attr(x, "names"))) x <- setNames(rep(NA_character_, length(x)), x)
 
   if (!is.null(y)) {
@@ -64,6 +64,6 @@ update_marketshares <- function(x, old = NULL) {
   if (length(entities) > 1L) stop("Multiple mainentities specified.", call. = FALSE)
 
   entities <- unique(x[[entities]])
-  update_named_attr(entities, old)
+  update_attr(entities, old)
 
 }

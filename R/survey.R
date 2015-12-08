@@ -1,11 +1,8 @@
 survey <- function(x) {
   if (is.labelled(x)) x <- from_labelled(x)
   x <- as.data.table(x)
-
-  # Attributes and return
-  set_survey_attr(x)
+  set_survey_attributes(x)
   x
-
 }
 
 
@@ -27,33 +24,33 @@ as.survey.default <- function(x) survey(x)
 
 #' @export
 "[.survey" <- function(x, ...) {
-  oa <- get_survey_attr(x)
+  oa <- get_survey_attributes(x)
   x <- data.table:::"[.data.table"(x, ...)
-  set_survey_attr(x, old = list(oa))
+  set_survey_attributes(x, old = list(oa))
   x
 }
 
 #' @export
 "[<-.survey" <- function(x, i, j, ...) {
-  oa <- get_survey_attr(x)
+  oa <- get_survey_attributes(x)
   x <- NextMethod()
-  set_survey_attr(x, old = list(oa))
+  set_survey_attributes(x, old = list(oa))
   x
 }
 
 #' @export
 "[[<-.survey" <- function(x, i, j, ...) {
-  oa <- get_survey_attr(x)
+  oa <- get_survey_attributes(x)
   x <- NextMethod()
-  set_survey_attr(x, old = list(oa))
+  set_survey_attributes(x, old = list(oa))
   x
 }
 
 #' @export
 "$<-.survey" <- function(x, i, j, ...) {
-  oa <- get_survey_attr(x)
+  oa <- get_survey_attributes(x)
   x <- NextMethod()
-  set_survey_attr(x, old = list(oa))
+  set_survey_attributes(x, old = list(oa))
   x
 }
 
@@ -84,25 +81,25 @@ cbind.default <- function(...) {
 
 #' @export
 rbind.survey <- function(..., use.names = TRUE, fill = FALSE, idcol = NULL) {
-  dots <- list(...); oa <- lapply(dots, get_survey_attr)
+  dots <- list(...); oa <- lapply(dots, get_survey_attributes)
   x <- data.table::rbindlist(dots, use.names = use.names, fill = fill, idcol = idcol)
-  set_survey_attr(x, old = oa)
+  set_survey_attributes(x, old = oa)
   x
 }
 
 #' @export
 cbind.survey <- function(...) {
-  dots <- list(...); oa <- lapply(dots, get_survey_attr)
+  dots <- list(...); oa <- lapply(dots, get_survey_attributes)
   x <- data.table::data.table(dots)
-  set_survey_attr(x, old = oa)
+  set_survey_attributes(x, old = oa)
   x
 }
 
 # Merge/join -------------------------------------------------------------------
 #' @export
 merge.survey <- function(x, y, ...) {
-  dots <- list(x, y); oa <- lapply(dots, get_survey_attr)
+  dots <- list(x, y); oa <- lapply(dots, get_survey_attributes)
   x <- NextMethod()
-  set_survey_attr(x, old = oa)
+  set_survey_attributes(x, old = oa)
   x
 }
