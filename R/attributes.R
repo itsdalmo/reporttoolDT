@@ -4,7 +4,7 @@ set_survey_attr <- function(x, old = NULL) {
   if (is.null(old)) {
     old <- get_survey_attr(x)
   } else {
-    old <- merge_attributes(list(old, get_survey_attr(x)))
+    old <- merge_attributes(c(old, get_survey_attr(x)))
   }
 
   setattr(x, "labels", update_named_attr(names(x), old[["labels"]]))
@@ -24,6 +24,7 @@ get_survey_attr <- function(x) {
 
 merge_attributes <- function(x) {
   stopifnot(is.list2(x))
+  x <- x[!vapply(x, is.null, logical(1))]
 
   # Return early if there is nothing to merge
   if (length(x) == 0L) return()
