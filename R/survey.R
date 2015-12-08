@@ -27,22 +27,33 @@ as.survey.default <- function(x) survey(x)
 
 #' @export
 "[.survey" <- function(x, ...) {
+  oa <- get_survey_attr(x)
   x <- data.table:::"[.data.table"(x, ...)
-  set_survey_attr(x)
+  set_survey_attr(x, old = list(oa))
   x
 }
 
 #' @export
 "[<-.survey" <- function(x, i, j, ...) {
+  oa <- get_survey_attr(x)
   x <- NextMethod()
-  set_survey_attr(x)
+  set_survey_attr(x, old = list(oa))
+  x
+}
+
+#' @export
+"[[<-.survey" <- function(x, i, j, ...) {
+  oa <- get_survey_attr(x)
+  x <- NextMethod()
+  set_survey_attr(x, old = list(oa))
   x
 }
 
 #' @export
 "$<-.survey" <- function(x, i, j, ...) {
+  oa <- get_survey_attr(x)
   x <- NextMethod()
-  set_survey_attr(x)
+  set_survey_attr(x, old = list(oa))
   x
 }
 
@@ -50,7 +61,7 @@ as.survey.default <- function(x) survey(x)
 "names<-.survey" <- function(x, value) {
   x <- NextMethod()
   setattr(x, "labels", setNames(attr(x, "labels"), names(x)))
-  setattr(x, "associations", setNames(attr(x, "labels"), names(x)))
+  setattr(x, "associations", setNames(attr(x, "associations"), names(x)))
   x
 }
 

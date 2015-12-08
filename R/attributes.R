@@ -4,6 +4,7 @@ set_survey_attr <- function(x, old = NULL) {
   if (is.null(old)) {
     old <- get_survey_attr(x)
   } else {
+    stopifnot(is.list2(old))
     old <- merge_attributes(c(old, get_survey_attr(x)))
   }
 

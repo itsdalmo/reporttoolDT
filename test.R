@@ -1,16 +1,20 @@
 rm(list = ls(all = TRUE))
-x <- read_data("test.sav")
-x <- survey(x)
+library(devtools)
+library(testthat)
+load_all()
 
-x[, "test" := "lol"]
-x$test2 <- "lol2"
-x[["test3"]] <- "lol3"
-x[, "test4"] <- "lol4"
+x <- data.frame("Q1" = c("Example 1", "Example 2"), "Score" = c(8, 9), stringsAsFactors = FALSE)
+y <- survey(x)
 
-attr(x, which = "labels")
-attr(x, which = "associations")
+y[, d := "test"]
+y <- set_association(y, "test" = "d")
+z <- rbind(y, x, fill = TRUE)
+expect_identical(unname(attr(z, "associations")), c(NA, NA, "test"))
 
+attributes(z)
 
-names(x)[1] <- "testdate"
-
-
+names(z)[3] <- "lol"
+x <- z
+setattr(x, "labels", setNames(attr(x, "labels"), names(x)))
+setattr(x, "associations", setNames(attr(x, "associations"), names(x)))
+x
