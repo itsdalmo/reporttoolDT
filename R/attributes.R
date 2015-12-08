@@ -37,7 +37,7 @@ merge_survey_attributes <- function(x) {
 
   for (a in old) {
     nms <- intersect(names(new), names(a))
-    new[nms] <- suppressWarnings(Map(update_attr, new[nms], a[nms]))
+    new[nms] <- suppressWarnings(Map(merge_attr, new[nms], a[nms]))
     new <- c(new, a[setdiff(names(a), names(new))])
   }
 
@@ -51,11 +51,15 @@ update_attr <- function(x, y) {
   if (!is.null(y)) {
     m <- intersect(names(y), names(x)[is.na(x)])
     if (length(m)) x[match_all(m, names(x))] <- y[m] #x[m] <- y[m]
-    x <- c(x, y[setdiff(names(y), names(x))])
   }
 
   x
 
+}
+
+merge_attr <- function(x, y) {
+  x <- update_attr(x, y)
+  c(x, y[setdiff(names(y), names(x))])
 }
 
 update_marketshares <- function(x, old = NULL) {

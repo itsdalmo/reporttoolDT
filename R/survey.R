@@ -90,7 +90,7 @@ rbind.survey <- function(..., use.names = TRUE, fill = FALSE, idcol = NULL) {
 #' @export
 cbind.survey <- function(...) {
   dots <- list(...); oa <- lapply(dots, get_survey_attributes)
-  x <- data.table::data.table(dots)
+  x <- base::cbind.data.frame(dots)
   set_survey_attributes(x, old = oa)
   x
 }

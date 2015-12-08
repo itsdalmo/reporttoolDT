@@ -1,4 +1,4 @@
-context("Survey")
+context("Init/mutate surveys")
 
 x <- data.frame("Q1" = c("Example 1", "Example 2"), "Score" = c(8, 9), stringsAsFactors = FALSE)
 
@@ -7,43 +7,43 @@ test_that("Creating a new survey", {
   y <- survey(x)
   expect_true(inherits(y, "survey"))
   expect_true(inherits(y, "data.table"))
+  expect_true(all(c("labels", "associations", "translations", "config") %in% names(attributes(y))))
 
 })
 
-test_that("Working with survey using [", {
-
+test_that("We can add columns to a survey with :=", {
   y <- survey(x)
-  y[, "test" := 5]
+  set_association(y, mainentity = "Q1")
 
-  expect_true(inherits(y, "survey"))
-  expect_true("test" %in% names(y))
-  expect_identical(y$test, c(5, 5))
-
-  # After setting attributes
-  y <- survey(x)
-  y <- set_association(y, mainentity = "Q1")
-  y[, "test" := 5]
-
-  expect_true(inherits(y, "survey"))
-  expect_identical(unname(attr(y, "associations")), c("mainentity", NA, NA))
-
+  y[, test := 1L]
+  expect_identical(names(attr(y, "associations")), names(y))
+  expect_identical(get_association(y, "mainentity"), "Q1")
 })
 
-
-test_that("Working with survey using [[", {
-
+test_that("We can add columns to a survey with [", {
   y <- survey(x)
-  y[["Q1"]] <- c("a", "b")
+  set_association(y, mainentity = "Q1")
 
-  expect_identical(y[["Q1"]], c("a", "b"))
-
+  y[, "test"] <- 1L
+  expect_identical(names(attr(y, "associations")), names(y))
+  expect_identical(get_association(y, "mainentity"), "Q1")
 })
 
-test_that("Working with survey using $", {
-
+test_that("We can add columns to a survey with $", {
   y <- survey(x)
-  y$Q1 <- c("a", "b")
+  set_association(y, mainentity = "Q1")
 
-  expect_identical(y$Q1, c("a", "b"))
-
+  y$test <- 1L
+  expect_identical(names(attr(y, "associations")), names(y))
+  expect_identical(get_association(y, "mainentity"), "Q1")
 })
+
+test_that("We can add columns to a survey with [[", {
+  y <- survey(x)
+  set_association(y, mainentity = "Q1")
+
+  y$test <- 1L
+  expect_identical(names(attr(y, "associations")), names(y))
+  expect_identical(get_association(y, "mainentity"), "Q1")
+})
+
