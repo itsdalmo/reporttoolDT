@@ -1,5 +1,54 @@
+
 #' @export
-get_association <- function(srv, associations, arrange = TRUE) {
+mm <- function(srv) {
+  x <- list("latent" = get_association(srv), "manifest" = names(srv), "question" = get_labels(srv),
+            "type" = vapply(srv, function(x) class(x)[1], character(1)))
+  structure(as.data.table(x), class = c("survey_mm", "data.table"))
+}
+
+#' @export
+codebook <- mm
+
+#' @export
+print.survey_mm <- function(mm, width = getOption("width")) {
+
+  cat("Measurement model\n")
+
+  # Print the number of observations
+  n <- nrow(mm); cat("Observations: ", n, "\n\n", sep = ""); if (!n) return()
+
+  # Limit string width
+  w_n <- stri_length(nrow(mm))
+  w_name <- max(stri_length(mm$manifest), na.rm = TRUE) + 1
+  w_reserved <- 8 + w_name + 3 # $ and three spaces as separation
+  w_available <- width - w_reserved - 5 # in case of large font
+
+  # Type
+  mm$type <- vapply(mm$type, function(x) {
+    x <- ifelse(is.na(x), "miss", x)
+    switch(x, character = "(char)", factor = "(fctr)", numeric = "(num)", Date = "(date)",
+           scale = "(scale)", integer = "(int)", "(????)") }, character(1))
+
+  mm$type <- ifelse(!is.na(mm$latent), stri_c(mm$type, "*"), mm$type)
+
+  # Clean manifest/type
+  mm$manifest <- vapply(mm$manifest, stri_pad_right, width = w_name, character(1))
+  mm$type <- vapply(mm$type, stri_pad_right, width = 8, character(1))
+
+  # Shorten question-text to the remaining width
+  mm$question <- vapply(mm$question, stri_sub, to = w_available-2, character(1))
+
+  # Print
+  for (i in 1:nrow(mm)) {
+    cat(stri_pad_right(i, w_n), ": ", mm$manifest[i], mm$type[i], " ", mm$question[i], sep = "", collapse = "\n")
+  }
+
+  cat("Note: Associations (including latents) are marked with *\n")
+
+}
+
+#' @export
+get_association <- function(srv, associations = NULL, arrange = TRUE) {
   x <- get_attr(srv, which = "associations", matches = associations, arrange = arrange, match_names = FALSE)
   names(x)
 }
@@ -10,8 +59,8 @@ set_association <- function(srv, ...) {
 }
 
 #' @export
-get_labels <- function(srv, associations, arrange = TRUE) {
-  x <- get_attr(srv, which = "labels", matches = associations, arrange)
+get_labels <- function(srv, labels = NULL, arrange = TRUE) {
+  x <- get_attr(srv, which = "labels", matches = labels, arrange)
   unname(x)
 }
 

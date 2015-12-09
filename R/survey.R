@@ -103,3 +103,17 @@ merge.survey <- function(x, y, ...) {
   set_survey_attributes(x, old = oa)
   x
 }
+
+# Convert to other formats -----------------------------------------------------
+#' @export
+as.list.survey <- function(srv) {
+  df <- as.data.frame(data.table::copy(srv))
+  en <- data.frame("lol" = 1)
+  mm <- data.frame("latent" = get_association(srv),
+                   "manifest" = names(srv),
+                   "question" = get_labels(srv),
+                   "type" = lapply(srv, function())
+                   "type" = vapply(srv, function(x) class(x)[1], character(1)))
+
+  list("df" = df, "ents" = en, "mm" = mm)
+}
