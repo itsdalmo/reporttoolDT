@@ -1,28 +1,24 @@
 #' @export
-replace <- function(x, replacement, ignore_case = TRUE) {
+replace <- function(x, list, by = x, ignore_case = TRUE, invert = FALSE) {
 
-  if (is.character(replacement)) {
-    replacement <- as.list(replacement)
-  }
+  stopifnot(length(x) == length(by))
+  if (is.character(list)) list <- as.list(list)
 
-  if (!is.list2(replacement)) {
+  # Replacements must be named
+  if (!is.list2(list)) {
     stop("Expecting a named list or character vector.", call. = FALSE)
-  } else if (is.null(names(replacement)) || any(names(replacement) == "")) {
-    stop("All replacement arguments must be named.", call. = FALSE)
+  } else if (is.null(names(list)) || any(names(list) == "")) {
+    stop("All list arguments must be named.", call. = FALSE)
   }
 
-  for (i in names(replacement)) {
-    old <- replacement[[i]]
-    new <- i
-
+  # Perform replacement
+  for (i in names(list)) {
     if (ignore_case) {
-      old_id <- stri_trans_tolower(x) %in% stri_trans_tolower(old)
+      id <- stri_trans_tolower(by) %in% stri_trans_tolower(list[[i]])
     } else {
-      old_id <- x %in% old
+      id <- by %in% list[[i]]
     }
-
-    x[old_id] <- new
-
+    x[id] <- i
   }
 
   x

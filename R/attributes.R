@@ -16,6 +16,10 @@ set_survey_attributes <- function(x, old = NULL) {
 
 }
 
+strip_survey_attributes <- function(x, old = NULL) {
+  lapply(default$attributes, setattr, x = x, value = NULL)
+}
+
 get_survey_attributes <- function(x) {
   if (!is.survey(x)) return()
   a <- attributes(x)
