@@ -15,8 +15,6 @@ update_survey <- function(x, old_attributes) {
 
 }
 
-new_survey <- function(x) update_survey(x, old_attributes = NULL)
-
 merge_survey_attributes <- function(x) {
   if (!is.list2(x)) stop("Argument 'x' should be a list of attributes.")
 

@@ -1,9 +1,11 @@
+# Create survey ----------------------------------------------------------------
+
 survey <- function(x) {
   x <- data.table::copy(x)
   if (is.labelled(x)) x <- from_labelled(x)
-  new_survey(as.data.table(x))
+  o <- get_attributes(x, which = default$attributes)
+  update_survey(as.data.table(x), old_attributes = list(o))
 }
-
 
 # is/as ------------------------------------------------------------------------
 
@@ -19,6 +21,11 @@ as.survey.survey <- function(x) x
 #' @export
 as.survey.default <- function(x) survey(x)
 
+#' @export
+as_list <- function(x) {
+  df <- as.data.frame(data.table::copy(x))
+  list("df" = df, "ents" = entities(y), "mm" = model(x))
+}
 # #' @export
 # as.list.survey <- function(x) {
 #   x <- as.data.frame(data.table::copy(x))
@@ -109,17 +116,3 @@ merge.survey <- function(x, y, ...) {
   update_survey(x, old = o)
   x
 }
-
-# Convert to other formats -----------------------------------------------------
-#' @export
-# as.list.survey <- function(srv) {
-#   df <- as.data.frame(data.table::copy(srv))
-#   en <- data.frame("lol" = 1)
-#   mm <- data.frame("latent" = get_association(srv),
-#                    "manifest" = names(srv),
-#                    "question" = get_labels(srv),
-#                    "type" = lapply(srv, function())
-#                    "type" = vapply(srv, function(x) class(x)[1], character(1)))
-#
-#   list("df" = df, "ents" = en, "mm" = mm)
-# }

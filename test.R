@@ -36,3 +36,11 @@ replace(x, r, by = names(x), invert = FALSE)
 x <- setNames(rep(NA, 3), c("e1", "e2", "e3"))
 r <- list(e1 = .5, e2 = .25, e3 = .25)
 replace(x, r, by = names(x), invert = FALSE)
+
+
+lol <- function(...) substitute(list(...))[-1]
+lol(a, b, c)
+
+lol <- function(...) substitute(list(...))
+lol(a, b, c)
+
