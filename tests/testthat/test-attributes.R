@@ -4,10 +4,10 @@ x <- list("config" = setNames(c("yes", "no", NA), c("foo", "bar", "zoo")))
 y <- list("config" = setNames(c("no", NA, "new"), c("foo", "bar", "zoo")))
 
 test_that("Updating attributes works", {
-  z <- update_attr(x$config, y$config)
+  z <- update_attribute(x$config, y$config)
   expect_identical(z, c(x$config[1:2], y$config[3]))
 
-  z <- update_attr(y$config, x$config)
+  z <- update_attribute(y$config, x$config)
   expect_identical(z, c(y$config[1], x$config[2], y$config[3]))
 
 })

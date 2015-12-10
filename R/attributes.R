@@ -1,47 +1,36 @@
-set_survey_attributes <- function(x, old = NULL) {
-  setattr(x, "class", c("survey", "data.table", "data.frame"))
+update_survey <- function(x, old_attributes) {
 
-  if (is.null(old)) {
-    old <- get_survey_attributes(x)
+  if (!is.null(old_attributes)) {
+    old <- merge_survey_attributes(old_attributes)
   } else {
-    stopifnot(is.list2(old))
-    old <- merge_survey_attributes(c(old, get_survey_attributes(x)))
+    old <- NULL
   }
 
-  setattr(x, "labels",       update_attr(names(x), old$labels))
-  setattr(x, "associations", update_attr(names(x), old$associations))
-  setattr(x, "translations", update_attr(default$translation$required, old$translations))
-  setattr(x, "config",       update_attr(default$config$setting, old$config))
+  setattr(x, "labels", update_attribute(names(x), old$labels))
+  setattr(x, "associations", update_attribute(names(x), old$associations))
+  setattr(x, "translations", update_attribute(default$translation$required, old$translations))
+  setattr(x, "config", update_attribute(default$config$setting, old$config))
   setattr(x, "marketshares", update_marketshares(x, old$marketshares))
+  setattr(x, "class", c("survey", "data.table", "data.frame"))
 
 }
 
-strip_survey_attributes <- function(x, old = NULL) {
-  lapply(default$attributes, setattr, x = x, value = NULL)
-}
-
-get_survey_attributes <- function(x) {
-  if (!is.survey(x)) return()
-  a <- attributes(x)
-  a <- a[names(a) %in% default$attributes]
-  a[!vapply(a, is.null, logical(1))]
-}
+new_survey <- function(x) update_survey(x, old_attributes = NULL)
 
 merge_survey_attributes <- function(x) {
-  stopifnot(is.list2(x))
-  x <- x[!vapply(x, is.null, logical(1))]
+  if (!is.list2(x)) stop("Argument 'x' should be a list of attributes.")
 
   # Return early if there is nothing to merge
-  if (length(x) == 0L) return()
-  if (length(x) == 1L) return(x[[1]])
+  x <- x[!vapply(x, is.null, logical(1))]
+  if (!length(x) > 1L) return(x[[1]])
 
-  # Merge in turn
+  # Use the first element as base and merge in turn
   new <- x[[1]]
   old <- x[-1]
 
   for (a in old) {
     nms <- intersect(names(new), names(a))
-    new[nms] <- suppressWarnings(Map(merge_attr, new[nms], a[nms]))
+    new[nms] <- suppressWarnings(Map(update_attribute, new[nms], a[nms], merge = TRUE))
     new <- c(new, a[setdiff(names(a), names(new))])
   }
 
@@ -49,22 +38,35 @@ merge_survey_attributes <- function(x) {
 
 }
 
-update_attr <- function(x, y) {
-  if (is.null(attr(x, "names"))) x <- setNames(rep(NA_character_, length(x)), x)
+# Get/set/update attributes ----------------------------------------------------
+get_attributes <- function(obj, which) {
+  setNames(lapply(which, attr, x = obj), which)
+}
 
-  if (!is.null(y)) {
-    m <- intersect(names(y), names(x)[is.na(x)])
-    if (length(m)) x[match_all(m, names(x))] <- y[m] #x[m] <- y[m]
+set_attributes <- function(obj, list) {
+  stopifnot(!is.null(names(list)))
+  for (i in names(list)) setattr(obj, i, list[[i]])
+}
+
+strip_attributes <- function(obj, which) {
+  for (i in which) setattr(obj, i, NULL)
+}
+
+update_attribute <- function(new, old, merge = FALSE) {
+  if (is.null(attr(new, "names"))) {
+    new <- setNames(rep(NA_character_, length(new)), new)
   }
 
-  x
+  if (!is.null(old)) {
+    nms <- intersect(names(old), names(new)[is.na(new)])
+    if (length(nms)) new[names(new) %in% nms] <- old[nms]
+    if (merge) new <- c(new, old[!names(old) %in% names(new)])
+  }
+
+  new
 
 }
 
-merge_attr <- function(x, y) {
-  x <- update_attr(x, y)
-  c(x, y[setdiff(names(y), names(x))])
-}
 
 update_marketshares <- function(x, old = NULL) {
   entities <- get_association(x, "mainentity")
@@ -72,12 +74,14 @@ update_marketshares <- function(x, old = NULL) {
   if (length(entities) > 1L) stop("Multiple mainentities specified.", call. = FALSE)
 
   entities <- unique(x[[entities]])
-  update_attr(entities, old)
+  update_attribute(entities, old)
 
 }
 
+# Get and set single attributes ------------------------------------------------
+
 get_attr <- function(srv, which, matches = NULL,  arrange = TRUE, match_names = TRUE) {
-  stopifnot(is.survey(srv))
+  # stopifnot(is.survey(srv))
   res <- attr(srv, which)
 
   # Return early if matches is NULL
@@ -107,7 +111,7 @@ get_attr <- function(srv, which, matches = NULL,  arrange = TRUE, match_names = 
 }
 
 set_attr <- function(srv, which, dots, match_names = TRUE) {
-  stopifnot(is.survey(srv))
+  # stopifnot(is.survey(srv))
   res <- attr(srv, which)
 
   # Set matches and replacements

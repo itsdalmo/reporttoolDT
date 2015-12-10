@@ -1,8 +1,7 @@
 survey <- function(x) {
+  x <- data.table::copy(x)
   if (is.labelled(x)) x <- from_labelled(x)
-  x <- as.data.table(x)
-  set_survey_attributes(x)
-  x
+  new_survey(as.data.table(x))
 }
 
 
@@ -20,37 +19,44 @@ as.survey.survey <- function(x) x
 #' @export
 as.survey.default <- function(x) survey(x)
 
+# #' @export
+# as.list.survey <- function(x) {
+#   x <- as.data.frame(data.table::copy(x))
+#   strip_attributes(x, which = default$attributes)
+#   list("df" = x)
+# }
+
 # Basic operations -------------------------------------------------------------
 
 #' @export
 "[.survey" <- function(x, ...) {
-  oa <- get_survey_attributes(x)
+  o <- get_attributes(x, which = default$attributes)
   x <- data.table:::"[.data.table"(x, ...)
-  set_survey_attributes(x, old = list(oa))
+  update_survey(x, old = list(o))
   x
 }
 
 #' @export
 "[<-.survey" <- function(x, i, j, ...) {
-  oa <- get_survey_attributes(x)
+  o <- get_attributes(x, which = default$attributes)
   x <- NextMethod()
-  set_survey_attributes(x, old = list(oa))
+  update_survey(x, old = list(o))
   x
 }
 
 #' @export
 "[[<-.survey" <- function(x, i, j, ...) {
-  oa <- get_survey_attributes(x)
+  o <- get_attributes(x, which = default$attributes)
   x <- NextMethod()
-  set_survey_attributes(x, old = list(oa))
+  update_survey(x, old = list(o))
   x
 }
 
 #' @export
 "$<-.survey" <- function(x, i, j, ...) {
-  oa <- get_survey_attributes(x)
+  o <- get_attributes(x, which = default$attributes)
   x <- NextMethod()
-  set_survey_attributes(x, old = list(oa))
+  update_survey(x, old = list(o))
   x
 }
 
@@ -81,39 +87,39 @@ cbind.default <- function(...) {
 
 #' @export
 rbind.survey <- function(..., use.names = TRUE, fill = FALSE, idcol = NULL) {
-  dots <- list(...); oa <- lapply(dots, get_survey_attributes)
+  dots <- list(...); o <- lapply(dots, get_attributes, which = default$attributes)
   x <- data.table::rbindlist(dots, use.names = use.names, fill = fill, idcol = idcol)
-  set_survey_attributes(x, old = oa)
+  update_survey(x, old = o)
   x
 }
 
 #' @export
 cbind.survey <- function(...) {
-  dots <- list(...); oa <- lapply(dots, get_survey_attributes)
+  dots <- list(...); o <- lapply(dots, get_attributes, which = default$attributes)
   x <- base::cbind.data.frame(dots)
-  set_survey_attributes(x, old = oa)
+  update_survey(x, old = o)
   x
 }
 
 # Merge/join -------------------------------------------------------------------
 #' @export
 merge.survey <- function(x, y, ...) {
-  dots <- list(x, y); oa <- lapply(dots, get_survey_attributes)
+  dots <- list(x, y); o <- lapply(dots, get_attributes, which = default$attributes)
   x <- NextMethod()
-  set_survey_attributes(x, old = oa)
+  update_survey(x, old = o)
   x
 }
 
 # Convert to other formats -----------------------------------------------------
 #' @export
-as.list.survey <- function(srv) {
-  df <- as.data.frame(data.table::copy(srv))
-  en <- data.frame("lol" = 1)
-  mm <- data.frame("latent" = get_association(srv),
-                   "manifest" = names(srv),
-                   "question" = get_labels(srv),
-                   "type" = lapply(srv, function())
-                   "type" = vapply(srv, function(x) class(x)[1], character(1)))
-
-  list("df" = df, "ents" = en, "mm" = mm)
-}
+# as.list.survey <- function(srv) {
+#   df <- as.data.frame(data.table::copy(srv))
+#   en <- data.frame("lol" = 1)
+#   mm <- data.frame("latent" = get_association(srv),
+#                    "manifest" = names(srv),
+#                    "question" = get_labels(srv),
+#                    "type" = lapply(srv, function())
+#                    "type" = vapply(srv, function(x) class(x)[1], character(1)))
+#
+#   list("df" = df, "ents" = en, "mm" = mm)
+# }

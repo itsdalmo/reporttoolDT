@@ -1,24 +1,32 @@
 #' @export
-replace <- function(x, list, by = x, ignore_case = TRUE, invert = FALSE) {
-
+replace <- function(x, list, by = x, ignore_case = FALSE, invert = FALSE) {
   stopifnot(length(x) == length(by))
   if (is.character(list)) list <- as.list(list)
 
   # Replacements must be named
   if (!is.list2(list)) {
     stop("Expecting a named list or character vector.", call. = FALSE)
-  } else if (is.null(names(list)) || any(names(list) == "")) {
+  } else if (is.null(names(list)) || any(is.na(names(list))) || any(names(list) == "")) {
     stop("All list arguments must be named.", call. = FALSE)
   }
 
   # Perform replacement
-  for (i in names(list)) {
-    if (ignore_case) {
-      id <- stri_trans_tolower(by) %in% stri_trans_tolower(list[[i]])
+  for (i in seq_along(matches)) {
+    # Invert if the list is of the form: list(value = matches)
+    if (invert) {
+      matches <- list[[i]]
+      value <- names(list)[i]
     } else {
-      id <- by %in% list[[i]]
+      matches <- names(list)[i]
+      value <- list[[i]]
     }
-    x[id] <- i
+
+    if (ignore_case) {
+      id <- stri_trans_tolower(by) %in% stri_trans_tolower(matches[i])
+    } else {
+      id <- by %in% matches[i]
+    }
+    x[id] <- value[i]
   }
 
   x
@@ -65,8 +73,15 @@ join_strings <- function(x, conjunction = "and") {
 
 # ------------------------------------------------------------------------------
 
+# base::match(x, table): only returns the first match-indicies if there are multiple hits.
+# table %in% x:          returns the indicies for all matches, but retains the order of table.
+# match_all:             returns all indicies like %in%, but ordered by x.
 match_all <- function(x, table) {
   unlist(lapply(x, function(x) which(table == x)))
+}
+
+"%oin%" <- function(x, table) {
+  match_all(table, x)
 }
 
 clean_path <- function(path) {
