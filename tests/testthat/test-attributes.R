@@ -50,27 +50,29 @@ test_that("Getting associations work", {
 
 })
 
-test_that("Setting marketshares works", {
+test_that("Get/set marketshares works", {
 
   y <- survey(x)
   y <- set_association(y, mainentity = "Q1")
   y <- set_marketshare(y, "Example 1" = .5, "Example 2" = .5)
 
   expect_true(inherits(y, "survey"))
-  expect_identical(unname(attr(y, "associations")), c("mainentity", NA))
+  expect_identical(unname(attr(y, "marketshares")), c(.5, .5))
+
+  z <- get_marketshare(y)
+  expect_identical(unname(z), c(.5, .5))
+
+  z <- get_marketshare(y, "Example 1")
+  expect_identical(names(z), "Example 1")
 
 })
 
-test_that("Getting marketshares work", {
+test_that("Get/set config works", {
 
   y <- survey(x)
+  y <- set_config(y, cutoff = .5)
 
-  # No associations (NULL)
-  expect_identical(get_association(y, "mainentity"), NULL)
-
-  # Found association
-  y <- set_association(y, mainentity = "Q1")
-  res <- get_association(y, "mainentity")
-  expect_identical(res, "Q1")
+  expect_true(inherits(y, "survey"))
+  expect_identical(get_config(y, "cutoff"), .5)
 
 })
