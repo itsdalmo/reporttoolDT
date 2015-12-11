@@ -53,24 +53,27 @@ print.survey_mm <- function(mm, width = getOption("width")) {
 
 # Get/set for measurement model ------------------------------------------------
 
-#' @export
 get_association <- function(srv, associations = NULL, arrange = TRUE) {
   x <- get_attr(srv, which = "associations", matches = associations, arrange = arrange, match_names = FALSE)
   names(x)
 }
 
 #' @export
-set_association <- function(srv, ...) {
-  set_attr(srv, "associations", list(...), match_names = FALSE)
+set_association <- function(srv, ..., list = NULL) {
+  srv <- data.table::copy(srv)
+  set_attr(srv, "associations", c(base::list(...), list), match_names = FALSE)
+  srv
 }
 
 #' @export
 get_labels <- function(srv, labels = NULL, arrange = TRUE) {
-  x <- get_attr(srv, which = "labels", matches = labels, arrange)
+  x <- get_attr(srv, which = "labels", matches = labels, arrange, match_names = TRUE)
   unname(x)
 }
 
 #' @export
-set_labels <- function(srv, ...) {
-  set_attr(srv, "labels", list(...))
+set_labels <- function(srv, ..., list = NULL) {
+  srv <- data.table::copy(srv)
+  set_attr(srv, "labels", c(base::list(...), list), match_names = TRUE)
+  srv
 }

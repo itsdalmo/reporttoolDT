@@ -6,18 +6,12 @@ rm(list = ls(all = TRUE))
 x <- read_data("test.sav")
 y <- survey(x)
 
-get_attributes(x, which = default$attributes)
-get_attributes(y, which = default$attributes)
+z <- set_association(y, mainentity = "q1", epsi = c("q3", "q6", "q16"))
 
-z <- copy(x)
-set_attributes(z, list = get_attributes(y, which = default$attributes))
-get_attributes(z, default$attributes)
+get_attributes(y, "associations")
+get_attributes(z, "associations")
 
-strip_attributes(z, which = default$attributes)
-get_attributes(z, default$attributes)
-
-z <- as.list(y)
-
+identical(get_attributes(y, "associations"), get_attributes(z, "associations"))
 
 # Association
 x <- setNames(rep(NA, 3), c("q1", "q3", "q10"))

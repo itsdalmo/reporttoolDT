@@ -80,7 +80,7 @@ match_all <- function(x, table) {
   unlist(lapply(x, function(x) which(table == x)))
 }
 
-"%oin%" <- function(x, table) {
+"%ordin%" <- function(x, table) {
   match_all(table, x)
 }
 

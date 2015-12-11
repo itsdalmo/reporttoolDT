@@ -13,7 +13,7 @@ test_that("Creating a new survey", {
 
 test_that("We can add columns to a survey with :=", {
   y <- survey(x)
-  set_association(y, mainentity = "Q1")
+  y <- set_association(y, mainentity = "Q1")
 
   y[, test := 1L]
   expect_identical(names(attr(y, "associations")), names(y))
@@ -22,7 +22,7 @@ test_that("We can add columns to a survey with :=", {
 
 test_that("We can add columns to a survey with [", {
   y <- survey(x)
-  set_association(y, mainentity = "Q1")
+  y <- set_association(y, mainentity = "Q1")
 
   y[, "test"] <- 1L
   expect_identical(names(attr(y, "associations")), names(y))
@@ -31,7 +31,7 @@ test_that("We can add columns to a survey with [", {
 
 test_that("We can add columns to a survey with $", {
   y <- survey(x)
-  set_association(y, mainentity = "Q1")
+  y <- set_association(y, mainentity = "Q1")
 
   y$test <- 1L
   expect_identical(names(attr(y, "associations")), names(y))
@@ -40,7 +40,7 @@ test_that("We can add columns to a survey with $", {
 
 test_that("We can add columns to a survey with [[", {
   y <- survey(x)
-  set_association(y, mainentity = "Q1")
+  y <- set_association(y, mainentity = "Q1")
 
   y$test <- 1L
   expect_identical(names(attr(y, "associations")), names(y))
