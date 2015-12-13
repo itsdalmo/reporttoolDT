@@ -2,7 +2,7 @@ context("Join/bind surveys")
 
 x <- data.frame("Q1" = c("Example 1", "Example 2"), "Score" = c(8, 9), stringsAsFactors = FALSE)
 
-test_that("rbind works with surveys", {
+test_that("rbind works with survey", {
   y <- survey(x)
   y <- set_association(y, mainentity = "Q1")
 
@@ -11,7 +11,7 @@ test_that("rbind works with surveys", {
   expect_identical(get_association(z, "mainentity"), "Q1")
 })
 
-test_that("cbind works with surveys", {
+test_that("cbind works with survey", {
   y <- survey(x)
   y <- set_association(y, mainentity = "Q1")
 
@@ -20,7 +20,7 @@ test_that("cbind works with surveys", {
   expect_identical(get_association(z, "mainentity"), "Q1")
 })
 
-test_that("Joins using [ works with surveys", {
+test_that("Joins using [ works with survey", {
   y <- survey(x)
   y <- set_association(y, mainentity = "Q1")
   setkey(y, "Q1")
@@ -30,7 +30,7 @@ test_that("Joins using [ works with surveys", {
   expect_identical(get_association(z, "mainentity"), "Q1")
 })
 
-test_that("Merge works with surveys", {
+test_that("Merge works with survey", {
   y <- survey(x)
   y <- set_association(y, mainentity = "Q1")
   setkey(y, "Q1")
@@ -38,4 +38,16 @@ test_that("Merge works with surveys", {
   z <- merge(y, x)
   expect_identical(names(attr(z, "associations")), names(z))
   expect_identical(get_association(z, "mainentity"), "Q1")
+})
+
+test_that("rbind works with multiple surveys", {
+  y <- survey(x)
+  y <- set_association(y, mainentity = "Q1")
+  y[, test := "test"]
+
+  z <- data.table::copy(y)
+  z <- set_association(z, "works" = "test")
+  z[, extra := "extra"]
+  z <- rbind(y, z, fill = TRUE)
+
 })
