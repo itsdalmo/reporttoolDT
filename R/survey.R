@@ -1,5 +1,4 @@
 # Create survey ----------------------------------------------------------------
-
 survey <- function(x) {
   x <- data.table::copy(x)
   if (is.labelled(x)) x <- from_labelled(x)
@@ -22,16 +21,19 @@ as.survey.survey <- function(x) x
 as.survey.default <- function(x) survey(x)
 
 #' @export
-as_list <- function(x) {
-  df <- as.data.frame(data.table::copy(x))
-  list("df" = df, "ents" = entities(y), "mm" = model(x))
+as.list.survey <- function(x, attributes = FALSE) {
+  if (!attributes) return(NextMethod())
+
+  if (is.null(get_association(x, "mainentity"))) {
+    ents <- NULL
+  } else {
+    ents <- entities(x)
+  }
+
+  df <- data.table::copy(x)
+  strip_attributes(df, which = default$attributes)
+  list("df" = df, "ents" = ents, "mm" = model(x))
 }
-# #' @export
-# as.list.survey <- function(x) {
-#   x <- as.data.frame(data.table::copy(x))
-#   strip_attributes(x, which = default$attributes)
-#   list("df" = x)
-# }
 
 # Basic operations -------------------------------------------------------------
 
