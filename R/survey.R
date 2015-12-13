@@ -30,9 +30,9 @@ as.list.survey <- function(x, attributes = FALSE) {
     ents <- entities(x)
   }
 
-  df <- data.table::copy(x)
+  df <- as.data.table(data.table::copy(x))
   strip_attributes(df, which = default$attributes)
-  list("df" = df, "ents" = ents, "mm" = model(x))
+  structure(list("df" = df, "ents" = ents, "mm" = model(x)), class = c("survey_list", "list"))
 }
 
 # Basic operations -------------------------------------------------------------
@@ -117,4 +117,23 @@ merge.survey <- function(x, y, ...) {
   x <- NextMethod()
   update_survey(x, old = o)
   x
+}
+
+# Print methods ----------------------------------------------------------------
+print.survey_list <- function(x, width = getOption("width")) {
+
+  cat("Survey\n")
+
+  # Class and dimensions of the objects
+  info <- lapply(x, function(x) {
+    classes <- stri_c("(", class(x)[1], ")", sep = "")
+    dimensions <- stri_c("[", stri_c(dim(x), collapse = "x"), "]", sep = "")
+    stri_c(classes, dimensions, sep = "")
+  })
+
+  # Adapt width
+  nms <- stri_c("$", names(x))
+  nms <- stri_pad_right(nms, width = max(stri_length(nms), n.rm = TRUE) + 4)
+  cat(stri_c(nms, info, collapse = "\n"))
+
 }

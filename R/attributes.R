@@ -82,7 +82,7 @@ get_attr <- function(srv, which, matches = NULL,  arrange = TRUE, match_names = 
 
   # Return early if matches is NULL
   if (is.null(res)) {
-    stop("Attribute '", which, "' is not set.")
+    warning("Attribute '", which, "' is not set."); return(res)
   } else if (is.null(matches)) {
     return(res)
   }

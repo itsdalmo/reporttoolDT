@@ -9,7 +9,7 @@ model <- function(x) {
               l <- levels(x); if (is.null(l)) NA_character_ else stri_c(l, collapse = "\n")
               }, character(1)))
 
-  structure(as.data.table(x), class = c("survey_mm", "data.table"))
+  structure(as.data.table(x), class = c("survey_mm", "data.table", "data.frame"))
 }
 
 #' @export
@@ -19,32 +19,29 @@ print.survey_mm <- function(mm, width = getOption("width")) {
 
   # Print the number of observations
   n <- nrow(mm); cat("Observations: ", n, "\n\n", sep = ""); if (!n) return()
+  mm <- data.table::copy(mm)
 
-  # Limit string width
-  w_n <- stri_length(nrow(mm))
-  w_name <- max(stri_length(mm$manifest), na.rm = TRUE) + 1
-  w_reserved <- 8 + w_name + 3 # $ and three spaces as separation
-  w_available <- width - w_n - w_reserved - 5
+  # Get string width limits
+  w <- mm[, list(n = stri_length(.N), manifest = max(stri_length(manifest), na.rm = TRUE) + 1)]
+  w[, reserved := 8 + manifest + 3] # $ and three spaces as seperation
+  w[, available := width - n - reserved - 5]
 
-  # Type
-  mm$type <- vapply(mm$type, function(x) {
-    x <- ifelse(is.na(x), "miss", x)
+  # Shorten name of 'type'
+  mm[is.na(type), type := "miss"]
+  mm[, type := vapply(type, function(x) {
     switch(x, character = "(char)", factor = "(fctr)", numeric = "(num)", Date = "(date)", scale = "(scale)", integer = "(int)", "(????)")
-    }, character(1))
+  }, character(1)) ]
+  mm[!is.na(latent), type := stri_c(type, "*")]
 
-  mm$type <- ifelse(!is.na(mm$latent), stri_c(mm$type, "*"), mm$type)
-
-  # Clean manifest/type
-  mm$manifest <- vapply(mm$manifest, stri_pad_right, width = w_name, character(1))
-  mm$type <- vapply(mm$type, stri_pad_right, width = 8, character(1))
-
-  # Shorten question-text to the remaining width
-  mm$question[is.na(mm$question)] <- ""
-  mm$question <- vapply(mm$question, stri_sub, to = w_available, character(1))
+  # Pad strings to correct width
+  mm[, manifest := stri_pad_right(manifest, width = w$manifest)]
+  mm[, type := stri_pad_right(type, width = 8)]
+  mm[is.na(question), question := ""]
+  mm[, question := stri_sub(question, to = w$available)]
 
   # Print
   for (i in 1:nrow(mm)) {
-    cat(stri_pad_right(i, w_n), ": ", mm$manifest[i], mm$type[i], " ", mm$question[i], sep = "", collapse = "\n")
+    cat(stri_pad_right(i, w$n), ": ", mm$manifest[i], mm$type[i], " ", mm$question[i], sep = "", collapse = "\n")
   }
 
   cat("Note: Associations (including latents) are marked with *\n")
