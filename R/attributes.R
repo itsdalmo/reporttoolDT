@@ -52,7 +52,7 @@ strip_attributes <- function(obj, which) {
 
 update_attribute <- function(new, old, merge = FALSE) {
   if (is.null(attr(new, "names"))) {
-    new <- setNames(rep(NA_character_, length(new)), new)
+    new <- setNames(rep(NA, length(new)), new)
   }
 
   if (!is.null(old)) {
@@ -64,7 +64,6 @@ update_attribute <- function(new, old, merge = FALSE) {
   new
 
 }
-
 
 update_marketshares <- function(x, old = NULL) {
   entities <- get_association(x, "mainentity")
@@ -79,7 +78,6 @@ update_marketshares <- function(x, old = NULL) {
 # Get and set single attributes ------------------------------------------------
 
 get_attr <- function(srv, which, matches = NULL,  arrange = TRUE, match_names = TRUE) {
-  # stopifnot(is.survey(srv))
   res <- attr(srv, which)
 
   # Return early if matches is NULL
@@ -89,16 +87,16 @@ get_attr <- function(srv, which, matches = NULL,  arrange = TRUE, match_names = 
     return(res)
   }
 
+  # Match values or names
+  m <- if (match_names) names(res) else unname(res)
+
   # Return NULL if no matches and give warning if not everything 'matches'
-  missing <- setdiff(matches, unique(res))
+  missing <- setdiff(matches, m)
   if (length(missing)) {
     matches <- setdiff(matches, missing)
     if (!length(matches)) return()
     warning("The following ", which, " were not found:\n", join_strings(missing))
   }
-
-  # Match values or names
-  m <- if (match_names) names(res) else unname(res)
 
   # Return
   if (arrange) {
@@ -109,7 +107,6 @@ get_attr <- function(srv, which, matches = NULL,  arrange = TRUE, match_names = 
 }
 
 set_attr <- function(srv, which, dots, match_names = TRUE) {
-  # stopifnot(is.survey(srv))
   res <- attr(srv, which)
 
   # Set matches and replacements
