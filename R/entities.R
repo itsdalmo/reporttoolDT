@@ -72,3 +72,25 @@ print.survey_ents <- function(ents, width = getOption("width")) {
   }
 
 }
+
+# Get/set for entities ---------------------------------------------------------
+
+#' @export
+get_marketshare <- function(srv, entities = NULL, arrange = TRUE) {
+  x <- get_attr(srv, which = "marketshares", matches = entities, arrange = arrange, match_names = TRUE)
+  x
+}
+
+
+#' @export
+set_marketshare <- function(srv, ..., list = NULL) {
+  srv <- data.table::copy(srv)
+  # Update survey in case mainentity has just been set
+  ms <- attr(srv, "marketshares")
+  if (is.null(ms)) {
+    setattr(srv, "marketshares", update_marketshares(srv, ms))
+  }
+
+  set_attr(srv, "marketshares", c(base::list(...), list), match_names = TRUE)
+  srv
+}
