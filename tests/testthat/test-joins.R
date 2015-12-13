@@ -51,3 +51,4 @@ test_that("rbind works with multiple surveys", {
   z <- rbind(y, z, fill = TRUE)
 
 })
+

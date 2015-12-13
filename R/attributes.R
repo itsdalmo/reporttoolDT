@@ -11,7 +11,7 @@ update_survey <- function(x, old_attributes) {
   setattr(x, "translations", update_attribute(default$translation$required, old$translations))
   setattr(x, "config", update_attribute(default$config$setting, old$config))
   setattr(x, "marketshares", update_marketshares(x, old$marketshares))
-  setattr(x, "class", c("survey", "data.table", "data.frame"))
+  setattr(x, "class", unique(c("survey", class(x))))
 
 }
 

@@ -41,7 +41,8 @@ as.list.survey <- function(x, attributes = FALSE) {
 "[.survey" <- function(x, ...) {
   o <- get_attributes(x, which = default$attributes)
   x <- NextMethod()
-  update_survey(x, old = list(o))
+  if (!is.atomic(x))
+    update_survey(x, old = list(o))
   x
 }
 
@@ -131,7 +132,7 @@ print.survey_list <- function(x, width = getOption("width")) {
     stri_c(classes, dimensions, sep = "")
   })
 
-  # Adapt width
+  # Fix width
   nms <- stri_c("$", names(x))
   nms <- stri_pad_right(nms, width = max(stri_length(nms), n.rm = TRUE) + 4)
   cat(stri_c(nms, info, collapse = "\n"))
