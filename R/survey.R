@@ -40,7 +40,7 @@ as.list.survey <- function(x, attributes = FALSE) {
 #' @export
 "[.survey" <- function(x, ...) {
   o <- get_attributes(x, which = default$attributes)
-  x <- data.table:::"[.data.table"(x, ...)
+  x <- NextMethod()
   update_survey(x, old = list(o))
   x
 }
@@ -96,16 +96,16 @@ cbind.default <- function(...) {
 
 #' @export
 rbind.survey <- function(..., use.names = TRUE, fill = FALSE, idcol = NULL) {
-  dots <- list(...); o <- lapply(dots, get_attributes, which = default$attributes)
-  x <- data.table::rbindlist(dots, use.names = use.names, fill = fill, idcol = idcol)
+  o <- lapply(list(...), get_attributes, which = default$attributes)
+  x <- NextMethod()
   update_survey(x, old = o)
   x
 }
 
 #' @export
 cbind.survey <- function(...) {
-  dots <- list(...); o <- lapply(dots, get_attributes, which = default$attributes)
-  x <- base::cbind.data.frame(dots)
+  o <- lapply(list(...), get_attributes, which = default$attributes)
+  x <- NextMethod()
   update_survey(x, old = o)
   x
 }
@@ -113,7 +113,7 @@ cbind.survey <- function(...) {
 # Merge/join -------------------------------------------------------------------
 #' @export
 merge.survey <- function(x, y, ...) {
-  dots <- list(x, y); o <- lapply(dots, get_attributes, which = default$attributes)
+  o <- lapply(list(x, y), get_attributes, which = default$attributes)
   x <- NextMethod()
   update_survey(x, old = o)
   x
