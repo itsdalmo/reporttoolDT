@@ -1,15 +1,7 @@
 #' @export
 get_config <- function(srv, config = NULL, arrange = TRUE) {
-  x <- attr(srv, which = "config")
-  if (!is.null(x) && !is.null(config)) {
-    if (arrange) {
-      id <- names(x) %ordin% config
-    } else {
-      id <- names(x) %in% config
-    }
-    x <- x[id]
-  }
-  unname(x)
+  srv <- get_attr(srv, which = "config", matches = config, arrange = arrange, match_names = TRUE)
+  srv
 }
 
 #' @export

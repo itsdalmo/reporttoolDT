@@ -40,6 +40,7 @@ as.list.survey <- function(x, attributes = FALSE) {
 #' @export
 "[.survey" <- function(x, ...) {
   o <- get_attributes(x, which = default$attributes)
+  # x <- data.table:::"[.data.table"(x, i, j, ...)
   x <- NextMethod()
   if (!is.atomic(x))
     update_survey(x, old = list(o))

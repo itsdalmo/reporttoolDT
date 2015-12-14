@@ -7,8 +7,7 @@ rm(list = ls(all = TRUE))
 x <- read_data("test.sav")
 x <- survey(x)
 names(x) <- stri_trans_tolower(names(x))
+x[, q1 := "Snitt"]
 
-z <- x[, lapply(.SD, mean, na.rm = TRUE), .SDcols = c("q3em")]
-z <- x[, q3em]
 
-z <- x[, mean(q3 + 10)]
+z <- rbind(x, copy(x)[, q1 := "Snitt"])

@@ -73,6 +73,6 @@ test_that("Get/set config works", {
   y <- set_config(y, cutoff = .5)
 
   expect_true(inherits(y, "survey"))
-  expect_identical(get_config(y, "cutoff"), .5)
+  expect_identical(get_config(y, "cutoff"), setNames(.5, "cutoff"))
 
 })
