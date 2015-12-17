@@ -26,22 +26,19 @@ qtable_.data.frame <- function(df, vars, groups = NULL) {
 qtable_.data.table <- function(df, vars, groups = NULL) {
   if (!length(vars)) stop("No variables specified.", call. = FALSE)
 
-  df <- data.table::copy(df)
-  drop <- setdiff(names(df), c(vars, groups))
-  df[, drop := NULL, with = FALSE]
+  cols <- c(vars, groups)
+  df <- df[, cols, with = FALSE]
 
-#   if (!is.null(groups)) {
-#     df <- melt(df, id = groups, measure = vars, na.rm = TRUE)
-#   } else {
-#     df <- melt(df, measure = vars, na.rm = TRUE)
-#   }
+  if (!is.null(groups)) {
+    df <- melt(df, id = groups, measure = vars, na.rm = TRUE)
+  } else {
+    df <- melt(df, measure = vars, na.rm = TRUE)
+  }
 
-  df <- df[, list("n" = .N, lapply(.SD, mean, na.rm = FALSE)), .SDcols = vars, by = groups]
-  df[, n := sum(n), by = groups]
   # df <- df[, list("n" = .N, "value" = mean(value, na.rm = TRUE)), by = c(groups, "variable")]
   # df[, n := sum(n), by = groups]
 
-  # dcast(df, stri_c(groups, "~", "variable"), value.var = "value")
+  df <- dcast(df, stri_c("...", "~", "variable"), value.var = "value", fun = mean, drop = FALSE)
   df
 
 }
