@@ -11,3 +11,4 @@ x[, q1 := "Snitt"]
 x <- set_association(x, mainentity = "q1")
 
 df <- qtable_(x, c("epsi", "loyal"))
+df <- qtable_(x, c("q17"))
