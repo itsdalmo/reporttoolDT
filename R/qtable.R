@@ -3,33 +3,45 @@ qtable <- function(srv, ..., wide = TRUE, weight = TRUE, question = TRUE) {
   qtable_(srv, dots)
 }
 
-qtable_ <- function(srv, dots, groups = NULL) {
+qtable_ <- function(df, vars, groups = NULL) UseMethod("qtable_")
 
-  if(!length(dots)) stop("No variables specified.", call. = FALSE)
-  srv <- data.table::copy(srv)
-
-  # Check the input
-  if (!is.survey(srv)) {
-    stop("Argument 'survey' is not an object with the class 'survey'. See help(survey).", call. = FALSE)
-  }
+qtable_.survey <- function(df, ...) {
 
   # Remove observations above cutoff (if it is not NA)
-  cutoff <- as.numeric(get_config(srv, "cutoff"))
-  if (!is.na(cutoff) && "percent_missing" %in% names(srv)) {
-    srv <- srv[cutoff <= percent_missing, with = FALSE]
+  cutoff <- as.numeric(get_config(df, "cutoff"))
+  if (!is.na(cutoff) && "percent_missing" %in% names(df)) {
+    df <- df[cutoff <= percent_missing, with = FALSE]
   } else {
     warning("Either cutoff is not set or 'percent_missing' is not in the data.", call. = FALSE)
   }
 
-  # Aggregate
-  if (length(groups)) {
-    srv <- melt(srv, id = groups, measure = dots)
-    srv <- srv[!is.na(variable) & !is.na(value), ]
-  } else {
+  NextMethod()
 
-  }
+}
 
-  srv[, list(n = .N, value = mean(value, na.rm = TRUE)), keyby = c(groups, "variable")]
-  # srv[, lapply(.SD, mean), .SDcols = dots, keyby = mainentity]
+qtable_.data.frame <- function(df, vars, groups = NULL) {
+  qtable_(as.data.table(df), vars, groups)
+}
+
+qtable_.data.table <- function(df, vars, groups = NULL) {
+  if (!length(vars)) stop("No variables specified.", call. = FALSE)
+
+  df <- data.table::copy(df)
+  drop <- setdiff(names(df), c(vars, groups))
+  df[, drop := NULL, with = FALSE]
+
+#   if (!is.null(groups)) {
+#     df <- melt(df, id = groups, measure = vars, na.rm = TRUE)
+#   } else {
+#     df <- melt(df, measure = vars, na.rm = TRUE)
+#   }
+
+  df <- df[, list("n" = .N, lapply(.SD, mean, na.rm = FALSE)), .SDcols = vars, by = groups]
+  df[, n := sum(n), by = groups]
+  # df <- df[, list("n" = .N, "value" = mean(value, na.rm = TRUE)), by = c(groups, "variable")]
+  # df[, n := sum(n), by = groups]
+
+  # dcast(df, stri_c(groups, "~", "variable"), value.var = "value")
+  df
 
 }

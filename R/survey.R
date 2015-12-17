@@ -121,6 +121,21 @@ merge.survey <- function(x, y, ...) {
   x
 }
 
+# melt/dcast -------------------------------------------------------------------
+melt.survey <- function(x, ...) {
+  o <- get_attributes(x, which = default$attributes)
+  x <- NextMethod()
+  update_survey(x, old = list(o))
+  x
+}
+
+dcast.survey <- function(x, ...) {
+  o <- get_attributes(x, which = default$attributes)
+  x <- NextMethod()
+  update_survey(x, old = list(o))
+  x
+}
+
 # Print methods ----------------------------------------------------------------
 print.survey_list <- function(x, width = getOption("width")) {
 
