@@ -1,9 +1,9 @@
 #' @export
 model <- function(x) {
   stopifnot(is.survey(x))
-  x <- list("latent" = get_association(x),
+  x <- list("latent" = attr(x, "associations"),
             "manifest" = names(x),
-            "question" = get_labels(x),
+            "question" = attr(x, "labels"),
             "type" = vapply(x, function(x) class(x)[1], character(1)),
             "levels" = vapply(x, function(x) {
               l <- levels(x); if (is.null(l)) NA_character_ else stri_c(l, collapse = "\n")
@@ -52,7 +52,11 @@ print.survey_mm <- function(mm, width = getOption("width")) {
 
 get_association <- function(srv, associations = NULL, arrange = TRUE) {
   x <- get_attr(srv, which = "associations", matches = associations, arrange = arrange, match_names = FALSE)
-  names(x)
+  if (is.null(associations)) {
+    x
+  } else {
+    names(x)
+  }
 }
 
 #' @export

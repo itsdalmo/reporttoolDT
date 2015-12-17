@@ -28,10 +28,21 @@ qtable_.data.table <- function(df, vars, groups = NULL) {
 
   cols <- c(vars, groups)
   df <- df[, cols, with = FALSE]
+  types <- vapply(df, function(x) class(x)[1], character(1))
+
+  invalid <- names(df)[!types %in% c("numeric", "factor", "Date")]
+  if (length(invalid)) {
+    types <- stri_c("(", types[!types %in% c("numeric", "factor", "Date")], ")")
+    invalid <- stri_c(invalid, types, sep = " ")
+    stop("The following variables are not supported:\n", join_strings(invalid), call. = FALSE)
+  } else if (length(unique(types)) != 1L) {
+    stop("qtable does not support mixed classes.", call. = FALSE)
+  }
 
   if (!is.null(groups)) {
     df <- melt(df, id = groups, measure = vars, na.rm = TRUE)
   } else {
+    # df <- df[, list("n" = . N, )]
     df <- melt(df, measure = vars, na.rm = TRUE)
   }
 
@@ -39,6 +50,7 @@ qtable_.data.table <- function(df, vars, groups = NULL) {
   # df[, n := sum(n), by = groups]
 
   df <- dcast(df, stri_c("...", "~", "variable"), value.var = "value", fun = mean, drop = FALSE)
+  if ("." %in% names(df)) df[, . := NULL][]
   df
 
 }

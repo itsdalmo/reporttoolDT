@@ -10,7 +10,4 @@ names(x) <- stri_trans_tolower(names(x))
 x[, q1 := "Snitt"]
 x <- set_association(x, mainentity = "q1")
 
-qtable_(x, c("epsi", "loyal"))
-CJ(df$q1, levels(df$q17))
-
-z <- rbind(x, copy(x)[, q1 := "Snitt"])
+df <- qtable_(x, c("epsi", "loyal"))
