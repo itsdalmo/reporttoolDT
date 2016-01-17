@@ -12,3 +12,10 @@ x <- set_association(x, mainentity = "q1")
 
 df <- qtable_(x, c("epsi", "loyal"))
 df <- qtable_(x, c("q17"))
+
+
+df <- qtable_(x, c("epsi", "loyal"), groups = "q1")
+df <- qtable_(x, c("q17"), groups = "q1")
+
+
+df <- qtable_(x, c("q5a", "q5b", "q5c"))
