@@ -15,7 +15,14 @@
 #' @examples
 #' read_data("test.sav") %>% from_labelled()
 
-from_labelled <- function(df) {
+from_labelled <- function(df) UseMethod("from_labelled")
+
+from_labelled.data.table <- function(df) {
+  df <- as.data.frame(df)
+  data.table::as.data.table(NextMethod())
+}
+
+from_labelled.data.frame <- function(df) {
 
   # Preserve label
   label <- lapply(df, attr, which = "label")
