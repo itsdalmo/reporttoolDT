@@ -8,8 +8,9 @@ Description: More about what it does (maybe more than one line)
 License: What license is it under?
 LazyData: TRUE
 Depends:
-    data.table
+    R
 Imports:
+    data.table,
     haven,
     openxlsx,
     readr,
