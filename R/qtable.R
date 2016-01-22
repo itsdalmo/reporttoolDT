@@ -9,15 +9,12 @@ qtable_.survey <- function(df, vars, groups = NULL) {
 
   # Remove observations above cutoff (if it is not NA)
   cutoff <- as.numeric(get_config(df, "cutoff"))
-  if (is.na(cutoff)) {
-    warning("Cutoff has not been set for the survey. See help(set_config).", call. = FALSE)
-  } else {
+  if (!is.na(cutoff)) {
     if ("percent_missing" %in% names(df)) {
       df <- df[cutoff <= percent_missing, with = FALSE]
     } else {
       warning("Cutoff has been set, but there is no 'percent_missing' variable in data.", call. = FALSE)
     }
-
   }
 
   NextMethod()
@@ -25,7 +22,8 @@ qtable_.survey <- function(df, vars, groups = NULL) {
 }
 
 qtable_.data.frame <- function(df, vars, groups = NULL) {
-  qtable_(as.data.table(df), vars, groups)
+  df <- data.table::as.data.table(df)
+  as.data.frame(qtable_(df, vars, groups))
 }
 
 qtable_.data.table <- function(df, vars, groups = NULL) {
@@ -58,38 +56,42 @@ qtable_.data.table <- function(df, vars, groups = NULL) {
     df <- rbind(data.table::copy(df), df[, groups[1] := "Average", with = FALSE])
   }
 
-  # Create a completed dataset for cross-joins
-  # cj <- lapply(df[, c(groups, var), with = FALSE], function(x) { if (is.factor(x)) levels(x) else x })
-  # cj <- do.call(CJ, c(cj, sorted = FALSE, unique = TRUE))
-
-
   if (type == "numeric") {
     qtable_numeric(df, vars, groups)
   } else if (type == "factor") {
     if (length(vars) > 1L) stop("qtable only handles 1 factor variable at a time.", call. = FALSE)
     qtable_factor(df, vars, groups)
   } else if (type == "Date") {
+    if (length(vars) > 1L) stop("qtable only handles 1 factor variable at a time.", call. = FALSE)
     qtable_date(df, vars, groups)
   }
 
 }
 
+# Create tables based on type of variable --------------------------------------
 qtable_numeric <- function(df, vars, groups = NULL) {
-  df[, lapply(.SD, mean, na.rm = TRUE), .SDcols = vars, keyby = groups]
+  if (!is.null(groups)) df <- complete_df(df, groups)
+  df[, lapply(.SD, mean, na.rm = TRUE), .SDcols = vars, keyby = groups][]
 }
 
 qtable_factor <- function(df, var, groups = NULL) {
-  res <- df[, list("n" = .N), keyby = c(groups, var)]
-  cj <- lapply(df[, c(groups, var), with = FALSE], function(x) { if (is.factor(x)) levels(x) else x })
-  cj <- do.call(CJ, c(cj, sorted = FALSE, unique = TRUE))
-
-  setkeyv(res, c(groups, var))
-  res <- res[cj][is.na(n), n := 0][, proportion := prop.table(n), keyby = groups]
-  res
-
+  df <- df[, list("n" = .N), keyby = c(groups, var)]
+  df <- complete_df(df, c(var, groups))
+  df[is.na(n), n := 0][, proportion := prop.table(n), keyby = groups][]
 }
 
-qtable_date <- function(df, vars, groups = NULL) {
-  df <- melt(df, id = groups, measure = vars, na.rm = TRUE)
-  df
+qtable_date <- function(df, var, groups = NULL) {
+  if (!is.null(groups)) df <- complete_df(df, groups)
+  df[, list("start" = min(var, na.rm = TRUE), "end" = min(var, na.rm = TRUE))][]
+}
+
+
+# Complete datasets ------------------------------------------------------------
+complete_df <- function(df, vars) {
+  cj <- df[, vars, with = FALSE]
+  cj <- lapply(cj, function(x) { if (is.factor(x)) levels(x) else unique(x) })
+  cj <- expand.grid(cj)
+
+  data.table::setkeyv(df, vars)
+  df[cj]
 }
