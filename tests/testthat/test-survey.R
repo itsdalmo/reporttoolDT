@@ -6,13 +6,12 @@ test_that("Creating a new survey", {
 
   y <- survey(x)
   expect_true(inherits(y, "survey"))
-  expect_true(inherits(y, "data.table"))
+  expect_true(inherits(y, "data.frame"))
   expect_true(all(c("labels", "associations", "translations", "config") %in% names(attributes(y))))
-
 })
 
-test_that("We can add columns to a survey with :=", {
-  y <- survey(x)
+test_that("We can add columns to a survey (data.table) with :=", {
+  y <- survey(data.table::as.data.table(x))
   y <- set_association(y, mainentity = "Q1")
 
   y[, test := 1L]
@@ -42,7 +41,7 @@ test_that("We can add columns to a survey with [[", {
   y <- survey(x)
   y <- set_association(y, mainentity = "Q1")
 
-  y$test <- 1L
+  y[["test"]] <- 1L
   expect_identical(names(attr(y, "associations")), names(y))
   expect_identical(get_association(y, "mainentity"), "Q1")
 })
