@@ -3,7 +3,7 @@ survey <- function(x) {
   x <- data.table::copy(x)
   if (is.labelled(x)) x <- from_labelled(x)
   o <- get_attributes(x, which = default$attributes)
-  update_survey(as.data.table(x), old_attributes = list(o))
+  update_survey(x, old_attributes = list(o))
 }
 
 # is/as ------------------------------------------------------------------------
@@ -30,7 +30,7 @@ as.list.survey <- function(x, attributes = FALSE) {
     ents <- entities(x)
   }
 
-  df <- as.data.table(data.table::copy(x))
+  df <- data.table::copy(x)
   strip_attributes(df, which = default$attributes)
   structure(list("df" = df, "ents" = ents, "mm" = model(x)), class = c("survey_list", "list"))
 }
