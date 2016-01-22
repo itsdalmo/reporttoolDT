@@ -6,12 +6,13 @@ update_survey <- function(x, old_attributes) {
     old <- NULL
   }
 
-  setattr(x, "labels", update_attribute(names(x), old$labels))
-  setattr(x, "associations", update_attribute(names(x), old$associations))
-  setattr(x, "translations", update_attribute(default$translation$required, old$translations))
-  setattr(x, "config", update_attribute(default$config$setting, old$config))
-  setattr(x, "marketshares", update_marketshares(x, old$marketshares))
-  setattr(x, "class", unique(c("survey", class(x))))
+  # Order matters when updating.
+  data.table::setattr(x, "labels", update_attribute(names(x), old$labels))
+  data.table::setattr(x, "associations", update_attribute(names(x), old$associations))
+  data.table::setattr(x, "translations", update_attribute(default$translation$required, old$translations))
+  data.table::setattr(x, "config", update_attribute(default$config$setting, old$config))
+  data.table::setattr(x, "marketshares", update_marketshares(x, old$marketshares))
+  data.table::setattr(x, "class", unique(c("survey", class(x))))
 
 }
 
@@ -43,11 +44,11 @@ get_attributes <- function(obj, which) {
 
 set_attributes <- function(obj, list) {
   stopifnot(!is.null(names(list)))
-  for (i in names(list)) setattr(obj, i, list[[i]])
+  for (i in names(list)) data.table::setattr(obj, i, list[[i]])
 }
 
 strip_attributes <- function(obj, which) {
-  for (i in which) setattr(obj, i, NULL)
+  for (i in which) data.table::setattr(obj, i, NULL)
 }
 
 update_attribute <- function(new, old, merge = FALSE) {
@@ -127,6 +128,6 @@ set_attr <- function(srv, which, dots, match_names = TRUE) {
     res[names(res) %in% m[[i]]] <- v[[i]]
   }
 
-  setattr(srv, which, res)
+  data.table::setattr(srv, which, res)
 
 }
