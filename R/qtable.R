@@ -1,11 +1,11 @@
-qtable <- function(srv, ..., groups = NULL, wide = TRUE) {
-  dots <- lazyeval::lazy_dots(...)
-  qtable_(srv, dots, groups, wide)
-}
+# qtable <- function(srv, ..., groups = NULL, wide = TRUE) {
+#   dots <- lazyeval::lazy_dots(...)
+#   qtable_(srv, dots, groups, wide)
+# }
 
-qtable_ <- function(df, ...) UseMethod("qtable_")
+qtable <- function(df, ...) UseMethod("qtable")
 
-qtable_.survey <- function(df, vars, groups = NULL, wide = TRUE) {
+qtable.survey <- function(df, vars, groups = NULL, wide = TRUE) {
 
   # Remove observations above cutoff (if it is not NA)
   cutoff <- as.numeric(get_config(df, "cutoff"))
@@ -21,17 +21,16 @@ qtable_.survey <- function(df, vars, groups = NULL, wide = TRUE) {
 
 }
 
-qtable_.data.frame <- function(df, vars, groups = NULL, wide = TRUE) {
+qtable.data.frame <- function(df, vars, groups = NULL, wide = TRUE) {
   df <- data.table::as.data.table(df)
   as.data.frame(qtable_(df, vars, groups, wide))
 }
 
-qtable_.data.table <- function(df, vars, groups = NULL, wide = TRUE) {
+qtable.data.table <- function(df, vars, groups = NULL, wide = TRUE) {
   if (!length(vars)) stop("No variables specified.", call. = FALSE)
 
   # Subset variables and check type
-  cols <- c(groups, vars)
-  df <- df[, cols, with = FALSE]
+  df <- df[, c(groups, vars), with = FALSE]
 
   types <- vapply(df, function(x) class(x)[1], character(1))
   types[types == "integer"] <- "numeric"
@@ -59,8 +58,10 @@ qtable_.data.table <- function(df, vars, groups = NULL, wide = TRUE) {
   if (type == "numeric") {
     qtable_numeric(df, vars, groups, wide)
   } else if (type == "factor") {
+    if (length(vars) > 1L) stop("qtable cannot handle multiple factor variables.", call. = FALSE)
     qtable_factor(df, vars, groups, wide)
   } else if (type == "Date") {
+    if (length(vars) > 1L) stop("qtable cannot handle multiple date variables.", call. = FALSE)
     qtable_date(df, vars, groups, wide)
   }
 
@@ -68,28 +69,38 @@ qtable_.data.table <- function(df, vars, groups = NULL, wide = TRUE) {
 
 # Create tables based on type of variable --------------------------------------
 qtable_numeric <- function(df, vars, groups, wide) {
-  # df[, n := .N, by = groups]
   if (!is.null(groups)) df <- complete_df(df, groups)
-  df[, lapply(.SD, mean, na.rm = TRUE), .SDcols = vars, keyby = groups][]
-}
+  df <- df[, lapply(.SD, mean, na.rm = TRUE), .SDcols = vars, keyby = groups]
 
-qtable_factor <- function(df, var, groups, wide) {
-  df <- df[, list("n" = .N), keyby = c(groups, var)]
-  df <- complete_df(df, c(var, groups))
-  df <- df[is.na(n), n := 0][, proportion := prop.table(n), keyby = groups]
-
-  if (wide && !is.null(groups)) {
-    df[, n := sum(n), by = groups]
-    df <- data.table::dcast(df, stri_c(groups, "+", "n", "~", var), value.var = "proportion")
+  if (!is.null(groups) && wide) {
+    if (length(groups) > 1L && length(vars) == 1L) {
+      n <- length(groups) # Spread on last group if there is only 1 var.
+      df <- data.table::dcast(df, stri_c(stri_c(groups[-n], collapse = "+"), "~", groups[n]), value.var = vars)
+    }
   }
 
   df[]
 
 }
 
-qtable_date <- function(df, var, groups, wideL) {
+qtable_factor <- function(df, vars, groups, wide) {
+  df <- df[, list("n" = .N), keyby = c(groups, vars)]
+  df <- complete_df(df, c(vars, groups))
+  df <- df[is.na(n), n := 0][, proportion := prop.table(n), keyby = groups]
+
+  if (!is.null(groups) && wide) {
+    df[, n := sum(n), by = groups]
+    df <- data.table::dcast(df, stri_c(groups, "+", "n", "~", vars), value.var = "proportion")
+  }
+
+  df[]
+
+}
+
+qtable_date <- function(df, vars, groups, wide) {
   if (!is.null(groups)) df <- complete_df(df, groups)
-  df[, list("start" = min(var, na.rm = TRUE), "end" = min(var, na.rm = TRUE))][]
+  data.table::setnames(df, vars, "date")
+  df[, .("start" = min(date, na.rm = TRUE), "end" = max(date, na.rm = TRUE)), keyby = groups][]
 }
 
 
