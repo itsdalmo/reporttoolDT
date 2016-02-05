@@ -1,32 +1,28 @@
 #' @export
-replace <- function(x, list, by = x, ignore_case = FALSE, invert = FALSE) {
+replace <- function(x, lst, by = x, ignore_case = FALSE) {
   stopifnot(length(x) == length(by))
-  if (is.character(list)) list <- as.list(list)
+  if (is.character(lst)) lst <- as.list(lst)
 
   # Replacements must be named
-  if (!is.list2(list)) {
+  if (!is.list2(lst)) {
     stop("Expecting a named list or character vector.", call. = FALSE)
-  } else if (is.null(names(list)) || any(is.na(names(list))) || any(names(list) == "")) {
-    stop("All list arguments must be named.", call. = FALSE)
+  } else if (is.null(names(lst)) || any(is.na(names(lst))) || any(names(lst) == "")) {
+    stop("All lst arguments must be named.", call. = FALSE)
   }
 
   # Perform replacement
-  for (i in seq_along(matches)) {
-    # Invert if the list is of the form: list(value = matches)
-    if (invert) {
-      matches <- list[[i]]
-      value <- names(list)[i]
-    } else {
-      matches <- names(list)[i]
-      value <- list[[i]]
-    }
+  for (i in names(lst)) {
+    new <- i
+    old <- lst[[i]]
 
     if (ignore_case) {
-      id <- stri_trans_tolower(by) %in% stri_trans_tolower(matches[i])
+      id <- stri_trans_tolower(by) %in% stri_trans_tolower(old)
     } else {
-      id <- by %in% matches[i]
+      id <- by %in% old
     }
-    x[id] <- value[i]
+
+    x[id] <- new
+
   }
 
   x

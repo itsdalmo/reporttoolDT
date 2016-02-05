@@ -18,28 +18,40 @@
 from_labelled <- function(df) UseMethod("from_labelled")
 
 from_labelled.data.table <- function(df) {
-  df <- as.data.frame(df)
-  data.table::as.data.table(NextMethod())
+  from_labelled_impl(data.table::copy(df))
 }
 
 from_labelled.data.frame <- function(df) {
+  df <- data.table::as.data.table(df)
+  as.data.frame(from_labelled_impl(df))
+}
 
-  # Preserve label
-  label <- lapply(df, attr, which = "label")
+from_labelled.tbl_df <- function(df) {
+  df <- data.table::as.data.table(df)
+  dplyr::tbl_df(from_labelled_impl(df))
+}
+
+from_labelled_impl <- function(dt) {
+  stopifnot(data.table::is.data.table(dt))
+
+  # Preserve labels
+  label <- lapply(dt, attr, which = "label")
   label <- unlist(lapply(label, function(x) { if(is.null(x)) NA else x }))
 
   # Differentiate between scale and factor variables
-  is_labelled <- vapply(df, inherits, what = "labelled", logical(1))
-  labels <- lapply(df, function(x) if (!is.null(attr(x, "labels"))) names(attr(x, "labels")) else attr(x, "levels"))
-  is_scale <- vapply(labels, function(x) { sum(stri_detect(x, regex = default$pattern$detect_scale)) == 10L }, logical(1))
+  #dt[, vapply(.SD, inherits, what = "labelled", logical(1))]
+  labelled <- vapply(dt, inherits, what = "labelled", logical(1))
+  labels <- lapply(dt, function(x) if (!is.null(attr(x, "labels"))) names(attr(x, "labels")) else attr(x, "levels"))
+  scales <- vapply(labels, function(x) { sum(stri_detect(x, regex = default$pattern$detect_scale)) == 10L }, logical(1))
 
   # Check labelled scales for consistency and convert to factor
-  df[is_scale] <- Map(fix_labelled, df[is_scale], names(df)[is_scale])
-  df[is_labelled] <- suppressWarnings(lapply(df[is_labelled], haven::as_factor, drop_na = FALSE, ordered = FALSE))
+  cols <- names(dt)
+  dt[, cols[scales] := Map(fix_labelled, .SD, names(.SD)), .SDcols = cols[scales], with = FALSE]
+  dt[, cols[labelled] := lapply(.SD, haven::as_factor, drop_na = FALSE, ordered = FALSE), .SDcols = cols[labelled], with = FALSE]
 
   # Return
-  attr(df, "labels") <- label
-  df
+  data.table::setattr(dt, "labels", label)
+  dt
 
 }
 

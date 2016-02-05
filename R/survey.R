@@ -3,7 +3,7 @@ survey <- function(x) {
   x <- data.table::copy(x)
   if (is.labelled(x)) x <- from_labelled(x)
   o <- get_attributes(x, which = default$attributes)
-  update_survey(x, old_attributes = list(o))
+  update_survey_attributes(x, old_attributes = list(o))
 }
 
 # is/as ------------------------------------------------------------------------
@@ -43,7 +43,7 @@ as.list.survey <- function(x, attributes = FALSE) {
   # x <- data.table:::"[.data.table"(x, i, j, ...)
   x <- NextMethod()
   if (!is.atomic(x))
-    update_survey(x, old = list(o))
+    update_survey_attributes(x, old = list(o))
   x
 }
 
@@ -51,7 +51,7 @@ as.list.survey <- function(x, attributes = FALSE) {
 "[<-.survey" <- function(x, i, j, ...) {
   o <- get_attributes(x, which = default$attributes)
   x <- NextMethod()
-  update_survey(x, old = list(o))
+  update_survey_attributes(x, old = list(o))
   x
 }
 
@@ -59,25 +59,59 @@ as.list.survey <- function(x, attributes = FALSE) {
 "[[<-.survey" <- function(x, i, j, ...) {
   o <- get_attributes(x, which = default$attributes)
   x <- NextMethod()
-  update_survey(x, old = list(o))
+  update_survey_attributes(x, old = list(o))
   x
 }
 
 #' @export
-"$<-.survey" <- function(x, i, j, ...) {
+`$<-.survey` <- function(x, i, j, ...) {
   o <- get_attributes(x, which = default$attributes)
   x <- NextMethod()
-  update_survey(x, old = list(o))
+  update_survey_attributes(x, old = list(o))
   x
 }
 
 #' @export
-"names<-.survey" <- function(x, value) {
-  x <- NextMethod()
-  setattr(x, "labels", setNames(attr(x, "labels"), names(x)))
-  setattr(x, "associations", setNames(attr(x, "associations"), names(x)))
-  x
+`names<-.survey` <- function(x, value) {
+  update_survey_names(x, names(x), value)
+  NextMethod()
 }
+
+#' @export
+setnames <- function(x, old, new) UseMethod("setnames")
+
+#' @export
+setnames.default <- function(x, old, new) data.table::setnames(x, old, new)
+
+#' @export
+setnames.survey <- function(x, old, new) {
+  update_survey_names(x, old, new)
+  data.table::setnames(x, old, new)
+}
+
+# setnames.survey <- function(x, old, new) {
+#   o <- get_attributes(x, which = default$attributes)
+#
+#   # If new is missing, old is a vector with the new columnnames
+#   if (missing(new)) {
+#     new <- old
+#     old <- names(x)
+#     if (length(old) != length(new)) {
+#       stop("When new is not specified, old must be the same length as the number of columns.", call. = FALSE)
+#     }
+#   }
+#
+#   # Replace names for attributes
+#   n <- lapply(o, function(x) {
+#     if (any(old %in% names(x)))
+#       names(x) <- replace(names(x), lst = setNames(old, new))
+#     x
+#   })
+#
+#   x <- data.table::setnames(x, old, new)
+#   update_survey_attributes(x, old = list(n))
+#   x
+# }
 
 # Bind rows/cols ---------------------------------------------------------------
 #' @export
@@ -100,7 +134,7 @@ cbind.default <- function(...) {
 rbind.survey <- function(..., use.names = TRUE, fill = FALSE, idcol = NULL) {
   o <- lapply(list(...), get_attributes, which = default$attributes)
   x <- NextMethod()
-  update_survey(x, old = o)
+  update_survey_attributes(x, old = o)
   x
 }
 
@@ -108,7 +142,7 @@ rbind.survey <- function(..., use.names = TRUE, fill = FALSE, idcol = NULL) {
 cbind.survey <- function(...) {
   o <- lapply(list(...), get_attributes, which = default$attributes)
   x <- NextMethod()
-  update_survey(x, old = o)
+  update_survey_attributes(x, old = o)
   x
 }
 
@@ -117,7 +151,7 @@ cbind.survey <- function(...) {
 merge.survey <- function(x, y, ...) {
   o <- lapply(list(x, y), get_attributes, which = default$attributes)
   x <- NextMethod()
-  update_survey(x, old = o)
+  update_survey_attributes(x, old = o)
   x
 }
 
@@ -125,14 +159,14 @@ merge.survey <- function(x, y, ...) {
 melt.survey <- function(x, ...) {
   o <- get_attributes(x, which = default$attributes)
   x <- NextMethod()
-  update_survey(x, old = list(o))
+  update_survey_attributes(x, old = list(o))
   x
 }
 
 dcast.survey <- function(x, ...) {
   o <- get_attributes(x, which = default$attributes)
   x <- NextMethod()
-  update_survey(x, old = list(o))
+  update_survey_attributes(x, old = list(o))
   x
 }
 

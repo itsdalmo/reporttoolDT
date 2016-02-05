@@ -1,23 +1,23 @@
 context("Utility functions")
 
-# test_that("replace", {
-#
-#   x <- c("a", "b", "c", "d")
-#
-#   y <- setNames(c("c", "a"), c("bar", "foo"))
-#   expect_identical(replace(x, y), c("foo", "b", "bar", "d"))
-#
-#   y <- list("bar" = c("a", "c"), "foo" = "b")
-#   expect_identical(replace(x, y), c("bar", "foo", "bar", "d"))
-#
-#   y <- list("bar" = "a")
-#   expect_identical(replace(x, y), c("bar", "b", "c", "d"))
-#
-#   # Using "by"
-#   y <- list("bar" = c("a", "c"), "foo" = "b")
-#   expect_identical(replace(1:4, y, by = x), c("bar", "foo", "bar", 4))
-#
-# })
+test_that("replace", {
+
+  x <- c("a", "b", "c", "d")
+
+  y <- c(bar = "c", foo = "a")
+  expect_identical(replace(x, y), c("foo", "b", "bar", "d"))
+
+  y <- list(bar = c("a", "c"), foo = "b")
+  expect_identical(replace(x, y), c("bar", "foo", "bar", "d"))
+
+  y <- list(bar = "a")
+  expect_identical(replace(x, y), c("bar", "b", "c", "d"))
+
+  # Using "by"
+  y <- list("bar" = c("a", "c"), "foo" = "b")
+  expect_identical(replace(1:4, y, by = x), c("bar", "foo", "bar", 4))
+
+})
 
 test_that("clean scores", {
 

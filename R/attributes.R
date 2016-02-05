@@ -1,4 +1,5 @@
-update_survey <- function(x, old_attributes) {
+# Updates to reflect changes after manipulation. Assumes no renames.
+update_survey_attributes <- function(x, old_attributes) {
 
   if (!is.null(old_attributes)) {
     old <- merge_survey_attributes(old_attributes)
@@ -13,6 +14,30 @@ update_survey <- function(x, old_attributes) {
   data.table::setattr(x, "config", update_attribute(default$config$setting, old$config))
   data.table::setattr(x, "marketshares", update_marketshares(x, old$marketshares))
   data.table::setattr(x, "class", unique(c("survey", class(x))))
+
+}
+
+# Update function for names<-, data.table::setnames and dplyr::rename.
+update_survey_names <- function(x, old, new) {
+  if (missing(new)) {
+    if (length(old) != length(new)) {
+      stop("When new is not specified, old must be the same length as the number of columns.", call. = FALSE)
+    } else {
+      # When only "old" is specified, this is in fact the new names.
+      colnms <- setNames(names(x), old)
+    }
+  } else {
+    colnms <- setNames(old, new)
+  }
+
+  named_attr <- c("labels", "associations")
+  for (i in named_attr) {
+    old <- attr(x, i)
+    new <- setNames(old, replace(names(old), lst = colnms))
+    data.table::setattr(x, i, new)
+  }
+
+  x
 
 }
 
@@ -76,7 +101,7 @@ update_marketshares <- function(x, old = NULL) {
 
 }
 
-# Get and set single attributes ------------------------------------------------
+# Get and set individual attributes --------------------------------------------
 
 get_attr <- function(srv, which, matches = NULL,  arrange = TRUE, match_names = TRUE) {
   res <- attr(srv, which)
