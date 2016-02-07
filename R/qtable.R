@@ -23,7 +23,7 @@ qtable.survey <- function(df, vars, groups = NULL, wide = TRUE) {
 
 qtable.data.frame <- function(df, vars, groups = NULL, wide = TRUE) {
   df <- data.table::as.data.table(df)
-  as.data.frame(qtable_(df, vars, groups, wide))
+  as.data.frame(qtable(df, vars, groups, wide))
 }
 
 qtable.data.table <- function(df, vars, groups = NULL, wide = TRUE) {
