@@ -1,12 +1,5 @@
-# Create survey ----------------------------------------------------------------
-survey <- function(x) {
-  x <- data.table::copy(x)
-  if (is.labelled(x)) x <- from_labelled(x)
-  o <- get_attributes(x, which = default$attributes)
-  update_survey_attributes(x, old_attributes = list(o))
-}
-
-# is/as ------------------------------------------------------------------------
+#' @export
+survey <- function(x) UseMethod("survey")
 
 #' @export
 is.survey <- function(x) inherits(x, "survey")
@@ -19,21 +12,6 @@ as.survey.survey <- function(x) x
 
 #' @export
 as.survey.default <- function(x) survey(x)
-
-#' @export
-as.list.survey <- function(x, attributes = FALSE) {
-  if (!attributes) return(NextMethod())
-
-  if (is.null(get_association(x, "mainentity"))) {
-    ents <- NULL
-  } else {
-    ents <- entities(x)
-  }
-
-  df <- data.table::copy(x)
-  strip_attributes(df, which = default$attributes)
-  structure(list("df" = df, "ents" = ents, "mm" = model(x)), class = c("survey_list", "list"))
-}
 
 # Basic operations -------------------------------------------------------------
 
@@ -89,30 +67,6 @@ setnames.survey <- function(x, old, new) {
   data.table::setnames(x, old, new)
 }
 
-# setnames.survey <- function(x, old, new) {
-#   o <- get_attributes(x, which = default$attributes)
-#
-#   # If new is missing, old is a vector with the new columnnames
-#   if (missing(new)) {
-#     new <- old
-#     old <- names(x)
-#     if (length(old) != length(new)) {
-#       stop("When new is not specified, old must be the same length as the number of columns.", call. = FALSE)
-#     }
-#   }
-#
-#   # Replace names for attributes
-#   n <- lapply(o, function(x) {
-#     if (any(old %in% names(x)))
-#       names(x) <- replace(names(x), lst = setNames(old, new))
-#     x
-#   })
-#
-#   x <- data.table::setnames(x, old, new)
-#   update_survey_attributes(x, old = list(n))
-#   x
-# }
-
 # Bind rows/cols ---------------------------------------------------------------
 #' @export
 rbind <- function(...) UseMethod("rbind")
@@ -126,16 +80,16 @@ rbind.default <- function(..., use.names = TRUE, fill = FALSE, idcol = NULL) {
 }
 
 #' @export
-cbind.default <- function(...) {
-  base::cbind(...)
-}
-
-#' @export
 rbind.survey <- function(..., use.names = TRUE, fill = FALSE, idcol = NULL) {
   o <- lapply(list(...), get_attributes, which = default$attributes)
   x <- NextMethod()
   update_survey_attributes(x, old = o)
   x
+}
+
+#' @export
+cbind.default <- function(...) {
+  base::cbind(...)
 }
 
 #' @export
@@ -146,7 +100,7 @@ cbind.survey <- function(...) {
   x
 }
 
-# Merge/join -------------------------------------------------------------------
+# Merge/join/cast --------------------------------------------------------------
 #' @export
 merge.survey <- function(x, y, ...) {
   o <- lapply(list(x, y), get_attributes, which = default$attributes)
@@ -155,7 +109,6 @@ merge.survey <- function(x, y, ...) {
   x
 }
 
-# melt/dcast -------------------------------------------------------------------
 melt.survey <- function(x, ...) {
   o <- get_attributes(x, which = default$attributes)
   x <- NextMethod()

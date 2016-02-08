@@ -13,7 +13,6 @@ update_survey_attributes <- function(x, old_attributes) {
   data.table::setattr(x, "translations", update_attribute(default$translation$required, old$translations))
   data.table::setattr(x, "config", update_attribute(default$config$setting, old$config))
   data.table::setattr(x, "marketshares", update_marketshares(x, old$marketshares))
-  data.table::setattr(x, "class", unique(c("survey", class(x))))
 
 }
 

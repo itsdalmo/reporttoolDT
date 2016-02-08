@@ -1,21 +1,31 @@
 #' @export
-model <- function(x) {
-  stopifnot(is.survey(x))
-  x <- list("latent" = attr(x, "associations"),
-            "manifest" = names(x),
-            "question" = attr(x, "labels"),
-            "type" = vapply(x, function(x) class(x)[1], character(1)),
-            "levels" = vapply(x, function(x) {
-              l <- levels(x); if (is.null(l)) NA_character_ else stri_c(l, collapse = "\n")
-              }, character(1)))
+model <- function(x) UseMethod("model")
 
-  structure(as.data.table(x), class = c("survey_mm", "data.table", "data.frame"))
+#' @export
+model.survey <- function(x) {
+  x <- data.frame(
+    "latent" = attr(x, "associations"),
+    "manifest" = names(x),
+    "question" = attr(x, "labels"),
+    "type" = vapply(x, function(x) class(x)[1], character(1)),
+    "levels" = vapply(x, function(x) {
+      l <- levels(x); if (is.null(l)) NA_character_ else stri_c(l, collapse = "\n")
+    }, character(1)),
+    stringsAsFactors = FALSE
+  )
+  structure(x, class = c("survey_model", "data.frame"))
 }
 
 #' @export
-print.survey_mm <- function(mm, width = getOption("width")) {
+print.survey_model <- function(mm, width = getOption("width")) {
 
   cat("Measurement model\n")
+
+  if (data.table::is.data.table(mm)) {
+    mm <- data.table::copy(mm)
+  } else {
+    mm <- data.table::as.data.table(mm)
+  }
 
   # Print the number of observations
   n <- nrow(mm); cat("Observations: ", n, "\n\n", sep = ""); if (!n) return()
