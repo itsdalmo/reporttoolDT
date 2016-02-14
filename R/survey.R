@@ -1,3 +1,33 @@
+survey <- R6::R6Class("survey",
+  private = list(
+    .associations = NULL,
+    .labels = NULL,
+    .config = NULL,
+    .dictionary = NULL
+  ),
+  public = list(
+    data = NULL,
+
+    initialize = function(df) {
+      if (missing(df) || !is.data.frame(df))
+          stop("Expecting a data.frame or data.table.", call = FALSE)
+      if (contains_labelled(df))
+        df <- convert_labelled(df)
+      self$data <- df
+      self$labels <- attr(df, "labels")
+    }
+
+    edit = function(i, j, ..., with = FALSE) {
+      self$data <- `[`(self$data, i, j, ..., with = with)
+    }
+
+    print = function(...) {
+      print(self$data)
+    }
+  )
+)
+
+
 #' @export
 survey <- function(x) UseMethod("survey")
 

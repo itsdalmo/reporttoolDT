@@ -13,9 +13,11 @@ Imports:
     data.table,
     haven,
     openxlsx,
+    R6,
     readr,
     readxl,
     stringi
 Suggests:
+    dplyr,
     testthat
 RoxygenNote: 5.0.1
