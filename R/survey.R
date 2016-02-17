@@ -1,3 +1,4 @@
+# INITIALIZE -------------------------------------------------------------------
 #' @export
 survey <- function(x) UseMethod("survey")
 
@@ -23,7 +24,29 @@ new_survey <- function(x) {
   )
 }
 
-# Basic operations -------------------------------------------------------------
+update_survey <- function(x) {
+  x[c(".data", ".associations", ".labels", ".config", ".dictionary")]
+}
+
+merge_survey <- function(x) {
+
+}
+
+# CONVERT ----------------------------------------------------------------------
+#' @export
+as.list.survey <- function(x) {
+  class(x) <- "list"
+  x
+}
+
+# GET --------------------------------------------------------------------------
+#' @export
+names.survey <- function(x) names(x$.data)
+
+#' @export
+dimnames.survey <- function(x) {
+  dimnames(x$.data)
+}
 
 #' @export
 `[.survey` <- function(x, ...) {
@@ -31,18 +54,8 @@ new_survey <- function(x) {
 }
 
 #' @export
-`[<-.survey` <- function(x, i, j, value) {
-  `[<-`(x$.data, i, j, value)
-}
-
-#' @export
 `$.survey` <- function(x, name) {
   `[[`(x, name)
-}
-
-#' @export
-`$<-.survey` <- function(x, name, value) {
-  `$<-`(x$.data, name, value)
 }
 
 #' @export
@@ -55,28 +68,10 @@ new_survey <- function(x) {
   }
 }
 
-#' @export
-`[[<-.survey` <- function(x, i, j, value) {
-  `[[<-`(x$.data, i, j, value)
-}
-
-#' @export
-names.survey <- function(x) names(x$.data)
-
+# REPLACE ----------------------------------------------------------------------
 #' @export
 `names<-.survey` <- function(x, value) {
   `names<-`(x$.data, value)
-}
-
-#' @export
-length.survey <- function(x) length(x$.data)
-
-#' @export
-dim.survey <- function(x) dim(x$.data)
-
-#' @export
-dimnames.survey <- function(x) {
-  dimnames(x$.data)
 }
 
 #' @export
@@ -84,7 +79,32 @@ dimnames.survey <- function(x) {
   `dimnames<-`(x$.data, value)
 }
 
-# data.table -------------------------------------------------------------------
+#' @export
+`[<-.survey` <- function(x, i, j, value) {
+  `[<-`(x$.data, i, j, value)
+}
+
+#' @export
+`$<-.survey` <- function(x, name, value) {
+  `$<-`(x$.data, name, value)
+}
+
+#' @export
+`[[<-.survey` <- function(x, i, j, value) {
+  `[[<-`(x$.data, i, j, value)
+}
+
+# OTHER ------------------------------------------------------------------------
+#' @export
+print.survey <- function(x, ...) {
+  print(x$.data, ...)
+}
+
+#' @export
+length.survey <- function(x) length(x$.data)
+
+#' @export
+dim.survey <- function(x) dim(x$.data)
 
 #' @export
 setnames <- function(x, old, new) UseMethod("setnames")
@@ -153,25 +173,4 @@ dcast.survey <- function(x, ...) {
   x
 }
 
-# Print methods ----------------------------------------------------------------
-print.survey <- function(x, ...) {
-  print(x$.data, ...)
-}
 
-print.survey_list <- function(x, width = getOption("width")) {
-
-  cat("Survey\n")
-
-  # Class and dimensions of the objects
-  info <- lapply(x, function(x) {
-    classes <- stri_c("(", class(x)[1], ")", sep = "")
-    dimensions <- stri_c("[", stri_c(dim(x), collapse = "x"), "]", sep = "")
-    stri_c(classes, dimensions, sep = "")
-  })
-
-  # Fix width
-  nms <- stri_c("$", names(x))
-  nms <- stri_pad_right(nms, width = max(stri_length(nms), n.rm = TRUE) + 4)
-  cat(stri_c(nms, info, collapse = "\n"))
-
-}
