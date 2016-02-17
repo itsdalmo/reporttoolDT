@@ -4,11 +4,7 @@ survey_df <- function(x) {
     x <- as.data.frame(x)
   }
 
-  # Update attributes
-  o <- get_attributes(x, which = default$attributes)
-  update_survey_attributes(x, old_attributes = list(o))
-  class(x) <- c("survey_df", "survey", "data.frame")
-  x
+  structure(new_survey(x), class = c("survey_df", "survey"))
 }
 
 #' @export

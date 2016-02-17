@@ -10,11 +10,7 @@ survey_dt <- function(x, copy = FALSE) {
     x <- data.table::as.data.table(x)
   }
 
-  # Update attributes
-  o <- get_attributes(x, which = default$attributes)
-  update_survey_attributes(x, old_attributes = list(o))
-  data.table::setattr(x, "class", c("survey_dt", "survey", "data.table", "data.frame"))
-  x
+  structure(new_survey(x), class = c("survey_dt", "survey"))
 }
 
 #' @export

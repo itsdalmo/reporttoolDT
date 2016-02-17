@@ -1,33 +1,3 @@
-survey <- R6::R6Class("survey",
-  private = list(
-    .associations = NULL,
-    .labels = NULL,
-    .config = NULL,
-    .dictionary = NULL
-  ),
-  public = list(
-    data = NULL,
-
-    initialize = function(df) {
-      if (missing(df) || !is.data.frame(df))
-          stop("Expecting a data.frame or data.table.", call = FALSE)
-      if (contains_labelled(df))
-        df <- convert_labelled(df)
-      self$data <- df
-      self$labels <- attr(df, "labels")
-    }
-
-    edit = function(i, j, ..., with = FALSE) {
-      self$data <- `[`(self$data, i, j, ..., with = with)
-    }
-
-    print = function(...) {
-      print(self$data)
-    }
-  )
-)
-
-
 #' @export
 survey <- function(x) UseMethod("survey")
 
@@ -43,46 +13,59 @@ as.survey.survey <- function(x) x
 #' @export
 as.survey.default <- function(x) survey(x)
 
+new_survey <- function(x) {
+  list(
+    .data = x,
+    .associations = NULL,
+    .labels = attr(x, "labels"),
+    .config = NULL,
+    .dictionary = NULL
+  )
+}
+
 # Basic operations -------------------------------------------------------------
 
 #' @export
-"[.survey" <- function(x, ...) {
-  o <- get_attributes(x, which = default$attributes)
-  # x <- data.table:::"[.data.table"(x, i, j, ...)
-  x <- NextMethod()
-  if (!is.atomic(x))
-    update_survey_attributes(x, old = list(o))
-  x
+`[.survey` <- function(x, ...) {
+  `[`(x$.data, ...)
 }
 
 #' @export
-"[<-.survey" <- function(x, i, j, ...) {
-  o <- get_attributes(x, which = default$attributes)
-  x <- NextMethod()
-  update_survey_attributes(x, old = list(o))
-  x
+`[<-.survey` <- function(x, i, j, value) {
+  `[<-`(x$.data, i, j, value)
 }
 
 #' @export
-"[[<-.survey" <- function(x, i, j, ...) {
-  o <- get_attributes(x, which = default$attributes)
-  x <- NextMethod()
-  update_survey_attributes(x, old = list(o))
-  x
+`$.survey` <- function(x, name) {
+  `[[`(x, name)
 }
 
 #' @export
-`$<-.survey` <- function(x, i, j, ...) {
-  o <- get_attributes(x, which = default$attributes)
-  x <- NextMethod()
-  update_survey_attributes(x, old = list(o))
-  x
+`$<-.survey` <- function(x, name, value) {
+  `$<-`(x$.data, name, value)
 }
+
+#' @export
+`[[.survey` <- function(x, ...) {
+  args <- list(...)
+  if (substr(args[[1]], 0, 1) == ".") {
+    NextMethod()
+  } else {
+    `[[`(x$.data, ...)
+  }
+}
+
+#' @export
+`[[<-.survey` <- function(x, i, j, value) {
+  `[[<-`(x$.data, i, j, value)
+}
+
+#' @export
+names.survey <- function(x) names(x$.data)
 
 #' @export
 `names<-.survey` <- function(x, value) {
-  update_survey_names(x, names(x), value)
-  NextMethod()
+  `names<-`(x$.data, value)
 }
 
 #' @export
@@ -93,8 +76,7 @@ setnames.default <- function(x, old, new) data.table::setnames(x, old, new)
 
 #' @export
 setnames.survey <- function(x, old, new) {
-  update_survey_names(x, old, new)
-  data.table::setnames(x, old, new)
+  data.table::setnames(x.data, old, new)
 }
 
 # Bind rows/cols ---------------------------------------------------------------
@@ -154,6 +136,10 @@ dcast.survey <- function(x, ...) {
 }
 
 # Print methods ----------------------------------------------------------------
+print.survey <- function(x, ...) {
+  print(x$.data, ...)
+}
+
 print.survey_list <- function(x, width = getOption("width")) {
 
   cat("Survey\n")
