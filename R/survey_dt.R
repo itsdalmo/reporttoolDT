@@ -38,9 +38,9 @@ as.list.survey_dt <- function(x, attributes = FALSE) {
 }
 
 #' @export
-rbind.survey_dt <- function(..., use.names = TRUE, fill = FALSE, idcol = NULL) {
-  survey_dt(NextMethod())
-}
+# rbind.survey_dt <- function(..., use.names = TRUE, fill = FALSE, idcol = NULL) {
+#   survey_dt(NextMethod())
+# }
 
 #' @export
 cbind.survey_dt <- function(...) {

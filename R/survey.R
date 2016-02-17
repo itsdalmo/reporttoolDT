@@ -114,7 +114,7 @@ setnames.default <- function(x, old, new) data.table::setnames(x, old, new)
 
 #' @export
 setnames.survey <- function(x, old, new) {
-  data.table::setnames(x.data, old, new)
+  data.table::setnames(x$.data, old, new)
 }
 
 # Bind rows/cols ---------------------------------------------------------------
@@ -131,9 +131,8 @@ rbind.default <- function(..., use.names = TRUE, fill = FALSE, idcol = NULL) {
 
 #' @export
 rbind.survey <- function(..., use.names = TRUE, fill = FALSE, idcol = NULL) {
-  o <- lapply(list(...), get_attributes, which = default$attributes)
-  x <- NextMethod()
-  update_survey_attributes(x, old = o)
+  dots <- lapply(list(...), "[[", ".data")
+  x <- rbind(dots, use.names = use.names, fill = fill, idcol = idcol)
   x
 }
 
