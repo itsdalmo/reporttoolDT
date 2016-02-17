@@ -58,16 +58,6 @@ survey <- function(x) {
   x$bracket(...)
 }
 
-# `$.survey_dt` <- function(x, name, ...) {
-#   class(x) <- setdiff(class(x), c("survey_dt", "survey_df"))
-#   if (name %in% names(x)) {
-#     x <- x$dollar(name)
-#   } else {
-#     x <- `$`(x, name)
-#   }
-#   structure(x, class = c("survey_dt", class(x)))
-# }
-
 `[[.Survey` <- function(x, ...) {
   x$dbracket(...)
 }

@@ -69,6 +69,24 @@ names.survey <- function(x) names(x$.data)
 }
 
 #' @export
+length.survey <- function(x) length(x$.data)
+
+#' @export
+dim.survey <- function(x) dim(x$.data)
+
+#' @export
+dimnames.survey <- function(x) {
+  dimnames(x$.data)
+}
+
+#' @export
+`dimnames<-.survey` <- function(x, value) {
+  `dimnames<-`(x$.data, value)
+}
+
+# data.table -------------------------------------------------------------------
+
+#' @export
 setnames <- function(x, old, new) UseMethod("setnames")
 
 #' @export
