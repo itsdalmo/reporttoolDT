@@ -19,6 +19,34 @@ Survey <- R6::R6Class("Survey",
       self$.data <- df
     },
 
+    bind_rows = function(...) {
+      data <- c(list(self$.data), list(...))
+      data <- lapply(data, function(x) {
+        if (is.survey(x))
+          x <- x$.data
+        if (data.table::is.data.table(x)) {
+          data.table::copy(x)
+        } else {
+          x
+        }
+      })
+      self$.data <- do.call("rbind", data)
+    },
+
+    bind_cols = function(...) {
+      data <- c(list(self$.data), list(...))
+      data <- lapply(data, function(x) {
+        if (is.survey(x))
+          x <- x$.data
+        if (data.table::is.data.table(x)) {
+          data.table::copy(x)
+        } else {
+          x
+        }
+      })
+      self$.data <- do.call("cbind", data)
+    },
+
     names = function(...) {
       "Return the name of columns in the data."
       names(self$.data)
@@ -30,10 +58,6 @@ Survey <- R6::R6Class("Survey",
 
     dbracket = function(...) {
       `[[`(self$.data, ...)
-    },
-
-    dollar = function(name) {
-      `$`(self$.data, name)
     },
 
     bracket_repl = function(i, j, value) {
@@ -50,9 +74,37 @@ Survey <- R6::R6Class("Survey",
   )
 )
 
-survey <- function(x) {
-  structure(Survey$new(x), class = c("survey_dt", "Survey", "R6"))
-}
+is.survey <- function(x) inherits(x, "Survey")
+
+Survey_dt <- R6::R6Class("Survey_dt",
+   inherit = Survey,
+   public = list(
+     initialize = function(x) {
+       if (!requireNamespace("data.table")) {
+         stop("data.table package required to use data tables", call. = FALSE)
+       }
+       if (data.table::is.data.table(x)) {
+         if (copy)
+           x <- data.table::copy(x)
+       } else {
+         x <- data.table::as.data.table(x)
+       }
+       super$initialize(x)
+     }
+  )
+)
+
+Survey_df <- R6::R6Class("Survey_df",
+   inherit = Survey,
+   public = list(
+     initialize = function(x) {
+       super$initialize(as.data.frame(x))
+     }
+   )
+)
+
+survey_dt <- function(x) Survey_dt$new(x)
+survey_df <- function(x) Survey_df$new(x)
 
 `[.Survey` <- function(x, ...) {
   x$bracket(...)
@@ -70,8 +122,23 @@ survey <- function(x) {
   x$dbracket_repl(i, j, value)
 }
 
+rbind.Survey <- function(x, ...) {
+  x$bind_rows(...)
+}
+
+cbind.Survey <- function(x, ...) {
+  x$bind_cols(...)
+}
+
 names.Survey <- function(x) x$names()
 
-y <- survey(x)
-y <- survey(data.table::as.data.table(x))
-y <- Survey$new(x)
+df <- survey_df(x)
+dt <- survey_dt(x)
+
+test <- rbind(dt, df); class(test); nrow(test)
+test <- rbind(df, df, df); class(test); nrow(test)
+test <- rbind(dt, df, df); class(test); nrow(test)
+
+test <- cbind(dt, df); class(test); ncol(test)
+test <- cbind(df, df, df); class(test); ncol(test)
+test <- cbind(dt, df, df); class(test); ncol(test)
