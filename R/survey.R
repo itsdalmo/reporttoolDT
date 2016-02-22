@@ -24,21 +24,6 @@ new_survey <- function(x) {
   )
 }
 
-update_survey <- function(x) {
-  x[c(".data", ".associations", ".labels", ".config", ".dictionary")]
-}
-
-merge_survey <- function(x) {
-
-}
-
-# CONVERT ----------------------------------------------------------------------
-#' @export
-as.list.survey <- function(x) {
-  class(x) <- "list"
-  x
-}
-
 # GET --------------------------------------------------------------------------
 #' @export
 names.survey <- function(x) names(x$.data)
