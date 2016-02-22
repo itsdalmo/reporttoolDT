@@ -60,11 +60,32 @@ intranet_link <- function(https) {
 
 }
 
+#  Takes c("X", "Y", "Z") and turns it into "x, y and z"
 #' @export
-join_strings <- function(x, conjunction = "and") {
+join_str <- function(x, conjunction = "and") {
   stopifnot(is.character(x))
   if (length(x) == 1L) return(x)
   stri_c(stri_c(x[1:(length(x)-1)], collapse = ", "), conjunction, x[length(x)], sep = " ")
+}
+
+#  Simple function to align text in plots/tables
+#' @export
+trim_str <- function(x, n = 50, trail = "...", pad = NULL, side = "right") {
+  stopifnot(is.character(x))
+  smax <- n - stri_length(trail)
+  smin <- if (!is.null(pad)) n else 0
+
+  x <- vapply(x, function(s) {
+    if (stri_length(s) > n) {
+      stri_c(stri_sub(s, to = smax), trail, sep = "")
+    } else if (smin > 0) {
+      stri_pad(s, width = smin, pad = pad, side = side)
+    } else {
+      s
+    }
+  }, character(1))
+
+  unname(x)
 }
 
 # ------------------------------------------------------------------------------
