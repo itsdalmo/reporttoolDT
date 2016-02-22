@@ -21,15 +21,6 @@ Survey <- R6::R6Class("Survey",
       private$.data <- df
     },
 
-    update = function() {
-
-      nms <- self$names()
-      for (i in names(private)) {
-
-      }
-      private$.labels <-
-    },
-
     data = function() {
       private$.data
     },

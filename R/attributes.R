@@ -1,0 +1,1 @@
+get_attribute <- function(x, ...) print("getting attribute")

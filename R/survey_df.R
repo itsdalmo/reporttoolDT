@@ -1,10 +1,20 @@
+#' @importFrom R6 R6Class
 #' @export
-survey_df <- function(x) {
-  if (!is.data.frame(x)) {
-    x <- as.data.frame(x)
-  }
+Survey_df <- R6::R6Class("Survey_df",
+  inherit = Survey,
+  public = list(
+    initialize = function(x) {
+      super$initialize(as.data.frame(x))
+    }
+  )
+)
 
-  structure(new_survey(x), class = c("survey_df", "survey"))
+survey_df <- function(x) {
+  if (inherits(x, "Survey_df")) {
+    x
+  } else {
+    Survey_df$new(x)
+  }
 }
 
 #' @export
