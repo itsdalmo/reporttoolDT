@@ -24,14 +24,32 @@ Survey <- R6::R6Class("Survey",
     },
 
     do = function(f, dots, assign = FALSE) {
-      "Do operations directly on the data."
+      "Perform operations directly on the data."
       if (assign) {
         self$data <- do.call(f, c(list(self$data), dots))
+        self$update_labels()
+        self$update_attributes()
         self
       } else {
         # self$subset(do.call(f, c(list(self$data), dots)))
         do.call(f, c(list(self$data), dots))
       }
+    },
+
+    model = function() {
+      "Return the measurement model"
+      na <- rep(NA, ncol(self$data))
+      x <- data.frame(
+        "latent" = if (is.null(private$.assocations)) na else private$.associations,
+        "manifest" = names(self$data),
+        "question" = if (is.null(private$.labels)) na else private$.labels,
+        "type" = vapply(self$data, function(x) class(x)[1], character(1)),
+        "levels" = vapply(self$data, function(x) {
+          l <- levels(x); if (is.null(l)) NA_character_ else stri_c(l, collapse = "\n")
+        }, character(1)),
+        stringsAsFactors = FALSE
+      )
+      structure(x, class = c("survey_model", "data.frame"))
     },
 
     subset = function(x) {
@@ -40,13 +58,22 @@ Survey <- R6::R6Class("Survey",
       new
     },
 
-    update = function() {
-      "Update attributes after manipulating the object."
-      print("Updating survey.")
+    update_labels = function() {
+      "Update labels."
+      cols <- names(self$data)
+      vars <- setNames(rep(NA_character_, length(cols)), cols)
+
+      if (!is.null(private$.labels))
+        private$.labels <- merge_vectors(private$.labels, vars)
     },
 
-    get_labels = function() {
-      private$.labels
+    update_attributes = function() {
+      "Update attributes."
+      cols <- names(self$data)
+      vars <- setNames(rep(NA_character_, length(cols)), cols)
+
+      if (!is.null(private$.attributes))
+        private$.associations <- merge_vectors(private$.associations, vars)
     },
 
     print = function(...) {
@@ -99,4 +126,47 @@ dimnames.Survey <- function(x) {
 #' @export
 `[[<-.Survey` <- function(x, ...) {
   x$do("[[<-", capture_dots(...), assign = TRUE)
+}
+
+# Print ------------------------------------------------------------------------
+#' @export
+print.survey_model <- function(mm, width = getOption("width")) {
+
+  cat("Measurement model\n")
+
+  if (data.table::is.data.table(mm)) {
+    mm <- data.table::copy(mm)
+  } else {
+    mm <- data.table::as.data.table(mm)
+  }
+
+  # Print the number of observations
+  n <- nrow(mm); cat("Observations: ", n, "\n\n", sep = ""); if (!n) return()
+  mm <- data.table::copy(mm)
+
+  # Get string width limits
+  w <- mm[, list(n = stri_length(.N), manifest = max(stri_length(manifest), na.rm = TRUE) + 1)]
+  w[, reserved := 8 + manifest + 3] # $ and three spaces as seperation
+  w[, available := width - n - reserved - 5]
+
+  # Shorten name of 'type'
+  mm[is.na(type), type := "miss"]
+  mm[, type := vapply(type, function(x) {
+    switch(x, character = "(char)", factor = "(fctr)", numeric = "(num)", Date = "(date)", scale = "(scale)", integer = "(int)", "(????)")
+  }, character(1)) ]
+  mm[!is.na(latent), type := stri_c(type, "*")]
+
+  # Pad strings to correct width
+  mm[, manifest := stri_pad_right(manifest, width = w$manifest)]
+  mm[, type := stri_pad_right(type, width = 8)]
+  mm[is.na(question), question := ""]
+  mm[, question := stri_sub(question, to = w$available)]
+
+  # Print
+  for (i in 1:nrow(mm)) {
+    cat(stri_pad_right(i, w$n), ": ", mm$manifest[i], mm$type[i], " ", mm$question[i], sep = "", collapse = "\n")
+  }
+
+  cat("Note: Associations (including latents) are marked with *\n")
+
 }

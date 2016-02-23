@@ -24,9 +24,7 @@ replace <- function(x, lst, by = x, ignore_case = FALSE) {
     x[id] <- new
 
   }
-
   x
-
 }
 
 #' @export
@@ -89,6 +87,21 @@ trim_str <- function(x, n = 50, trail = "...", pad = NULL, side = "right") {
 }
 
 # ------------------------------------------------------------------------------
+capture_dots <- function(...) {
+  eval(substitute(alist(...)))
+}
+
+# Identical to wch/R6. Used for updating survey labels and attributes.
+merge_vectors <- function(a, b) {
+  if ((!is.null(a) && length(a) > 1 && is.null(names(a))) ||
+      (!is.null(b) && length(b) > 1 && is.null(names(b)))) {
+    stop("merge_vectors: vectors must be either NULL or named vectors")
+  }
+
+  x <- c(a, b)
+  drop_idx <- duplicated(names(x), fromLast = FALSE)
+  x[!drop_idx]
+}
 
 # base::match(x, table): only returns the first match-indicies if there are multiple hits.
 # table %in% x:          returns the indicies for all matches, but retains the order of table.
@@ -116,7 +129,3 @@ filename_no_ext <- function(file)  {
 is.string <- function(x) is.character(x) && length(x) == 1
 is.labelled <- function(x) any(vapply(x, inherits, what = "labelled", logical(1)))
 is.list2 <- function(x) inherits(x, "list")
-
-capture_dots <- function(...) {
-  eval(substitute(alist(...)))
-}
