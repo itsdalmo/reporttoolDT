@@ -9,6 +9,11 @@ x <- reporttool::read_data("./test.sav")
 y <- survey_df(x)
 y <- as.survey(data.table::as.data.table(x))
 
+y[, "lol"] <- "test2"
+z <- y$clone(deep = TRUE)
+z[1:5, "lol"] <- "funker"
+
+
 is.survey(y)
 all(names(y) == names(x))
 all(class(y) == c("Survey_dt", "Survey", "R6"))

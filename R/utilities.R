@@ -116,3 +116,7 @@ filename_no_ext <- function(file)  {
 is.string <- function(x) is.character(x) && length(x) == 1
 is.labelled <- function(x) any(vapply(x, inherits, what = "labelled", logical(1)))
 is.list2 <- function(x) inherits(x, "list")
+
+capture_dots <- function(...) {
+  eval(substitute(alist(...)))
+}

@@ -16,7 +16,28 @@ Survey <- R6::R6Class("Survey",
     initialize = function(x) {
       if (missing(x) || !is.data.frame(x))
         stop("Expecting a data.frame or data.table.", call = FALSE)
+      if (is.labelled(x)) {
+        x <- from_labelled(x, copy = FALSE)
+        private$.labels <- attr(x, "labels")
+      }
       self$data <- x
+    },
+
+    do = function(f, dots, assign = FALSE) {
+      "Do operations directly on the data."
+      if (assign) {
+        self$data <- do.call(f, c(list(self$data), dots))
+        self
+      } else {
+        # self$subset(do.call(f, c(list(self$data), dots)))
+        do.call(f, c(list(self$data), dots))
+      }
+    },
+
+    subset = function(x) {
+      new <- self$clone(deep = TRUE)
+      new$data <- x
+      new
     },
 
     update = function() {
@@ -24,19 +45,8 @@ Survey <- R6::R6Class("Survey",
       print("Updating survey.")
     },
 
-    update_data = function(value) {
-      "Update data."
-      self$data <- value
-    },
-
-    get_attribute = function(name) {
-      "Retrieve hidden/private attributes in a survey object."
-      `$`(private, name)
-    },
-
-    set_attribute = function(name, value) {
-      "Set hidden/private attributes in a survey object."
-      `$<-`("private", name, value)
+    get_labels = function() {
+      private$.labels
     },
 
     print = function(...) {
@@ -73,23 +83,20 @@ dimnames.Survey <- function(x) {
 # Subset/alter -----------------------------------------------------------------
 #' @export
 `[.Survey` <- function(x, ...) {
-  x$data[...]
-  x$update()
+  x$do("[", capture_dots(...))
 }
 
 #' @export
 `[[.Survey` <- function(x, ...) {
-  x$data[[...]]
+  x$do("[[", capture_dots(...))
 }
 
 #' @export
 `[<-.Survey` <- function(x, ...) {
-  x$update_data(`[<-`(x$data, ...))
+  x$do("[<-", capture_dots(...), assign = TRUE)
 }
 
 #' @export
 `[[<-.Survey` <- function(x, ...) {
-  x$update_data(`[[<-`(x$data, ...))
+  x$do("[[<-", capture_dots(...), assign = TRUE)
 }
-
-

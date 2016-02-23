@@ -2,6 +2,16 @@
 #' @export
 Survey_dt <- R6::R6Class("Survey_dt",
   inherit = Survey,
+  private = list(
+    deep_clone = function(name, value) {
+      if (name == "data") {
+        data.table::copy(value)
+      } else {
+        value
+      }
+    }
+  ),
+
   public = list(
     initialize = function(x) {
       if (!requireNamespace("data.table")) {
@@ -27,6 +37,5 @@ survey_dt <- function(x) {
 
 #' @export
 survey.data.table <- function(x) {
-  if (is.labelled(x)) x <- from_labelled(x)
   survey_dt(x)
 }
