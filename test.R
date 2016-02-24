@@ -18,3 +18,17 @@ data.table::address(test3$data)
 data.table::address(test1) # 1 and 3 are identical. I.e., updated by reference.
 data.table::address(test2)
 data.table::address(test3)
+
+
+test <- survey(x)
+test1 <- test
+test2 <- test[, "EPSI"]
+test3 <- dplyr::mutate(test, test = "lol")
+
+# TODO
+# 1. [, "Q1", drop = FALSE] should not only return a new survey, but also retain
+# associations, labels etc. Implement: "constructor" for slices.
+# 2. Need methods to set labels and associations. Simple lists where var = value will work.
+# 3. Update marketshares? Can/should this be done without too much overhead?
+# 4. Survey_tbl - should be easy to do. Might need to use the "address" thing in "do" here also (in case it is DT with copy = FALSE)
+# 5.

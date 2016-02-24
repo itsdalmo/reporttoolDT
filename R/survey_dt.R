@@ -52,6 +52,11 @@ Survey_dt <- R6::R6Class("Survey_dt",
   )
 )
 
+#' @export
+survey.data.table <- function(x) {
+  survey_dt(x)
+}
+
 survey_dt <- function(x) {
   if (inherits(x, "Survey_dt")) {
     x
@@ -60,7 +65,3 @@ survey_dt <- function(x) {
   }
 }
 
-#' @export
-survey.data.table <- function(x) {
-  survey_dt(x)
-}
