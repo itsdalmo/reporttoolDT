@@ -23,7 +23,32 @@ Survey_dt <- R6::R6Class("Survey_dt",
         x <- data.table::as.data.table(x)
       }
       super$initialize(x)
+    },
+
+    do = function(f, dots, assign = FALSE) {
+      "Perform operations directly on the data.table."
+      res <- do.call(f, c(list(self$data), dots))
+
+      if (identical(data.table::address(res), data.table::address(self$data))) {
+        super$update()
+        self
+      } else if (assign) {
+        self$data <- res
+        super$update()
+        self
+      } else {
+        if (is.data.frame(res)) {
+          survey_dt(res)
+        } else {
+          res
+        }
+      }
+    },
+
+    names = function() {
+      data.table::copy(super$names())
     }
+
   )
 )
 

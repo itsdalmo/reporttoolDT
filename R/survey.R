@@ -6,7 +6,35 @@ Survey <- R6::R6Class("Survey",
     .labels = NULL,
     .config = NULL,
     .dictionary = NULL,
-    .marketshares = NULL
+    .marketshares = NULL,
+
+    update_labels = function() {
+      "Update labels."
+      cols <- self$names()
+      new <- setNames(rep(NA_character_, length(cols)), cols)
+      old <- private$.labels
+
+      if (!is.null(old)) {
+        old <- old[!is.na(old)]
+        new <- merge_vectors(if (length(old)) old else NULL, new)
+        new <- new[cols]
+      }
+      private$.labels <- new
+    },
+
+    update_associations = function() {
+      "Update associations."
+      cols <- self$names()
+      new <- setNames(rep(NA_character_, length(cols)), cols)
+      old <- private$.associations
+
+      if (!is.null(old)) {
+        old <- old[!is.na(old)]
+        new <- merge_vectors(if (length(old)) old else NULL, new)
+        new <- new[cols]
+      }
+      private$.associations <- new
+    }
   ),
 
   public = list(
@@ -21,24 +49,36 @@ Survey <- R6::R6Class("Survey",
         private$.labels <- attr(x, "labels")
       }
       self$data <- x
+      self$update()
     },
 
     do = function(f, dots, assign = FALSE) {
       "Perform operations directly on the data."
+      res <- do.call(f, c(list(self$data), dots))
+
       if (assign) {
-        self$data <- do.call(f, c(list(self$data), dots))
-        self$update_labels()
-        self$update_attributes()
+        self$data <- res
+        self$update()
         self
       } else {
-        # self$subset(do.call(f, c(list(self$data), dots)))
-        do.call(f, c(list(self$data), dots))
+        if (is.data.frame(res)) {
+          survey(res)
+        } else {
+          res
+        }
       }
+    },
+
+    update = function() {
+      "Update the survey. (Associations, labels, etc.)"
+      private$update_associations()
+      private$update_labels()
     },
 
     model = function() {
       "Return the measurement model"
       na <- rep(NA, ncol(self$data))
+
       x <- data.frame(
         "latent" = if (is.null(private$.assocations)) na else private$.associations,
         "manifest" = names(self$data),
@@ -49,31 +89,12 @@ Survey <- R6::R6Class("Survey",
         }, character(1)),
         stringsAsFactors = FALSE
       )
+
       structure(x, class = c("survey_model", "data.frame"))
     },
 
-    subset = function(x) {
-      new <- self$clone(deep = TRUE)
-      new$data <- x
-      new
-    },
-
-    update_labels = function() {
-      "Update labels."
-      cols <- names(self$data)
-      vars <- setNames(rep(NA_character_, length(cols)), cols)
-
-      if (!is.null(private$.labels))
-        private$.labels <- merge_vectors(private$.labels, vars)
-    },
-
-    update_attributes = function() {
-      "Update attributes."
-      cols <- names(self$data)
-      vars <- setNames(rep(NA_character_, length(cols)), cols)
-
-      if (!is.null(private$.attributes))
-        private$.associations <- merge_vectors(private$.associations, vars)
+    names = function() {
+      names(self$data)
     },
 
     print = function(...) {

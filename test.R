@@ -6,28 +6,23 @@ rm(list = ls(all = TRUE))
 devtools::load_all()
 x <- reporttool::read_data("./test.sav")
 
-y <- survey_df(x)
-y <- as.survey(data.table::as.data.table(x))
+test <- survey_dt(data.table::as.data.table(x))
+test1 <- test
+test2 <- test[, .(EPSI)]
+test3 <- test[, test := "lol"]
 
-y[, "lol"] <- "test2"
-z <- y$clone(deep = TRUE)
-z[1:5, "lol"] <- "funker"
+data.table::address(test1$data) # 1 and 3 are identical. I.e., updated by reference.
+data.table::address(test2$data)
+data.table::address(test3$data)
 
-
-is.survey(y)
-all(names(y) == names(x))
-all(class(y) == c("Survey_dt", "Survey", "R6"))
-all(dimnames(y)[[2]] == dimnames(x)[[2]])
-
-y2 <- y
-
-y[["Image"]]
-y[, "Image"]
-y[, lol := "test"]
-y[["lol"]] <- "test2"
-y[, "lol"] <- "test2"
+data.table::address(test1) # 1 and 3 are identical. I.e., updated by reference.
+data.table::address(test2)
+data.table::address(test3)
 
 
-is.survey(y[["Image"]])
-is.survey(y[, "Image"])
-y[, lol := "test"]
+test <- survey_df(x)
+test1 <- test
+test2 <- test[, "EPSI", drop = FALSE]
+
+data.table::address(test1)
+data.table::address(test2)

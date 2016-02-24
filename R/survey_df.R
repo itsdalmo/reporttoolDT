@@ -6,6 +6,7 @@ Survey_df <- R6::R6Class("Survey_df",
     initialize = function(x) {
       super$initialize(as.data.frame(x))
     }
+
   )
 )
 
