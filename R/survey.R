@@ -52,23 +52,6 @@ Survey <- R6::R6Class("Survey",
       self$update()
     },
 
-    do = function(f, dots, assign = FALSE) {
-      "Perform operations directly on the data."
-      res <- do.call(f, c(list(self$data), dots))
-
-      if (assign) {
-        self$data <- res
-        self$update()
-        self
-      } else {
-        if (is.data.frame(res)) {
-          survey(res)
-        } else {
-          res
-        }
-      }
-    },
-
     update = function() {
       "Update the survey. (Associations, labels, etc.)"
       private$update_associations()
