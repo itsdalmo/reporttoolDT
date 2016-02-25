@@ -6,7 +6,25 @@ rm(list = ls(all = TRUE))
 devtools::load_all()
 x <- reporttool::read_data("./test.sav")
 
+library(dplyr)
+y <- data.table::as.data.table(x)
+y <- x
+names(y) <- stri_trans_tolower(names(y))
+y <- survey_tbl(y)
+
+test <- y %>%
+  select(q1, image, epsi) %>%
+  group_by(q1) %>%
+  summarise(image = mean(image), epsi = mean(epsi))
+
+
+
+
 test <- survey(data.table::as.data.table(x))
+test1 <- dplyr::mutate(test, hehe = "lol")
+
+test <- survey(x)
+test1 <- dplyr::mutate(test, hehe = "lol")
 
 test1 <- test
 test2 <- test[, .(EPSI)]
@@ -19,6 +37,8 @@ data.table::address(test3$data)
 data.table::address(test1) # 1 and 3 are identical. I.e., updated by reference.
 data.table::address(test2)
 data.table::address(test3)
+
+
 
 
 # TODO
