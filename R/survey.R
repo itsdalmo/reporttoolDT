@@ -55,7 +55,7 @@ Survey <- R6::R6Class("Survey",
 
     copy = function() {
       "Return a copy of the Survey."
-      new <- self$clone(deep = TRUE)
+      new <- self$clone(deep = FALSE)
       if (data.table::is.data.table(self$data))
         # Invalid .internal.selfref when using copy. setDT shallow copies instead.
         new$data <- data.table::setDT(self$data)
