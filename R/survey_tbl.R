@@ -8,6 +8,26 @@ Survey_tbl <- R6::R6Class("Survey_tbl",
         stop("dplyr package required to use tbl's.", call. = FALSE)
       }
       super$initialize(dplyr::as.tbl(x))
+    },
+
+    do = function(f, dots, assign = FALSE) {
+      "Perform operations directly on the tbl."
+      res <- do.call(f, c(list(self$data), dots))
+
+      if (identical(data.table::address(res), data.table::address(self$data))) {
+        super$update()
+        self
+      } else if (assign) {
+        self$data <- res
+        super$update()
+        self
+      } else {
+        if (is.data.frame(res)) {
+          survey_tbl(res)
+        } else {
+          res
+        }
+      }
     }
 
   )

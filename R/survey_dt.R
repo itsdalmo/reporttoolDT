@@ -14,9 +14,6 @@ Survey_dt <- R6::R6Class("Survey_dt",
 
   public = list(
     initialize = function(x) {
-      if (!requireNamespace("data.table")) {
-        stop("data.table package required to use data tables", call. = FALSE)
-      }
       if (data.table::is.data.table(x)) {
         x <- data.table::copy(x)
       } else {

@@ -31,4 +31,11 @@ test3 <- dplyr::mutate(test, test = "lol")
 # 2. Need methods to set labels and associations. Simple lists where var = value will work.
 # 3. Update marketshares? Can/should this be done without too much overhead?
 # 4. Survey_tbl - should be easy to do. Might need to use the "address" thing in "do" here also (in case it is DT with copy = FALSE)
-# 5.
+# 5. Add dplyr and tidyr methods for Survey objects.
+
+# Take a data.frame, load it into R.
+# Create a survey if wanted.
+# Labels can be set automatically.
+# Associations, config, translations have to be set manually. Associations should support common = TRUE.
+# set associations etc should include a COPY = TRUE option?
+#
