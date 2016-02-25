@@ -2,6 +2,16 @@
 #' @export
 Survey_tbl <- R6::R6Class("Survey_tbl",
   inherit = Survey,
+  private = list(
+    deep_clone = function(name, value) {
+      if (name == "data" && data.table::is.data.table(value)) {
+        data.table::copy(value)
+      } else {
+        value
+      }
+    }
+  ),
+
   public = list(
     initialize = function(x) {
       if (!requireNamespace("dplyr")) {
@@ -23,7 +33,7 @@ Survey_tbl <- R6::R6Class("Survey_tbl",
         self
       } else {
         if (is.data.frame(res)) {
-          survey_tbl(res)
+          super$initialize_subset(res)
         } else {
           res
         }

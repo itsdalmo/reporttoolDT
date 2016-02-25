@@ -17,7 +17,7 @@ Survey_df <- R6::R6Class("Survey_df",
         self
       } else {
         if (is.data.frame(res)) {
-          survey_df(res)
+          super$initialize_subset(res)
         } else {
           res
         }

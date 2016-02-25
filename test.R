@@ -6,7 +6,8 @@ rm(list = ls(all = TRUE))
 devtools::load_all()
 x <- reporttool::read_data("./test.sav")
 
-test <- survey_dt(data.table::as.data.table(x))
+test <- survey(data.table::as.data.table(x))
+
 test1 <- test
 test2 <- test[, .(EPSI)]
 test3 <- test[, test := "lol"]
@@ -19,11 +20,6 @@ data.table::address(test1) # 1 and 3 are identical. I.e., updated by reference.
 data.table::address(test2)
 data.table::address(test3)
 
-
-test <- survey(x)
-test1 <- test
-test2 <- test[, "EPSI"]
-test3 <- dplyr::mutate(test, test = "lol")
 
 # TODO
 # 1. [, "Q1", drop = FALSE] should not only return a new survey, but also retain

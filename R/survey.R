@@ -47,15 +47,33 @@ Survey <- R6::R6Class("Survey",
       if (is.labelled(x)) {
         x <- from_labelled(x, copy = FALSE)
         private$.labels <- attr(x, "labels")
+        attr(x, "labels") <- NULL
       }
       self$data <- x
       self$update()
+    },
+
+    copy = function() {
+      "Return a copy of the Survey."
+      new <- self$clone(deep = TRUE)
+      if (data.table::is.data.table(self$data))
+        # Invalid .internal.selfref when using copy. setDT shallow copies instead.
+        new$data <- data.table::setDT(self$data)
+      new
     },
 
     update = function() {
       "Update the survey. (Associations, labels, etc.)"
       private$update_associations()
       private$update_labels()
+    },
+
+    initialize_subset = function(x) {
+      "Return a sliced or subset survey."
+      slice <- self$copy()
+      slice$data <- x
+      slice$update()
+      slice
     },
 
     model = function() {

@@ -35,7 +35,7 @@ Survey_dt <- R6::R6Class("Survey_dt",
         self
       } else {
         if (is.data.frame(res)) {
-          survey_dt(res)
+          super$initialize_subset(res)
         } else {
           res
         }
