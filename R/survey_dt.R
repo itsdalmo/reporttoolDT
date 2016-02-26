@@ -43,7 +43,7 @@ Survey_dt <- R6::R6Class("Survey_dt",
     },
 
     names = function() {
-      data.table::copy(super$names())
+      data.table::copy(names(self$data))
     }
 
   )
