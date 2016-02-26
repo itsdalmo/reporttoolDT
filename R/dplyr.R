@@ -15,6 +15,7 @@ ungroup.Survey <- function(x) {
 
 #' @export
 group_by_.Survey <- function(x, ..., add = FALSE) {
+  # TODO: "add" is not passed to next call. Error message.
   f <- get("group_by_", asNamespace("dplyr"))
   x$do(f, lazyeval::all_dots(..., all_named = TRUE), assign = FALSE)
 }
