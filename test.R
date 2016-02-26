@@ -6,45 +6,26 @@ rm(list = ls(all = TRUE))
 devtools::load_all()
 x <- reporttool::read_data("./test.sav")
 
-library(dplyr)
-y <- data.table::as.data.table(x)
-y <- x
-names(y) <- stri_trans_tolower(names(y))
-y <- survey_tbl(y)
-
-test <- y %>%
-  select(q1, image, epsi) %>%
-  group_by(q1) %>%
-  summarise(image = mean(image), epsi = mean(epsi))
-
-
-
-
-test <- survey(data.table::as.data.table(x))
-test1 <- dplyr::mutate(test, hehe = "lol")
-
-test <- survey(x)
-test1 <- dplyr::mutate(test, hehe = "lol")
-
-test1 <- test
-test2 <- test[, .(EPSI)]
-test3 <- test[, test := "lol"]
-
-data.table::address(test1$data) # 1 and 3 are identical. I.e., updated by reference.
-data.table::address(test2$data)
-data.table::address(test3$data)
-
-data.table::address(test1) # 1 and 3 are identical. I.e., updated by reference.
-data.table::address(test2)
-data.table::address(test3)
-
-
-
-
 # TODO
 # 1. [, "Q1", drop = FALSE] should not only return a new survey, but also retain
 # associations, labels etc. Implement: "constructor" for slices.
+
+dt <- survey_dt(x)
+dt2 <- dt[, .(q1, EPSI, Loyal)]
+dt2$model()
+
 # 2. Need methods to set labels and associations. Simple lists where var = value will work.
+
+dt <- survey_dt(x)
+dt$set_association(new = c("q1" = "mainentity"))
+dt$model()
+dt$get_association("mainentity")
+
+dt$set_label(new = c("q1" = "test"))
+dt$get_labels("q1")
+dt$model()
+
+
 # 3. Update marketshares? Can/should this be done without too much overhead?
 # 4. Survey_tbl - should be easy to do. Might need to use the "address" thing in "do" here also (in case it is DT with copy = FALSE)
 # 5. Add dplyr and tidyr methods for Survey objects.
