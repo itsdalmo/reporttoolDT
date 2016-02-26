@@ -6,35 +6,7 @@ Survey <- R6::R6Class("Survey",
     .labels = NULL,
     .config = NULL,
     .dictionary = NULL,
-    .marketshares = NULL,
-
-    update_labels = function() {
-      "Update labels."
-      cols <- self$names()
-      new <- setNames(rep(NA_character_, length(cols)), cols)
-      old <- private$.labels
-
-      if (!is.null(old)) {
-        old <- old[!is.na(old)]
-        new <- merge_vectors(if (length(old)) old else NULL, new)
-        new <- new[cols]
-      }
-      private$.labels <- new
-    },
-
-    update_associations = function() {
-      "Update associations."
-      cols <- self$names()
-      new <- setNames(rep(NA_character_, length(cols)), cols)
-      old <- private$.associations
-
-      if (!is.null(old)) {
-        old <- old[!is.na(old)]
-        new <- merge_vectors(if (length(old)) old else NULL, new)
-        new <- new[cols]
-      }
-      private$.associations <- new
-    }
+    .marketshares = NULL
   ),
 
   public = list(
@@ -53,6 +25,14 @@ Survey <- R6::R6Class("Survey",
       self$update()
     },
 
+    initialize_subset = function(x) {
+      "Return a sliced or subset survey."
+      slice <- self$copy()
+      slice$data <- x
+      slice$update()
+      slice
+    },
+
     copy = function() {
       "Return a copy of the Survey."
       new <- self$clone(deep = FALSE)
@@ -64,35 +44,82 @@ Survey <- R6::R6Class("Survey",
 
     update = function() {
       "Update the survey. (Associations, labels, etc.)"
-      private$update_associations()
-      private$update_labels()
+      self$set_associations()
+      self$set_labels()
     },
 
-    initialize_subset = function(x) {
-      "Return a sliced or subset survey."
-      slice <- self$copy()
-      slice$data <- x
-      slice$update()
-      slice
+    set_labels = function() {
+      "Set labels."
+      cols <- self$names()
+      new <- setNames(rep(NA_character_, length(cols)), cols)
+      old <- private$.labels
+
+      if (!is.null(old)) {
+        old <- old[!is.na(old)]
+        new <- merge_vectors(if (length(old)) old else NULL, new)
+        new <- new[cols]
+      }
+      private$.labels <- new
+    },
+
+    set_associations = function() {
+      "Set associations."
+      cols <- self$names()
+      new <- setNames(rep(NA_character_, length(cols)), cols)
+      old <- private$.associations
+
+      if (!is.null(old)) {
+        old <- old[!is.na(old)]
+        new <- merge_vectors(if (length(old)) old else NULL, new)
+        new <- new[cols]
+      }
+      private$.associations <- new
     },
 
     model = function() {
       "Return the measurement model"
-      na <- rep(NA, ncol(self$data))
-
-      x <- data.frame(
-        "latent" = if (is.null(private$.assocations)) na else private$.associations,
-        "manifest" = names(self$data),
-        "question" = if (is.null(private$.labels)) na else private$.labels,
-        "type" = vapply(self$data, function(x) class(x)[1], character(1)),
-        "levels" = vapply(self$data, function(x) {
+      mm <- list(
+        latent = private$.associations,
+        manifest = self$names(),
+        question = private$.labels,
+        type = vapply(self$data, function(x) class(x)[1], character(1)),
+        levels = vapply(self$data, function(x) {
           l <- levels(x); if (is.null(l)) NA_character_ else stri_c(l, collapse = "\n")
-        }, character(1)),
-        stringsAsFactors = FALSE
+        }, character(1))
       )
 
-      structure(x, class = c("survey_model", "data.frame"))
+      na <- rep(NA, ncol(self$data))
+      mm <- lapply(mm, function(x) { if (is.null(x)) na else x })
+      mm <- as.data.frame(mm, stringsAsFactors = FALSE)
+      structure(mm, class = c("survey_model", "data.frame"))
     },
+
+#     entities = function() {
+#
+#       me <- self$get_association("mainentity")
+#       if (is.null(me)) stop("'mainentity' has not been specified yet. See help(set_association).")
+#
+#       x <- data.table::copy(x); setkeyv(x, me)
+#       co <- as.numeric(get_config(x, "cutoff"))
+#
+#       # Aggregate
+#       val <- !is.null(co) && "percent_missing" %in% names(x)
+#       x <- x[, list("n" = .N, "valid" = if (val) sum(percent_missing <= co) else NA), by = me]
+#
+#       ms <- get_marketshare(x)
+#       if (!is.null(ms)) {
+#         ms <- setNames(list(names(ms), unname(ms)), c(me, "marketshare"))
+#         ms <- as.data.table(ms)
+#         x <- x[ms[, marketshare := as.numeric(marketshare)]]
+#       } else {
+#         x[, marketshare := NA]
+#       }
+#
+#       setkeyv(x, NULL)
+#       setnames(x, me, "entity")
+#       structure(x, class = c("survey_ents", "data.table", "data.frame"))
+#
+#     },
 
     names = function() {
       names(self$data)
@@ -122,7 +149,7 @@ as.survey.default <- function(x) survey(x)
 
 # Names ------------------------------------------------------------------------
 #' @export
-names.Survey <- function(x) names(x$data)
+names.Survey <- function(x) x$names()
 
 #' @export
 dimnames.Survey <- function(x) {
@@ -148,47 +175,4 @@ dimnames.Survey <- function(x) {
 #' @export
 `[[<-.Survey` <- function(x, ...) {
   x$do("[[<-", capture_dots(...), assign = TRUE)
-}
-
-# Print ------------------------------------------------------------------------
-#' @export
-print.survey_model <- function(mm, width = getOption("width")) {
-
-  cat("Measurement model\n")
-
-  if (data.table::is.data.table(mm)) {
-    mm <- data.table::copy(mm)
-  } else {
-    mm <- data.table::as.data.table(mm)
-  }
-
-  # Print the number of observations
-  n <- nrow(mm); cat("Observations: ", n, "\n\n", sep = ""); if (!n) return()
-  mm <- data.table::copy(mm)
-
-  # Get string width limits
-  w <- mm[, list(n = stri_length(.N), manifest = max(stri_length(manifest), na.rm = TRUE) + 1)]
-  w[, reserved := 8 + manifest + 3] # $ and three spaces as seperation
-  w[, available := width - n - reserved - 5]
-
-  # Shorten name of 'type'
-  mm[is.na(type), type := "miss"]
-  mm[, type := vapply(type, function(x) {
-    switch(x, character = "(char)", factor = "(fctr)", numeric = "(num)", Date = "(date)", scale = "(scale)", integer = "(int)", "(????)")
-  }, character(1)) ]
-  mm[!is.na(latent), type := stri_c(type, "*")]
-
-  # Pad strings to correct width
-  mm[, manifest := stri_pad_right(manifest, width = w$manifest)]
-  mm[, type := stri_pad_right(type, width = 8)]
-  mm[is.na(question), question := ""]
-  mm[, question := stri_sub(question, to = w$available)]
-
-  # Print
-  for (i in 1:nrow(mm)) {
-    cat(stri_pad_right(i, w$n), ": ", mm$manifest[i], mm$type[i], " ", mm$question[i], sep = "", collapse = "\n")
-  }
-
-  cat("Note: Associations (including latents) are marked with *\n")
-
 }
