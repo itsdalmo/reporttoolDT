@@ -74,7 +74,9 @@ trim_str <- function(x, n = 50, trail = "...", pad = NULL, side = "right") {
   smin <- if (!is.null(pad)) n else 0
 
   x <- vapply(x, function(s) {
-    if (stri_length(s) > n) {
+    if (is.na(s)) {
+      s
+    } else if (stri_length(s) > n) {
       stri_c(stri_sub(s, to = smax), trail, sep = "")
     } else if (smin > 0) {
       stri_pad(s, width = smin, pad = pad, side = side)
