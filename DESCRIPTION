@@ -19,5 +19,6 @@ Imports:
     stringi
 Suggests:
     dplyr,
-    testthat
+    testthat,
+    tidyr
 RoxygenNote: 5.0.1
