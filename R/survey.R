@@ -19,7 +19,6 @@ Survey <- R6::R6Class("Survey",
       if (is.labelled(x)) {
         x <- from_labelled(x, copy = FALSE)
         private$.labels <- attr(x, "labels")
-        attr(x, "labels") <- NULL
       }
       self$data <- x
       self$update()
@@ -27,53 +26,58 @@ Survey <- R6::R6Class("Survey",
 
     initialize_subset = function(x) {
       "Return a sliced or subset survey."
-      slice <- self$copy()
+      slice <- self$clone(deep = TRUE)
       slice$data <- x
       slice$update()
       slice
     },
 
-    copy = function() {
-      "Return a copy of the Survey."
-      new <- self$clone(deep = FALSE)
-      if (data.table::is.data.table(self$data))
-        # Invalid .internal.selfref when using copy. setDT shallow copies instead.
-        new$data <- data.table::setDT(self$data)
-      new
-    },
-
     update = function() {
       "Update the survey. (Associations, labels, etc.)"
-      self$set_associations()
-      self$set_labels()
+      self$set_association()
+      self$set_label()
     },
 
-    set_labels = function() {
+    set_label = function(new = NULL) {
       "Set labels."
-      cols <- self$names()
-      new <- setNames(rep(NA_character_, length(cols)), cols)
-      old <- private$.labels
-
-      if (!is.null(old)) {
-        old <- old[!is.na(old)]
-        new <- merge_vectors(if (length(old)) old else NULL, new)
-        new <- new[cols]
-      }
+      new <- merge_attributes(self$names(), new, private$.labels)
       private$.labels <- new
     },
 
-    set_associations = function() {
+    set_association = function(new = NULL) {
       "Set associations."
-      cols <- self$names()
-      new <- setNames(rep(NA_character_, length(cols)), cols)
-      old <- private$.associations
-
-      if (!is.null(old)) {
-        old <- old[!is.na(old)]
-        new <- merge_vectors(if (length(old)) old else NULL, new)
-        new <- new[cols]
-      }
+      new <- merge_attributes(self$names(), new, private$.associations)
       private$.associations <- new
+    },
+
+    get_labels = function(which = NULL) {
+      "Get labels."
+      res <- private$.labels
+      if (!is.null(which))
+        res <- res[match_all(which, names(res))]
+      res
+    },
+
+    get_associations = function(which = NULL) {
+      "Get associations."
+      res <- private$.associations
+      if (!is.null(which))
+        res <- res[match_all(which, res)]
+      res
+    },
+
+    set_marketshare = function(new = NULL) {
+      "Set marketshares."
+      me <- self$get_association("mainentity")
+      if (is.null(me)) {
+        stop("'mainentity' is not specified. See help(set_association).")
+      } else {
+        me <- self$data[[me]]
+        me <- if (is.factor(me)) levels(me) else unique(me)
+      }
+
+      new <- merge_attributes(me, private$.marketshares, new)
+      private$.marketshares <- new
     },
 
     model = function() {
