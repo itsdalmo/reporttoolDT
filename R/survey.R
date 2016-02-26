@@ -26,7 +26,7 @@ Survey <- R6::R6Class("Survey",
 
     initialize_subset = function(x) {
       "Return a sliced or subset survey."
-      slice <- self$clone(deep = TRUE)
+      slice <- self$clone(deep = FALSE)
       slice$data <- x
       slice$update()
       slice
