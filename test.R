@@ -17,6 +17,11 @@ dt2$model()
 # 2. Need methods to set labels and associations. Simple lists where var = value will work.
 
 dt <- survey_dt(x)
+dt$set_association(new = c(q1 = "mainentity"))
+dt$set_marketshare(new = c(reporttool = 1L))
+dt$entities()
+
+dt <- survey_dt(x)
 dt$set_association(new = c("q1" = "mainentity"))
 dt$model()
 dt$get_association("mainentity")
