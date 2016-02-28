@@ -24,6 +24,14 @@ Survey <- R6::R6Class("Survey",
       self$update()
     },
 
+    get_data = function(copy = TRUE) {
+      if (copy && data.table::is.data.table(self$data)) {
+        data.table::copy(self$data)
+      } else {
+        self$data
+      }
+    },
+
     initialize_subset = function(x) {
       "Return a sliced or subset survey."
       slice <- self$clone(deep = FALSE)
@@ -50,6 +58,26 @@ Survey <- R6::R6Class("Survey",
       private$.associations <- new
     },
 
+    set_marketshare = function(new = NULL) {
+      "Set marketshares."
+      me <- self$get_associations("mainentity")
+      if (is.null(me)) {
+        stop("'mainentity' is not specified. See help(set_association).")
+      } else {
+        me <- self$data[[names(me)]]
+        me <- if (is.factor(me)) levels(me) else unique(me)
+      }
+
+      new <- merge_attributes(me, private$.marketshares, new)
+      private$.marketshares <- new
+    },
+
+    set_config = function(new = NULL) {
+      "Set associations."
+      new <- merge_attributes(default$config$setting, new, private$.config)
+      private$.config <- new
+    },
+
     get_labels = function(which = NULL) {
       "Get labels."
       res <- private$.labels
@@ -66,18 +94,20 @@ Survey <- R6::R6Class("Survey",
       res
     },
 
-    set_marketshare = function(new = NULL) {
-      "Set marketshares."
-      me <- self$get_association("mainentity")
-      if (is.null(me)) {
-        stop("'mainentity' is not specified. See help(set_association).")
-      } else {
-        me <- self$data[[me]]
-        me <- if (is.factor(me)) levels(me) else unique(me)
-      }
+    get_marketshares = function(which = NULL) {
+      "Get marketshares."
+      res <- private$.marketshares
+      if (!is.null(which))
+        res <- res[match_all(which, res)]
+      res
+    },
 
-      new <- merge_attributes(me, private$.marketshares, new)
-      private$.marketshares <- new
+    get_config = function(which = NULL) {
+      "Get marketshares."
+      res <- private$.marketshares
+      if (!is.null(which))
+        res <- res[match_all(which, res)]
+      res
     },
 
     model = function() {
@@ -98,32 +128,28 @@ Survey <- R6::R6Class("Survey",
       structure(mm, class = c("survey_model", "data.frame"))
     },
 
-#     entities = function() {
-#
-#       me <- self$get_association("mainentity")
-#       if (is.null(me)) stop("'mainentity' has not been specified yet. See help(set_association).")
-#
-#       x <- data.table::copy(x); setkeyv(x, me)
-#       co <- as.numeric(get_config(x, "cutoff"))
-#
-#       # Aggregate
-#       val <- !is.null(co) && "percent_missing" %in% names(x)
-#       x <- x[, list("n" = .N, "valid" = if (val) sum(percent_missing <= co) else NA), by = me]
-#
-#       ms <- get_marketshare(x)
-#       if (!is.null(ms)) {
-#         ms <- setNames(list(names(ms), unname(ms)), c(me, "marketshare"))
-#         ms <- as.data.table(ms)
-#         x <- x[ms[, marketshare := as.numeric(marketshare)]]
-#       } else {
-#         x[, marketshare := NA]
-#       }
-#
-#       setkeyv(x, NULL)
-#       setnames(x, me, "entity")
-#       structure(x, class = c("survey_ents", "data.table", "data.frame"))
-#
-#     },
+    entities = function() {
+      me <- names(self$get_associations("mainentity"))
+      if (is.null(me)) stop("'mainentity' has not been specified yet. See help(set_association).")
+
+      cutoff <- as.numeric(self$get_config("cutoff"))
+      valid <- !is.null(cutoff) && "percent_missing" %in% names(x)
+
+      df <- data.table::as.data.table(self$get_data())
+      df <- df[, list("n" = .N, "valid" = if (valid) sum(percent_missing <= cutoff) else NA_integer_), keyby = me]
+
+      ms <- self$get_marketshares()
+      if (!is.null(ms)) {
+        ms <- setNames(list(names(ms), unname(ms)), c(me, "marketshare"))
+        ms <- data.table::as.data.table(ms)
+        df <- df[ms[, marketshare := as.numeric(marketshare)]]
+      } else {
+        df[, marketshare := NA_real_]
+      }
+
+      data.table::setnames(df, me, "entity")
+      structure(as.data.frame(df), class = c("survey_entities", "data.frame"))
+    },
 
     names = function() {
       names(self$data)
