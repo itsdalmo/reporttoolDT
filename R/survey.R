@@ -130,7 +130,7 @@ Survey <- R6::R6Class("Survey",
 
     entities = function() {
       me <- names(self$get_associations("mainentity"))
-      if (is.null(me)) stop("'mainentity' has not been specified yet. See help(set_association).")
+      if (!length(me) || is.null(me)) stop("'mainentity' has not been specified yet. See help(set_association).")
 
       cutoff <- as.numeric(self$get_config("cutoff"))
       valid <- !is.null(cutoff) && "percent_missing" %in% names(x)
