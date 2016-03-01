@@ -8,7 +8,7 @@ Description: More about what it does (maybe more than one line)
 License: What license is it under?
 LazyData: TRUE
 Depends:
-    R
+    R (>= 3.2)
 Imports:
     data.table,
     haven,
@@ -19,6 +19,8 @@ Imports:
     stringi
 Suggests:
     dplyr,
+    ggplot2,
+    ggrepel,
     testthat,
     tidyr
 RoxygenNote: 5.0.1
