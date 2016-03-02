@@ -1,124 +1,131 @@
-context("Using dplyr with a survey")
+context("dplyr methods for Survey")
 
-df <- data.frame("Q1" = c("Example 1", "Example 2"), "Score" = c(8, 9), stringsAsFactors = FALSE)
-dt <- data.table::as.data.table(df)
+org <- data.frame("Q1" = c("Example 1", "Example 2"), "Score" = c(9, 8), stringsAsFactors = FALSE)
 
-df <- set_association(survey(df), mainentity = "Q1")
-dt <- set_association(survey(dt), mainentity = "Q1")
+df_org <- survey_df(org)$set_association(list(mainentity = "Q1"))$set_label(list(Q1 = "test label"))
+dt_org <- survey_dt(org)$set_association(list(mainentity = "Q1"))$set_label(list(Q1 = "test label"))
+tb_org <- survey_tbl(org)$set_association(list(mainentity = "Q1"))$set_label(list(Q1 = "test label"))
 
-check_dplyr <- function(x) {
-  expect_true(all(c("labels", "associations", "translations", "config") %in% names(attributes(x))))
-  expect_identical(names(attr(x, "associations")), names(x))
-  expect_identical(names(attr(x, "labels")), names(x))
-  expect_identical(get_association(x, "mainentity"), "Q1")
+test_dplyr <- function(x) {
+
+  # Class
+  expect_true(all(c("Survey", "R6") %in% class(x)))
+  expect_true(any(c("Survey_df", "Survey_dt", "Survey_tbl") %in% class(x)))
+
+  if ("Survey_df" %in% class(x))
+    expect_identical(class(x$data), "data.frame")
+  if ("Survey_dt" %in% class(x))
+    expect_identical(class(x$data), c("data.table", "data.frame"))
+  if ("Survey_tbl" %in% class(x))
+    expect_is(x$data, c("tbl_df", "tbl_dt", "tbl"))
+
+  # Association and label
+  expect_identical(x$get_association("mainentity"), names(x)[1L])
+  expect_identical(x$get_label(names(x)[1L]), "test label")
+  expect_identical(names(x$get_association()), names(x))
+  expect_identical(names(x$get_labels()), names(x))
+
 }
 
 # ------------------------------------------------------------------------------
 
-test_that("rename", {
-
-  x <- dplyr::rename(df, entity = Q1)
-  y <- dplyr::rename(dt, entity = Q1)
-
-  expect_identical(class(x), c("survey_df", "survey", "tbl_df", "tbl", "data.frame"))
-  expect_identical(x$entity, c("Example 1", "Example 2"))
-  expect_true(all(c("labels", "associations", "translations", "config") %in% names(attributes(x))))
-  expect_identical(names(attr(x, "associations")), names(x))
-  expect_identical(names(attr(x, "labels")), names(x))
-  expect_identical(get_association(x, "mainentity"), "entity")
-
-  expect_identical(class(y), c("survey_dt", "survey", "tbl_dt", "tbl",  "data.table", "data.frame"))
-  expect_identical(y$entity, c("Example 1", "Example 2"))
-  expect_true(all(c("labels", "associations", "translations", "config") %in% names(attributes(y))))
-  expect_identical(names(attr(y, "associations")), names(y))
-  expect_identical(names(attr(y, "labels")), names(y))
-  expect_identical(get_association(y, "mainentity"), "entity")
-
-})
-
 test_that("mutate", {
 
-  x <- dplyr::mutate(df, "test" = "df")
-  y <- dplyr::mutate(dt, "test" = "dt")
+  df <- dplyr::mutate(df_org, "test" = "df")
+  dt <- dplyr::mutate(dt_org, "test" = "dt")
+  tb <- dplyr::mutate(tb_org, "test" = "tb")
 
-  expect_identical(x$test, rep("df", 2))
-  expect_identical(y$test, rep("dt", 2))
+  expect_identical(df$test, rep("df", 2))
+  expect_identical(dt$test, rep("dt", 2))
+  expect_identical(tb$test, rep("tb", 2))
 
-  expect_identical(class(x), c("survey_df", "survey", "tbl_df", "tbl", "data.frame"))
-  expect_identical(class(y), c("survey_dt", "survey", "tbl_dt", "tbl",  "data.table", "data.frame"))
-
-  check_dplyr(x)
-  check_dplyr(y)
+  expect_true("test" %in% names(df$get_association()))
+  expect_true("test" %in% names(dt$get_association()))
+  expect_true("test" %in% names(tb$get_association()))
 
 })
 
 test_that("select", {
 
-  x <- dplyr::select(df, Q1)
-  y <- dplyr::select(dt, Q1)
+  df <- dplyr::select(df_org, Q1)
+  dt <- dplyr::select(dt_org, Q1)
+  tb <- dplyr::select(tb_org, Q1)
 
-  expect_true(ncol(x) == 1L)
-  expect_true(ncol(y) == 1L)
+  test_dplyr(df)
+  test_dplyr(dt)
+  test_dplyr(tb)
 
-  expect_identical(names(x), "Q1")
-  expect_identical(names(y), "Q1")
+  expect_true(ncol(df) == 1L)
+  expect_true(ncol(dt) == 1L)
+  expect_true(ncol(tb) == 1L)
 
-  expect_identical(class(x), c("survey_df", "survey", "tbl_df", "tbl", "data.frame"))
-  expect_identical(class(y), c("survey_dt", "survey", "tbl_dt", "tbl",  "data.table", "data.frame"))
-
-  check_dplyr(x)
-  check_dplyr(y)
+  expect_identical(names(df), "Q1")
+  expect_identical(names(dt), "Q1")
+  expect_identical(names(tb), "Q1")
 
 })
 
 test_that("filter", {
 
-  x <- dplyr::filter(df, Score > 8)
-  y <- dplyr::filter(dt, Score > 8)
+  df <- dplyr::filter(df_org, Score > 8)
+  dt <- dplyr::filter(dt_org, Score > 8)
+  tb <- dplyr::filter(tb_org, Score > 8)
 
-  expect_true(nrow(x) == 1L)
-  expect_true(nrow(y) == 1L)
+  test_dplyr(df)
+  test_dplyr(dt)
+  test_dplyr(tb)
 
-  expect_identical(class(x), c("survey_df", "survey", "tbl_df", "tbl", "data.frame"))
-  expect_identical(class(y), c("survey_dt", "survey", "tbl_dt", "tbl",  "data.table", "data.frame"))
-
-  check_dplyr(x)
-  check_dplyr(y)
+  expect_true(nrow(df) == 1L)
+  expect_true(nrow(dt) == 1L)
+  expect_true(nrow(tb) == 1L)
 
 })
 
 test_that("arrange", {
 
-  x <- dplyr::mutate(df, Q1 = c("Test 2", "Test 1"))
-  y <- dplyr::mutate(dt, Q1 = c("Test 2", "Test 1"))
+  df <- dplyr::arrange(df_org, Score)
+  dt <- dplyr::arrange(dt_org, Score)
+  tb <- dplyr::arrange(tb_org, Score)
 
-  x <- dplyr::arrange(x, Q1)
-  y <- dplyr::arrange(y, Q1)
+  test_dplyr(df)
+  test_dplyr(dt)
+  test_dplyr(tb)
 
-  expect_identical(x$Score, c(9, 8))
-  expect_identical(y$Score, c(9, 8))
-
-  expect_identical(class(x), c("survey_df", "survey", "tbl_df", "tbl", "data.frame"))
-  expect_identical(class(y), c("survey_dt", "survey", "tbl_dt", "tbl",  "data.table", "data.frame"))
-
-  check_dplyr(x)
-  check_dplyr(y)
+  expect_identical(df$data$Score, c("Example 2", "Example 1"))
+  expect_identical(dt$data$Score, c("Example 2", "Example 1"))
+  expect_identical(tb$data$Score, c("Example 2", "Example 1"))
 
 })
 
 test_that("group_by", {
 
-  x <- dplyr::group_by(df, Q1)
-  y <- dplyr::group_by(dt, Q1)
+  df <- dplyr::group_by(df_org, Q1)
+  dt <- dplyr::group_by(dt_org, Q1)
+  tb <- dplyr::group_by(tb_org, Q1)
 
-  expect_identical(as.character(dplyr::groups(x)), "Q1")
-  expect_identical(as.character(dplyr::groups(x)), "Q1")
+  test_dplyr(df)
+  test_dplyr(dt)
+  test_dplyr(tb)
 
-  expect_identical(class(x), c("survey_df", "survey", "grouped_df", "tbl_df", "tbl", "data.frame"))
-  expect_identical(class(y), c("survey_dt", "survey", "grouped_dt", "tbl_dt", "tbl",  "data.table", "data.frame"))
+  expect_identical(as.character(dplyr::groups(df)), "Q1")
+  expect_identical(as.character(dplyr::groups(dt)), "Q1")
+  expect_identical(as.character(dplyr::groups(tb)), "Q1")
 
-  check_dplyr(x)
-  check_dplyr(y)
+})
+
+test_that("rename", {
+
+  df <- dplyr::rename(df_org, entity = Q1)
+  dt <- dplyr::rename(dt_org, entity = Q1)
+  tb <- dplyr::rename(tb_org, entity = Q1)
+
+  test_dplyr(df)
+  test_dplyr(dt)
+  test_dplyr(tb)
+
+  expect_identical(names(df)[1], "entity")
+  expect_identical(names(dt)[1], "entity")
+  expect_identical(names(tb)[1], "entity")
 
 })
 
