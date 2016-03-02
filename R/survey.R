@@ -50,12 +50,14 @@ Survey <- R6::R6Class("Survey",
       "Set labels."
       new <- merge_attributes(self$names(), new, private$.labels)
       private$.labels <- new
+      invisible(self)
     },
 
     set_association = function(new = NULL) {
       "Set associations."
       new <- merge_attributes(self$names(), new, private$.associations)
       private$.associations <- new
+      invisible(self)
     },
 
     set_marketshare = function(new = NULL) {
@@ -70,12 +72,14 @@ Survey <- R6::R6Class("Survey",
 
       new <- merge_attributes(me, private$.marketshares, new)
       private$.marketshares <- new
+      invisible(self)
     },
 
     set_config = function(new = NULL) {
       "Set associations."
       new <- merge_attributes(default$config$setting, new, private$.config)
       private$.config <- new
+      invisible(self)
     },
 
     get_labels = function(which = NULL) {
