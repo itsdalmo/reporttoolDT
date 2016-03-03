@@ -44,6 +44,16 @@ Survey_dt <- R6::R6Class("Survey_dt",
 
     names = function() {
       data.table::copy(names(self$data))
+    },
+
+    set_names = function(nms) {
+      "Set colnames in the data."
+      if (!length(nms) == length(self$data))
+        stop("set_names: New names must be of same length as the data.", call. = FALSE)
+      data.table::setnames(self$data, nms)
+      data.table::setattr(private$.associations, "names", nms)
+      data.table::setattr(private$.labels, "names", nms)
+      invisible(self)
     }
 
   )
