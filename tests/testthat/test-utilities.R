@@ -45,7 +45,7 @@ test_that("get_default", {
 test_that("clean path", {
 
   path <- system.file("tests/testthat/xlsx.xlsx", package="reporttool")
-  expect_false(stri_detect(clean_path(paste0(path, "/")), regex = "/$"))
+  expect_false(stringi::stri_detect(clean_path(paste0(path, "/")), regex = "/$"))
 
   expect_error(validate_path(rep(path, 2)))
   expect_error(validate_path(numeric(1)))
