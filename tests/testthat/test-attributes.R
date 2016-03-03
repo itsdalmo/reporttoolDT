@@ -1,78 +1,74 @@
 context("update/merge attributes")
 
-x <- list("config" = setNames(c("yes", "no", NA), c("foo", "bar", "zoo")))
-y <- list("config" = setNames(c("no", NA, "new"), c("foo", "bar", "zoo")))
+org <- data.frame("Q1" = c("Example 1", "Example 2"), "Score" = c(9, 8), stringsAsFactors = FALSE)
+df_org <- survey_df(org)
+dt_org <- survey_dt(org)
+tb_org <- survey_tbl(org)
 
 
-test_that("Updating attributes works", {
-  z <- update_attribute(x$config, y$config)
-  expect_identical(z, c(x$config[1:2], y$config[3]))
+test_that("merge_attributes", {
 
-  z <- update_attribute(y$config, x$config)
-  expect_identical(z, c(y$config[1], x$config[2], y$config[3]))
+  default <- c("a", "b", "c", "d")
+  lst <- c("a" = 1, list(c("b" = 2), "d" = 4))
+  res <- merge_attributes(default, lst)
+  expect_identical(res, c("a" = 1, "b" = 2, "c" = NA, "d" = 4))
 
-})
+  lst[[2]] <- c(lst[[2]], "a" = "test")
+  res <- merge_attributes(default, lst) # Mode ends up being character.
+  expect_identical(res, c("a" = "1", "b" = "2", "c" = NA, "d" = "4"))
 
-test_that("Merging attributes works", {
-  z <- merge_survey_attributes(list(x, y))
-  expect_identical(z$config, c(x$config[1:2], y$config[3]))
-
-  z <- merge_survey_attributes(list(y, x))
-  expect_identical(z$config, c(y$config[1], x$config[2], y$config[3]))
-
-})
-
-
-# Specific attributes ----------------------------------------------------------
-x <- data.frame("Q1" = c("Example 1", "Example 2"), "Score" = c(8, 9), stringsAsFactors = FALSE)
-
-test_that("Setting association works", {
-
-  y <- survey(x)
-  y <- set_association(y, mainentity = "Q1")
-
-  expect_true(inherits(y, "survey"))
-  expect_identical(unname(attr(y, "associations")), c("mainentity", NA))
+  expect_error(merge_attributes("a", lst = 1))
+  expect_error(merge_attributes("a", lst = list(1)))
 
 })
 
-test_that("Getting associations work", {
+test_that("setting/getting label works", {
 
-  y <- survey(x)
+  df <- df_org$clone()$set_label(Q1 = "test")
+  dt <- dt_org$clone()$set_label(Q1 = "test")
+  tb <- tb_org$clone()$set_label(Q1 = "test")
 
-  # No associations (NULL)
-  expect_identical(get_association(y, "mainentity"), NULL)
-
-  # Found association
-  y <- set_association(y, mainentity = "Q1")
-  res <- get_association(y, "mainentity")
-  expect_identical(res, "Q1")
+  expect_identical(df$get_label("Q1"), c("Q1" = "test"))
+  expect_identical(dt$get_label("Q1"), c("Q1" = "test"))
+  expect_identical(tb$get_label("Q1"), c("Q1" = "test"))
 
 })
 
-test_that("Get/set marketshares works", {
+test_that("setting/getting association works", {
 
-  y <- survey(x)
-  y <- set_association(y, mainentity = "Q1")
-  y <- set_marketshare(y, "Example 1" = .5, "Example 2" = .5)
+  df <- df_org$clone()$set_association(mainentity = c("Q1", "Score"))
+  dt <- df_org$clone()$set_association(mainentity = c("Q1", "Score"))
+  tb <- df_org$clone()$set_association(mainentity = c("Q1", "Score"))
 
-  expect_true(inherits(y, "survey"))
-  expect_identical(unname(attr(y, "marketshares")), c(.5, .5))
-
-  z <- get_marketshare(y)
-  expect_identical(unname(z), c(.5, .5))
-
-  z <- get_marketshare(y, "Example 1")
-  expect_identical(names(z), "Example 1")
+  expect_identical(df$get_association(), c("Q1" = "mainentity", "Score" = "mainentity"))
+  expect_identical(dt$get_association(), c("Q1" = "mainentity", "Score" = "mainentity"))
+  expect_identical(tb$get_association(), c("Q1" = "mainentity", "Score" = "mainentity"))
 
 })
 
-test_that("Get/set config works", {
+test_that("setting/getting marketshare works", {
 
-  y <- survey(x)
-  y <- set_config(y, cutoff = .5)
+  # Can't set markeshares without specifying mainentity first.
+  expect_error(df_org$clone()$set_marketshare("Example 1" = .5, "Example 2" = .3))
 
-  expect_true(inherits(y, "survey"))
-  expect_identical(get_config(y, "cutoff"), setNames(.5, "cutoff"))
+  df <- df_org$clone()$set_association(mainentity = "Q1")$set_marketshare("Example 1" = .5)
+  dt <- df_org$clone()$set_association(mainentity = "Q1")$set_marketshare("Example 1" = .5)
+  tb <- df_org$clone()$set_association(mainentity = "Q1")$set_marketshare("Example 1" = .5)
+
+  expect_identical(df$get_marketshare(), c("Example 1" = 0.5, "Example 2" = NA))
+  expect_identical(dt$get_marketshare(), c("Example 1" = 0.5, "Example 2" = NA))
+  expect_identical(tb$get_marketshare(), c("Example 1" = 0.5, "Example 2" = NA))
+
+})
+
+test_that("setting/getting config works", {
+
+  # TODO
+
+})
+
+test_that("setting/getting translation works", {
+
+  # TODO
 
 })
