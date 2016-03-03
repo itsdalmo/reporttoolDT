@@ -5,7 +5,7 @@ Survey <- R6::R6Class("Survey",
     .associations = NULL,
     .labels = NULL,
     .config = NULL,
-    .dictionary = NULL,
+    .translations = NULL,
     .marketshares = NULL
   ),
 
@@ -15,7 +15,7 @@ Survey <- R6::R6Class("Survey",
 
     initialize = function(x) {
       if (missing(x) || !is.data.frame(x))
-        stop("Expecting a data.frame or data.table.", call = FALSE)
+        stop("Expecting a data.frame or data.table.", call. = FALSE)
       if (is.labelled(x)) {
         x <- from_labelled(x, copy = FALSE)
         private$.labels <- attr(x, "labels")
@@ -46,43 +46,24 @@ Survey <- R6::R6Class("Survey",
       self$set_label()
     },
 
-    set_label = function(new = NULL) {
+    set_names = function(nms) {
+      "Set colnames in the data."
+      if (!length(nms) == length(self$data))
+        stop("set_names: New names must be of same length as the data.", call. = FALSE)
+      names(self$data) <- nms
+      private$.labels <- setNames(unname(private$.labels), nms)
+      private$.associations <- setNames(unname(private$.associations), nms)
+      invisible(self)
+    },
+
+    set_label = function(..., lst = NULL) {
       "Set labels."
-      new <- merge_attributes(self$names(), new, private$.labels)
+      new <- merge_attributes(self$names(), lst = c(list(...), lst, private$.labels))
       private$.labels <- new
       invisible(self)
     },
 
-    set_association = function(new = NULL) {
-      "Set associations."
-      new <- merge_attributes(self$names(), new, private$.associations)
-      private$.associations <- new
-      invisible(self)
-    },
-
-    set_marketshare = function(new = NULL) {
-      "Set marketshares."
-      me <- self$get_associations("mainentity")
-      if (is.null(me)) {
-        stop("'mainentity' is not specified. See help(set_association).")
-      } else {
-        me <- self$data[[names(me)]]
-        me <- if (is.factor(me)) levels(me) else unique(me)
-      }
-
-      new <- merge_attributes(me, private$.marketshares, new)
-      private$.marketshares <- new
-      invisible(self)
-    },
-
-    set_config = function(new = NULL) {
-      "Set associations."
-      new <- merge_attributes(default$config$setting, new, private$.config)
-      private$.config <- new
-      invisible(self)
-    },
-
-    get_labels = function(which = NULL) {
+    get_label = function(which = NULL) {
       "Get labels."
       res <- private$.labels
       if (!is.null(which))
@@ -90,7 +71,18 @@ Survey <- R6::R6Class("Survey",
       res
     },
 
-    get_associations = function(which = NULL) {
+    set_association = function(..., lst = NULL) {
+      "Set associations."
+      # Associations are specified as value = c(vars), i.e. we have to reverse name and value.
+      lst <- c(list(...), lst)
+      lst <- lapply(names(lst), function(nm) { x <- lst[[nm]]; setNames(rep(nm, length(x)), x) })
+
+      new <- merge_attributes(self$names(), lst = c(lst, private$.associations))
+      private$.associations <- new
+      invisible(self)
+    },
+
+    get_association = function(which = NULL) {
       "Get associations."
       res <- private$.associations
       if (!is.null(which))
@@ -98,7 +90,24 @@ Survey <- R6::R6Class("Survey",
       res
     },
 
-    get_marketshares = function(which = NULL) {
+    set_marketshare = function(..., lst = NULL) {
+      "Set marketshares."
+      me <- self$get_association("mainentity")
+      if (is.null(me) || !length(me)) {
+        stop("'mainentity' is not specified. See help(set_association).", call. = FALSE)
+      } else if (length(me) > 1L) {
+        stop("More than one 'mainentity' specified. See help(set_association).", call. = FALSE)
+      } else {
+        me <- self$data[[names(me)]]
+        me <- if (is.factor(me)) levels(me) else unique(me)
+      }
+
+      new <- merge_attributes(me, lst = c(list(...), lst, private$.marketshares))
+      private$.marketshares <- new
+      invisible(self)
+    },
+
+    get_marketshare = function(which = NULL) {
       "Get marketshares."
       res <- private$.marketshares
       if (!is.null(which))
@@ -106,9 +115,31 @@ Survey <- R6::R6Class("Survey",
       res
     },
 
+    set_config = function(..., lst = NULL) {
+      "Set associations."
+      new <- merge_attributes(default$config$setting, lst = c(list(...), lst, private$.config))
+      private$.config <- new
+      invisible(self)
+    },
+
     get_config = function(which = NULL) {
       "Get marketshares."
       res <- private$.marketshares
+      if (!is.null(which))
+        res <- res[match_all(which, res)]
+      res
+    },
+
+    set_translation = function(..., lst = NULL) {
+      "Set associations."
+      new <- merge_attributes(default$translation$required, lst = c(list(...), lst, private$.translations))
+      private$.translations <- new
+      invisible(self)
+    },
+
+    get_translation = function(which = NULL) {
+      "Get marketshares."
+      res <- private$.translations
       if (!is.null(which))
         res <- res[match_all(which, res)]
       res
@@ -134,7 +165,7 @@ Survey <- R6::R6Class("Survey",
 
     entities = function() {
       me <- names(self$get_associations("mainentity"))
-      if (!length(me) || is.null(me)) stop("'mainentity' has not been specified yet. See help(set_association).")
+      if (!length(me) || is.null(me)) stop("'mainentity' has not been specified yet. See help(set_association).", call. = FALSE)
 
       cutoff <- as.numeric(self$get_config("cutoff"))
       valid <- !is.null(cutoff) && "percent_missing" %in% names(x)
@@ -183,11 +214,28 @@ as.survey.default <- function(x) survey(x)
 
 # Names ------------------------------------------------------------------------
 #' @export
-names.Survey <- function(x) x$names()
+names.Survey <- function(x) {
+  x$names()
+}
+
+#' @export
+`names<-.Survey` <- function(x, value) {
+  x$set_names(value)
+}
 
 #' @export
 dimnames.Survey <- function(x) {
   dimnames(x$data)
+}
+
+#' @export
+dim.Survey <- function(x) {
+  dim(x$data)
+}
+
+#' @export
+length.Survey <- function(x) {
+  length(x$data)
 }
 
 # Subset/alter -----------------------------------------------------------------
