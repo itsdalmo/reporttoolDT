@@ -11,6 +11,7 @@ Depends:
     R (>= 3.2)
 Imports:
     data.table,
+    ggplot2 (>= 2.1),
     haven,
     openxlsx,
     R6,
@@ -19,7 +20,6 @@ Imports:
     stringi
 Suggests:
     dplyr,
-    ggplot2,
     ggrepel,
     testthat,
     tidyr
