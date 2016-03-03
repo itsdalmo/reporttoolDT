@@ -1,4 +1,4 @@
-context("update/merge attributes")
+context("Survey/R6 accessors")
 
 org <- data.frame("Q1" = c("Example 1", "Example 2"), "Score" = c(9, 8), stringsAsFactors = FALSE)
 df_org <- survey_df(org)
