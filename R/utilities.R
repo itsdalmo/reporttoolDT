@@ -1,5 +1,6 @@
+# Recode. List of "new" vs "old" values. Only works for factors due to list names?
 #' @export
-replace <- function(x, lst, by = x, ignore_case = FALSE) {
+recode <- function(x, lst, by = x, ignore_case = FALSE) {
   stopifnot(length(x) == length(by))
   if (is.character(lst)) lst <- as.list(lst)
 
