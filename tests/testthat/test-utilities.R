@@ -1,21 +1,21 @@
 context("Utility functions")
 
-test_that("replace", {
+test_that("recode", {
 
   x <- c("a", "b", "c", "d")
 
   y <- c(bar = "c", foo = "a")
-  expect_identical(replace(x, y), c("foo", "b", "bar", "d"))
+  expect_identical(recode(x, y), c("foo", "b", "bar", "d"))
 
   y <- list(bar = c("a", "c"), foo = "b")
-  expect_identical(replace(x, y), c("bar", "foo", "bar", "d"))
+  expect_identical(recode(x, y), c("bar", "foo", "bar", "d"))
 
   y <- list(bar = "a")
-  expect_identical(replace(x, y), c("bar", "b", "c", "d"))
+  expect_identical(recode(x, y), c("bar", "b", "c", "d"))
 
   # Using "by"
   y <- list("bar" = c("a", "c"), "foo" = "b")
-  expect_identical(replace(1:4, y, by = x), c("bar", "foo", "bar", 4))
+  expect_identical(recode(1:4, y, by = x), c("bar", "foo", "bar", 4))
 
 })
 
