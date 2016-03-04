@@ -7,9 +7,13 @@ Survey_df <- R6::R6Class("Survey_df",
       super$initialize(as.data.frame(x))
     },
 
-    do = function(f, dots, assign = FALSE) {
+    do = function(f, dots, renamed = NULL, assign = FALSE) {
       "Perform operations directly on the data.frame."
       res <- do.call(f, c(list(self$data), dots))
+
+      if (!is.null(renamed)) {
+        self$update_names(renamed)
+      }
 
       if (assign) {
         self$data <- res

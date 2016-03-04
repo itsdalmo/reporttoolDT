@@ -46,13 +46,19 @@ Survey <- R6::R6Class("Survey",
       self$set_label()
     },
 
-    set_names = function(nms) {
-      "Set colnames in the data."
+    update_names = function(nms) {
+      "Update colnames/named vectors with new names."
       if (!length(nms) == length(self$data))
         stop("set_names: New names must be of same length as the data.", call. = FALSE)
-      names(self$data) <- nms
-      private$.labels <- setNames(unname(private$.labels), nms)
-      private$.associations <- setNames(unname(private$.associations), nms)
+      if (data.table::is.data.table(self$data)) {
+        data.table::setnames(self$data, nms)
+        data.table::setattr(private$.associations, "names", nms)
+        data.table::setattr(private$.labels, "names", nms)
+      } else {
+        names(self$data) <- nms
+        private$.labels <- setNames(unname(private$.labels), nms)
+        private$.associations <- setNames(unname(private$.associations), nms)
+      }
       invisible(self)
     },
 

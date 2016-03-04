@@ -3,14 +3,26 @@ tbl_vars.Survey <- function(x) x$names()
 
 #' @export
 select_.Survey <- function(x, ...) {
+  dots <- lazyeval::all_dots(..., all_named = FALSE)
+
+  # dplyr::select allows renaming variables when called. (e.g., select(x, new_name = old_var))
+  vars <- renamed_vars(dots)
+  if (length(vars))
+    vars <- replace_all(names(x), vars)
+
   f <- get("select_", asNamespace("dplyr"))
-  x$do(f, lazyeval::all_dots(..., all_named = FALSE), assign = FALSE)
+  x$do(f, dots, renamed = vars, assign = FALSE)
 }
 
 #' @export
 rename_.Survey <- function(x, ...) {
+  dots <- lazyeval::all_dots(...)
+  vars <- renamed_vars(dots)
+  if (length(vars))
+    vars <- replace_all(x$names(), vars)
+
   f <- get("rename_", asNamespace("dplyr"))
-  x$do(f, lazyeval::all_dots(..., all_named = TRUE), assign = FALSE)
+  x$do(f, dots, renamed = vars, assign = FALSE)
 }
 
 #' @export
