@@ -64,8 +64,8 @@ test_that("We can rename the data.", {
   df <- survey_df(org)
   dt <- survey_dt(org)
 
-  df <- df$set_names(c("a", "b"))
-  dt <- dt$set_names(c("a", "b"))
+  df <- df$update_names(c("a", "b"))
+  dt <- dt$update_names(c("a", "b"))
 
   expect_identical(names(df$get_association()), c("a", "b"))
   expect_identical(names(dt$get_association()), c("a", "b"))
