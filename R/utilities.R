@@ -1,6 +1,6 @@
 # Recode. List of "new" vs "old" values. Only works for factors due to list names?
 #' @export
-recode <- function(x, lst, by = x, ignore_case = FALSE) {
+replace_all <- function(x, lst, by = x, ignore_case = FALSE) {
   stopifnot(length(x) == length(by))
   if (is.character(lst)) lst <- as.list(lst)
 
@@ -92,6 +92,19 @@ trim_str <- function(x, n = 50, trail = "...", pad = NULL, side = "right") {
 # ------------------------------------------------------------------------------
 capture_dots <- function(...) {
   eval(substitute(alist(...)))
+}
+
+# Get renamed columns from lazy_dots in dplyr::select and dplyr::rename.
+# Returns equivalent to: setNames(old_name, new_name)
+renamed_vars <- function(dots) {
+  expr <- dots[!is.na(names(dots)) & names(dots) != ""]
+  if (length(expr)) {
+    nms <- lapply(names(expr), function(nm) { x <- expr[[nm]]$expr; if (x != nm) x })
+    nms <- setNames(as.character(unlist(nms)), names(expr))
+  } else {
+    nms <- NULL
+  }
+  nms
 }
 
 # Identical to wch/R6. Used for updating survey labels and attributes.
