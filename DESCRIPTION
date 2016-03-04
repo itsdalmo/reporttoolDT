@@ -23,5 +23,6 @@ Suggests:
     dplyr,
     ggrepel,
     testthat,
+    ReporteRs (>= 0.8.6),
     tidyr
 RoxygenNote: 5.0.1
