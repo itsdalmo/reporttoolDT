@@ -14,7 +14,7 @@ read_sp <- function(lnk, destination = NULL) {
   psw <- readline("Enter password: ")
 
   # Todo - clean URL? Necessary or does httr handle it internally?
-  resp <- httr::GET(lnk, authenticate(usr, psw, type = "ntlm"), httr::write_disk(destination))
+  resp <- httr::GET(utils::URLencode(lnk), authenticate(usr, psw, type = "ntlm"), httr::write_disk(destination))
   res <- readxl::read_excel(destination)
   res
 

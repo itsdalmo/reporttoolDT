@@ -17,7 +17,8 @@ Imports:
     R6,
     readr,
     readxl,
-    stringi
+    stringi,
+    utils
 Suggests:
     dplyr,
     ggrepel,
