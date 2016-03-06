@@ -6,6 +6,12 @@ rm(list = ls(all = TRUE))
 devtools::load_all()
 x <- reporttool::read_data("./test.sav")
 
+
+y <- survey_df(x)
+z <- bind_rows(y, y, y)
+
+z <- bind_cols(y,y)
+
 # TODO
 # 1. [, "Q1", drop = FALSE] should not only return a new survey, but also retain
 # associations, labels etc. Implement: "constructor" for slices.
