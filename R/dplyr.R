@@ -1,3 +1,4 @@
+# Basic dplyr verbs ------------------------------------------------------------
 #' @export
 tbl_vars.Survey <- function(x) x$names()
 
@@ -68,7 +69,7 @@ summarise_.Survey <- function(x, ...) {
   x$do(f, lazyeval::all_dots(...), assign = FALSE)
 }
 
-# Binds and joins --------------------------------------------------------------
+# Binds ------------------------------------------------------------------------
 
 # Generic bind_rows
 bind_rows <- function(x, ...) {
@@ -105,8 +106,30 @@ bind_cols.Survey <- function(x, ...) {
   x$do_merge(f, list(...), assign = FALSE)
 }
 
+# Joins ------------------------------------------------------------------------
+
 left_join.Survey <- function(x, y, ...) {
   f <- get("left_join", asNamespace("dplyr"))
   x$do_merge(f, list(y, ...), assign = FALSE)
 }
 
+right_join.Survey <- function(x, y, ...) {
+  f <- get("right_join", asNamespace("dplyr"))
+  x$do_merge(f, list(y, ...), assign = FALSE)
+}
+
+
+full_join.Survey <- function(x, y, ...) {
+  f <- get("full_join", asNamespace("dplyr"))
+  x$do_merge(f, list(y, ...), assign = FALSE)
+}
+
+semi_join.Survey <- function(x, y, ...) {
+  f <- get("semi_join", asNamespace("dplyr"))
+  x$do_merge(f, list(y, ...), assign = FALSE)
+}
+
+anti_join.Survey <- function(x, y, ...) {
+  f <- get("anti_join", asNamespace("dplyr"))
+  x$do_merge(f, list(y, ...), assign = FALSE)
+}
