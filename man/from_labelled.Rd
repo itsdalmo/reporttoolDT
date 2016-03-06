@@ -4,7 +4,7 @@
 \alias{from_labelled}
 \title{Flatten SPSS input}
 \usage{
-from_labelled(df)
+from_labelled(df, ...)
 }
 \arguments{
 \item{df}{A data.frame as returned from \code{read_data} or \code{haven::read_sav}.

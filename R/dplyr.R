@@ -1,64 +1,112 @@
 #' @export
-tbl_vars.survey <- function(x) NextMethod()
+tbl_vars.Survey <- function(x) x$names()
 
 #' @export
-groups.survey <- function(x) NextMethod()
+select_.Survey <- function(x, ...) {
+  # dplyr::select also allows renaming variables when called.
+  # e.g., select(x, new_name = old_var)
+  dots <- lazyeval::all_dots(...)
+  vars <- renamed_vars(dots)
+  if (length(vars))
+    vars <- replace_all(names(x), vars)
 
-#' @export
-ungroup.survey <- function(x) NextMethod()
-
-#' @export
-group_by_.survey <- function(x, ..., .dots, add = FALSE) {
-  o <- get_attributes(x, which = default$attributes)
-  x <- NextMethod()
-  update_survey_attributes(x, old = list(o))
-  x
+  f <- get("select_", asNamespace("dplyr"))
+  x$do(f, dots, renamed = vars, assign = FALSE)
 }
 
 #' @export
-summarise_.survey <- function(x, ..., .dots) {
-  o <- get_attributes(x, which = default$attributes)
-  x <- NextMethod()
-  update_survey_attributes(x, old = list(o))
-  x
+rename_.Survey <- function(x, ...) {
+  dots <- lazyeval::all_dots(...)
+  vars <- renamed_vars(dots)
+  if (length(vars))
+    vars <- replace_all(x$names(), vars)
+
+  f <- get("rename_", asNamespace("dplyr"))
+  x$do(f, dots, renamed = vars, assign = FALSE)
 }
 
 #' @export
-arrange_.survey <- function(x, ..., .dots) {
-  o <- get_attributes(x, which = default$attributes)
-  x <- NextMethod()
-  update_survey_attributes(x, old = list(o))
-  x
+filter_.Survey <- function(x, ...) {
+  f <- get("filter_", asNamespace("dplyr"))
+  x$do(f, lazyeval::all_dots(...), assign = FALSE)
 }
 
 #' @export
-mutate_.survey <- function(x, ..., .dots) {
-  o <- get_attributes(x, which = default$attributes)
-  x <- NextMethod()
-  update_survey_attributes(x, old = list(o))
-  x
+arrange_.Survey <- function(x, ...) {
+  f <- get("arrange_", asNamespace("dplyr"))
+  x$do(f, lazyeval::all_dots(...), assign = FALSE)
 }
 
 #' @export
-select_.survey <- function(x, ..., .dots) {
-  o <- get_attributes(x, which = default$attributes)
-  x <- NextMethod()
-  update_survey_attributes(x, old = list(o))
-  x
+group_by_.Survey <- function(x, ..., add = FALSE) {
+  # TODO: "add" is not passed to next call. Error message.
+  f <- get("group_by_", asNamespace("dplyr"))
+  x$do(f, lazyeval::all_dots(...), assign = FALSE)
 }
 
 #' @export
-rename_.survey <- function(x, ..., .dots) {
-  old <- names(x)
-  x <- NextMethod()
-  update_survey_names(x, old, names(x))
-  x
+groups.Survey <- function(x, ...) {
+  f <- get("groups", asNamespace("dplyr"))
+  x$do(f, lazyeval::all_dots(...), assign = FALSE)
 }
 
 #' @export
-filter_.survey <- function(x, ..., .dots) {
-  o <- get_attributes(x, which = default$attributes)
-  x <- NextMethod()
-  update_survey_attributes(x, old = list(o))
-  x
+ungroup.Survey <- function(x, ...) {
+  f <- get("ungroup", asNamespace("dplyr"))
+  x$do(f, lazyeval::all_dots(...), assign = FALSE)
 }
+
+#' @export
+mutate_.Survey <- function(x, ...) {
+  f <- get("mutate_", asNamespace("dplyr"))
+  x$do(f, lazyeval::all_dots(...), assign = FALSE)
+}
+
+#' @export
+summarise_.Survey <- function(x, ...) {
+  f <- get("summarise_", asNamespace("dplyr"))
+  x$do(f, lazyeval::all_dots(...), assign = FALSE)
+}
+
+# Binds and joins --------------------------------------------------------------
+
+# Generic bind_rows
+bind_rows <- function(x, ...) {
+  if (!requireNamespace("dplyr")) {
+    stop("dplyr package required to use bind_rows.", call. = FALSE)
+  }
+  UseMethod("bind_rows")
+}
+
+bind_rows.default <- function(...) {
+  dplyr::bind_rows(...)
+}
+
+bind_rows.Survey <- function(x, ...) {
+  f <- get("bind_rows", asNamespace("dplyr"))
+  x$do_merge(f, list(...), assign = FALSE)
+}
+
+
+# Generic bind_cols
+bind_cols <- function(x, ...) {
+  if (!requireNamespace("dplyr")) {
+    stop("dplyr package required to use bind_rows.", call. = FALSE)
+  }
+  UseMethod("bind_cols")
+}
+
+bind_cols.default <- function(...) {
+  dplyr::bind_cols(...)
+}
+
+bind_cols.Survey <- function(x, ...) {
+  f <- get("bind_cols", asNamespace("dplyr"))
+  x$do_merge(f, list(...), assign = FALSE)
+}
+
+left_join.Survey <- function(x, y, ...) {
+  f <- get("left_join", asNamespace("dplyr"))
+  x$do_merge(f, list(y, ...), assign = FALSE)
+}
+

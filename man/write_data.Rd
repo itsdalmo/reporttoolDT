@@ -12,9 +12,9 @@ write_data(x, file, ...)
 \item{file}{Path.}
 }
 \description{
-A simple wrapper for writing common data formats. The format is determined 
+A simple wrapper for writing common data formats. The format is determined
 by the extension given in \code{file}. Flat files are written with \code{readr},
-and the encoding is always \code{UTF-8}. For xlsx, the function uses \code{to_sheet} 
+and the encoding is always \code{UTF-8}. For xlsx, the function uses \code{to_sheet}
 (which in turn uses \code{openxlsx}).
 }
 \note{

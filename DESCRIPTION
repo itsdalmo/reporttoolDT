@@ -8,16 +8,21 @@ Description: More about what it does (maybe more than one line)
 License: What license is it under?
 LazyData: TRUE
 Depends:
-    R
+    R (>= 3.2)
 Imports:
     data.table,
+    ggplot2 (>= 2.1),
     haven,
     openxlsx,
     R6,
     readr,
     readxl,
-    stringi
+    stringi,
+    utils
 Suggests:
     dplyr,
-    testthat
+    ggrepel,
+    testthat,
+    ReporteRs (>= 0.8.6),
+    tidyr
 RoxygenNote: 5.0.1

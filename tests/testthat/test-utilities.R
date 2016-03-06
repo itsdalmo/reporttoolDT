@@ -1,21 +1,21 @@
 context("Utility functions")
 
-test_that("replace", {
+test_that("replace_all", {
 
   x <- c("a", "b", "c", "d")
 
   y <- c(bar = "c", foo = "a")
-  expect_identical(replace(x, y), c("foo", "b", "bar", "d"))
+  expect_identical(replace_all(x, y), c("foo", "b", "bar", "d"))
 
   y <- list(bar = c("a", "c"), foo = "b")
-  expect_identical(replace(x, y), c("bar", "foo", "bar", "d"))
+  expect_identical(replace_all(x, y), c("bar", "foo", "bar", "d"))
 
   y <- list(bar = "a")
-  expect_identical(replace(x, y), c("bar", "b", "c", "d"))
+  expect_identical(replace_all(x, y), c("bar", "b", "c", "d"))
 
   # Using "by"
   y <- list("bar" = c("a", "c"), "foo" = "b")
-  expect_identical(replace(1:4, y, by = x), c("bar", "foo", "bar", 4))
+  expect_identical(replace_all(1:4, y, by = x), c("bar", "foo", "bar", 4))
 
 })
 
@@ -45,7 +45,7 @@ test_that("get_default", {
 test_that("clean path", {
 
   path <- system.file("tests/testthat/xlsx.xlsx", package="reporttool")
-  expect_false(stri_detect(clean_path(paste0(path, "/")), regex = "/$"))
+  expect_false(stringi::stri_detect(clean_path(paste0(path, "/")), regex = "/$"))
 
   expect_error(validate_path(rep(path, 2)))
   expect_error(validate_path(numeric(1)))

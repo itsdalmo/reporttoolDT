@@ -4,7 +4,7 @@
 \alias{to_sheet}
 \title{Write data to sheet (in an openxlsx workbook)}
 \usage{
-to_sheet(df, wb, title = "Table", sheet = "analysis", row = 1L,
+to_sheet(df, wb, title = "Table", sheet = "tables", row = 1L,
   format_style = TRUE, format_values = TRUE, append = TRUE)
 }
 \arguments{
@@ -33,7 +33,7 @@ A list containing data.frames matching the sheets in the .xlsx file.
 If only one sheet is read, the function returns a data.frame instead.
 }
 \description{
-This function (a very thin wrapper for openxlsx functions) that writes/appends 
+This function (a very thin wrapper for openxlsx functions) that writes/appends
 a data.frame to the specified sheet in a loaded openxlsx workbook.
 }
 \note{

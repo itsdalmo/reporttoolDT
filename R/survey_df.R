@@ -1,121 +1,41 @@
+#' @importFrom R6 R6Class
 #' @export
-survey_df <- function(x) {
-  if (!is.data.frame(x)) {
-    x <- as.data.frame(x)
-  }
+Survey_df <- R6::R6Class("Survey_df",
+  inherit = Survey,
+  public = list(
+    initialize = function(x) {
+      super$initialize(as.data.frame(x))
+    },
 
-  structure(new_survey(x), class = c("survey_df", "survey"))
-}
+    do = function(f, dots, renamed = NULL, assign = FALSE) {
+      "Perform operations directly on the data.frame."
+      res <- do.call(f, c(list(self$data), dots))
+
+      if (assign) {
+        self$data <- res
+        self$update(renamed)
+        self
+      } else {
+        if (is.data.frame(res)) {
+          self$initialize_subset(res)$update(renamed)
+        } else {
+          res
+        }
+      }
+    }
+
+  )
+)
 
 #' @export
 survey.data.frame <- function(x) {
-  if (is.labelled(x)) x <- from_labelled(x)
   survey_df(x)
 }
 
-#' @export
-as.list.survey_df <- function(x, attributes = FALSE) {
-  if (!attributes) return(NextMethod())
-
-  if (is.null(get_association(x, "mainentity"))) {
-    ents <- NULL
+survey_df <- function(x) {
+  if (inherits(x, "Survey_df")) {
+    x
   } else {
-    ents <- entities(x)
+    Survey_df$new(x)
   }
-
-  df <- as.data.frame(x)
-  mm <- model(x)
-
-  strip_attributes(df, which = default$attributes)
-  structure(list("df" = df, "ents" = ents, "mm" = mm), class = c("survey_list", "list"))
-
-}
-
-#' @export
-rbind.survey_df <- function(..., use.names = TRUE, fill = FALSE, idcol = NULL) {
-  survey_df(NextMethod())
-}
-
-#' @export
-cbind.survey_df <- function(...) {
-  survey_df(NextMethod())
-}
-
-#' @export
-merge.survey_df <- function(x, y, ...) {
-  survey_df(NextMethod())
-}
-
-#' @export
-melt.survey_df <- function(x, ...) {
-  survey_df(NextMethod())
-}
-
-#' @export
-dcast.survey_df <- function(x, ...) {
-  survey_df(NextMethod())
-}
-
-#' @export
-model.survey_df <- function(x) {
-  NextMethod()
-}
-
-# DPLYR ------------------------------------------------------------------------
-#' @export
-tbl_vars.survey_df <- function(x) NextMethod()
-
-#' @export
-groups.survey_df <- function(x) NextMethod()
-
-#' @export
-ungroup.survey_df <- function(x) NextMethod()
-
-#' @export
-group_by_.survey_df <- function(x, ..., .dots, add = FALSE) {
-  x <- dplyr::as.tbl(NextMethod())
-  class(x) <- unique(c("survey_df", "survey", class(x)))
-  x
-}
-
-#' @export
-summarise_.survey_df <- function(x, ..., .dots) {
-  x <- dplyr::as.tbl(NextMethod())
-  class(x) <- unique(c("survey_df", "survey", class(x)))
-  x
-}
-
-#' @export
-arrange_.survey_df <- function(x, ..., .dots) {
-  x <- dplyr::as.tbl(NextMethod())
-  class(x) <- unique(c("survey_df", "survey", class(x)))
-  x
-}
-
-#' @export
-mutate_.survey_df <- function(x, ..., .dots) {
-  x <- dplyr::as.tbl(NextMethod())
-  class(x) <- unique(c("survey_df", "survey", class(x)))
-  x
-}
-
-#' @export
-select_.survey_df <- function(x, ..., .dots) {
-  x <- dplyr::as.tbl(NextMethod())
-  class(x) <- unique(c("survey_df", "survey", class(x)))
-  x
-}
-
-#' @export
-rename_.survey_df <- function(x, ..., .dots) {
-  x <- dplyr::as.tbl(NextMethod())
-  class(x) <- unique(c("survey_df", "survey", class(x)))
-  x
-}
-
-#' @export
-filter_.survey_df <- function(x, ..., .dots) {
-  x <- dplyr::as.tbl(NextMethod())
-  class(x) <- unique(c("survey_df", "survey", class(x)))
-  x
 }

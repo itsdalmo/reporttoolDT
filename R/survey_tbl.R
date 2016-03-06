@@ -1,10 +1,10 @@
 #' @importFrom R6 R6Class
 #' @export
-Survey_dt <- R6::R6Class("Survey_dt",
+Survey_tbl <- R6::R6Class("Survey_tbl",
   inherit = Survey,
   private = list(
     deep_clone = function(name, value) {
-      if (name == "data") {
+      if (name == "data" && data.table::is.data.table(value)) {
         data.table::copy(value)
       } else {
         value
@@ -14,16 +14,14 @@ Survey_dt <- R6::R6Class("Survey_dt",
 
   public = list(
     initialize = function(x) {
-      if (data.table::is.data.table(x)) {
-        x <- data.table::copy(x)
-      } else {
-        x <- data.table::as.data.table(x)
+      if (!requireNamespace("dplyr")) {
+        stop("dplyr package required to use tbl's.", call. = FALSE)
       }
-      super$initialize(x)
+      super$initialize(dplyr::as.tbl(x))
     },
 
     do = function(f, dots, renamed = NULL, assign = FALSE) {
-      "Perform operations directly on the data.table."
+      "Perform operations directly on the tbl."
       res <- do.call(f, c(list(self$data), dots))
 
       if (identical(data.table::address(res), data.table::address(self$data))) {
@@ -40,25 +38,20 @@ Survey_dt <- R6::R6Class("Survey_dt",
           res
         }
       }
-    },
-
-    names = function() {
-      data.table::copy(names(self$data))
     }
 
   )
 )
 
 #' @export
-survey.data.table <- function(x) {
-  survey_dt(x)
+survey.tbl <- function(x) {
+  survey_tbl(x)
 }
 
-survey_dt <- function(x) {
-  if (inherits(x, "Survey_dt")) {
+survey_tbl <- function(x) {
+  if (inherits(x, "Survey_tbl")) {
     x
   } else {
-    Survey_dt$new(x)
+    Survey_tbl$new(x)
   }
 }
-

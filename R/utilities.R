@@ -1,5 +1,6 @@
+# Recode. List of "new" vs "old" values. Only works for factors due to list names?
 #' @export
-replace <- function(x, lst, by = x, ignore_case = FALSE) {
+replace_all <- function(x, lst, by = x, ignore_case = FALSE) {
   stopifnot(length(x) == length(by))
   if (is.character(lst)) lst <- as.list(lst)
 
@@ -24,9 +25,7 @@ replace <- function(x, lst, by = x, ignore_case = FALSE) {
     x[id] <- new
 
   }
-
   x
-
 }
 
 #' @export
@@ -76,7 +75,9 @@ trim_str <- function(x, n = 50, trail = "...", pad = NULL, side = "right") {
   smin <- if (!is.null(pad)) n else 0
 
   x <- vapply(x, function(s) {
-    if (stri_length(s) > n) {
+    if (is.na(s)) {
+      s
+    } else if (stri_length(s) > n) {
       stri_c(stri_sub(s, to = smax), trail, sep = "")
     } else if (smin > 0) {
       stri_pad(s, width = smin, pad = pad, side = side)
@@ -89,6 +90,34 @@ trim_str <- function(x, n = 50, trail = "...", pad = NULL, side = "right") {
 }
 
 # ------------------------------------------------------------------------------
+capture_dots <- function(...) {
+  eval(substitute(alist(...)))
+}
+
+# Get renamed columns from lazy_dots in dplyr::select and dplyr::rename.
+# Returns equivalent to: setNames(old_name, new_name)
+renamed_vars <- function(dots) {
+  expr <- dots[!is.na(names(dots)) & names(dots) != ""]
+  if (length(expr)) {
+    nms <- lapply(names(expr), function(nm) { x <- expr[[nm]]$expr; if (x != nm) x })
+    nms <- setNames(as.character(unlist(nms)), names(expr))
+  } else {
+    nms <- NULL
+  }
+  nms
+}
+
+# Identical to wch/R6. Used for updating survey labels and attributes.
+merge_vectors <- function(a, b) {
+  if ((!is.null(a) && length(a) > 1 && is.null(names(a))) ||
+      (!is.null(b) && length(b) > 1 && is.null(names(b)))) {
+    stop("merge_vectors: vectors must be either NULL or named vectors")
+  }
+
+  x <- c(a, b)
+  drop_idx <- duplicated(names(x), fromLast = FALSE)
+  x[!drop_idx]
+}
 
 # base::match(x, table): only returns the first match-indicies if there are multiple hits.
 # table %in% x:          returns the indicies for all matches, but retains the order of table.

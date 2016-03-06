@@ -16,7 +16,7 @@ Wrapper for writing to windows/OSX clipboards with the most-used defaults for a
 scandinavian locale.
 }
 \note{
-This function only works on Windows or OSX, and the data-size cannot 
+This function only works on Windows or OSX, and the data-size cannot
 exceed 128kb in Windows.
 }
 \examples{

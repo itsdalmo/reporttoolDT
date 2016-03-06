@@ -4,7 +4,6 @@ library(stringi)
 
 rm(list = ls(all = TRUE))
 devtools::load_all()
-x <- reporttool::read_data("./test.sav")
+x <- reporttool::read_data("./tests/testthat/test.sav")
 
-y <- survey_df(x)
-y <- survey_dt(x)
+# TODO: Add tidyr methods for Survey.
