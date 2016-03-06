@@ -1,4 +1,4 @@
-context("dplyr methods for Survey")
+context("Regular dplyr methods for Survey")
 
 org <- data.frame("Q1" = c("Example 1", "Example 2"), "Score" = c(9, 8), stringsAsFactors = FALSE)
 
@@ -6,155 +6,100 @@ df_org <- survey_df(org)$set_association(mainentity = "Q1")$set_label(list(Q1 = 
 dt_org <- survey_dt(org)$set_association(mainentity = "Q1")$set_label(list(Q1 = "test label"))
 tb_org <- survey_tbl(org)$set_association(mainentity = "Q1")$set_label(list(Q1 = "test label"))
 
-test_dplyr <- function(x, check_class = TRUE) {
+is_valid_survey <- function(x) {
+  expect_true(
+    # All dplyr verbs should return a Survey/data.frame.
+    all(c("Survey", "R6") %in% class(x)) &&
+    any(c("Survey_df", "Survey_dt", "Survey_tbl") %in% class(x)) &&
+    is.data.frame(x$data) &&
 
-  # Class
-  expect_true(all(c("Survey", "R6") %in% class(x)))
-  expect_true(any(c("Survey_df", "Survey_dt", "Survey_tbl") %in% class(x)))
-
-  if (check_class) {
-    if ("Survey_df" %in% class(x))
-      expect_identical(class(x$data), "data.frame")
-    if ("Survey_dt" %in% class(x))
-      expect_identical(class(x$data), c("data.table", "data.frame"))
-    if ("Survey_tbl" %in% class(x))
-      expect_is(x$data, c("tbl_df", "tbl_dt", "tbl"))
-  }
-
-  # Association and label
-  expect_identical(x$get_association("mainentity"), setNames("mainentity", names(x)[1L]))
-  expect_identical(x$get_label(names(x)[1L]), setNames("test label", names(x)[1L]))
-
+    # Tests are written so that:
+    # mainentity = Q1 (or whatever it is renamed to)
+    # Q1 should have the label "test label"
+    identical(x$get_association("mainentity"), setNames("mainentity", names(x)[1L])) &&
+    identical(x$get_label(names(x)[1L]), setNames("test label", names(x)[1L]))
+  )
 }
 
 # ------------------------------------------------------------------------------
 
 test_that("mutate", {
 
-  df <- dplyr::mutate(df_org, "test" = "df")
-  dt <- dplyr::mutate(dt_org, "test" = "dt")
-  tb <- dplyr::mutate(tb_org, "test" = "tb")
+  lapply(list(df_org, dt_org, tb_org), function(x) {
 
-  expect_identical(df$data$test, rep("df", 2))
-  expect_identical(dt$data$test, rep("dt", 2))
-  expect_identical(tb$data$test, rep("tb", 2))
+    x <- dplyr::mutate(x, test = "val")
+    is_valid_survey(x)
 
-  expect_true("test" %in% names(df$get_association()))
-  expect_true("test" %in% names(dt$get_association()))
-  expect_true("test" %in% names(tb$get_association()))
+    expect_identical(x$data$test, rep("val", 2))
+    expect_true("test" %in% names(x$get_association()))
+
+  })
 
 })
 
 test_that("select", {
 
-  df <- dplyr::select(df_org, Q1)
-  dt <- dplyr::select(dt_org, Q1)
-  tb <- dplyr::select(tb_org, Q1)
+  lapply(list(df_org, dt_org, tb_org), function(x) {
 
-  test_dplyr(df)
-  test_dplyr(dt)
-  test_dplyr(tb)
+    x <- dplyr::select(x, Q1)
+    is_valid_survey(x)
 
-  expect_true(ncol(df) == 1L)
-  expect_true(ncol(dt) == 1L)
-  expect_true(ncol(tb) == 1L)
+    expect_true(ncol(x) == 1L)
+    expect_identical(names(x), "Q1")
 
-  expect_identical(names(df), "Q1")
-  expect_identical(names(dt), "Q1")
-  expect_identical(names(tb), "Q1")
+  })
 
 })
 
 test_that("filter", {
 
-  df <- dplyr::filter(df_org, Score > 8)
-  dt <- dplyr::filter(dt_org, Score > 8)
-  tb <- dplyr::filter(tb_org, Score > 8)
+  lapply(list(df_org, dt_org, tb_org), function(x) {
 
-  test_dplyr(df)
-  test_dplyr(dt)
-  test_dplyr(tb)
+    x <- dplyr::filter(x, Score > 8)
+    is_valid_survey(x)
 
-  expect_true(nrow(df) == 1L)
-  expect_true(nrow(dt) == 1L)
-  expect_true(nrow(tb) == 1L)
+    expect_true(nrow(x) == 1L)
+
+  })
 
 })
 
 test_that("arrange", {
 
-  df <- dplyr::arrange(df_org, Score)
-  dt <- dplyr::arrange(dt_org, Score)
-  tb <- dplyr::arrange(tb_org, Score)
+  lapply(list(df_org, dt_org, tb_org), function(x) {
 
-  test_dplyr(df)
-  test_dplyr(dt)
-  test_dplyr(tb)
+    x <- dplyr::arrange(x, Score)
+    is_valid_survey(x)
 
-  expect_identical(df$data$Q1, c("Example 2", "Example 1"))
-  expect_identical(dt$data$Q1, c("Example 2", "Example 1"))
-  expect_identical(tb$data$Q1, c("Example 2", "Example 1"))
+    expect_identical(x$data$Q1, c("Example 2", "Example 1"))
+
+  })
 
 })
 
 test_that("group_by", {
 
-  df <- dplyr::group_by(df_org, Q1)
-  dt <- dplyr::group_by(dt_org, Q1)
-  tb <- dplyr::group_by(tb_org, Q1)
+  lapply(list(df_org, dt_org, tb_org), function(x) {
 
-  test_dplyr(df, check_class = FALSE)
-  test_dplyr(dt, check_class = FALSE)
-  test_dplyr(tb, check_class = FALSE)
+    x <- dplyr::group_by(x, Q1)
+    is_valid_survey(x)
 
-  expect_identical(as.character(dplyr::groups(df)), "Q1")
-  expect_identical(as.character(dplyr::groups(dt)), "Q1")
-  expect_identical(as.character(dplyr::groups(tb)), "Q1")
+    expect_identical(as.character(dplyr::groups(x)), "Q1")
+
+  })
 
 })
 
 test_that("rename", {
 
-  df <- dplyr::rename(df_org, entity = Q1)
-  dt <- dplyr::rename(dt_org, entity = Q1)
-  tb <- dplyr::rename(tb_org, entity = Q1)
+  lapply(list(df_org, dt_org, tb_org), function(x) {
 
-  test_dplyr(df)
-  test_dplyr(dt)
-  test_dplyr(tb)
+    x <- dplyr::rename(x, entity = Q1)
+    is_valid_survey(x)
 
-  expect_identical(names(df)[1], "entity")
-  expect_identical(names(dt)[1], "entity")
-  expect_identical(names(tb)[1], "entity")
+    expect_identical(names(x)[1], "entity")
+
+  })
 
 })
 
-test_that("bind_rows", {
-
-  # TODO
-
-})
-
-test_that("bind_cols", {
-
-  # TODO
-
-})
-
-test_that("left_join", {
-
-  # TODO
-
-})
-
-test_that("gather", {
-
-  # TODO
-
-})
-
-test_that("spread", {
-
-  # TODO
-
-})
