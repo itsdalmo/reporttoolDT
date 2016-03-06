@@ -23,8 +23,6 @@ test_that("bind_rows", {
 
 test_that("bind_cols", {
 
-  x <- bind_cols(dt_org, dplyr::mutate(dt_org, test = "test"))
-
   lapply(list(df_org, dt_org, tb_org), function(x) {
 
     x <- bind_cols(x, dplyr::mutate(x, test = "test"))
@@ -39,7 +37,17 @@ test_that("bind_cols", {
 
 test_that("left_join", {
 
-  # TODO
+  lapply(list(df_org, dt_org, tb_org), function(x) {
+
+    x <- dplyr::left_join(x, dplyr::mutate(x[1, ], test = "test"))
+
+    expect_is(x, "Survey")
+    expect_identical(x$get_association("mainentity"),  setNames("mainentity", "Q1"))
+    expect_identical(x$get_label("Q1"),  setNames("test label", "Q1"))
+    expect_identical(names(x), c("Q1", "Score", "test"))
+    expect_identical(x$data$test, c("test", NA))
+
+  })
 
 })
 

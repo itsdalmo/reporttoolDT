@@ -105,4 +105,8 @@ bind_cols.Survey <- function(x, ...) {
   x$do_merge(f, list(...), assign = FALSE)
 }
 
+left_join.Survey <- function(x, y, ...) {
+  f <- get("left_join", asNamespace("dplyr"))
+  x$do_merge(f, list(y, ...), assign = FALSE)
+}
 
