@@ -12,4 +12,4 @@ x <- dplyr::select(x, q1, Image:EPSI)
 x <- tidyr::gather(x, latent, score, -q1)
 x <- dplyr::summarise(dplyr::group_by(x, q1, latent), score = mean(score))
 
-y <- tidyr::spread(x, latent, score)
+tidyr::spread(x, latent, score)
