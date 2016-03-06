@@ -1,31 +1,30 @@
 #' @export
 gather_.Survey <- function(x, ...) {
-  f <- get("gather", asNamespace("tidyr"))
-  x$do(f, lazyeval::lazy_eval(lazyeval::lazy_dots(...)), assign = FALSE)
+  f <- get("gather_", asNamespace("tidyr"))
+  x$do(f, list(...), assign = FALSE)
 }
 
 #' @export
-spread_.Survey <- function(x, key_col, value_col, ...) {
-  f <- get("spread", asNamespace("tidyr"))
-  # dots <- c(eval(substitute(key_col)), eval(substitute(value_col)), capture_dots(...))
-  x$do(f, capture_dots(key_col, value_col, ...), assign = FALSE)
+spread_.Survey <- function(x, ...) {
+  f <- get("spread_", asNamespace("tidyr"))
+  x$do(f, list(...), assign = FALSE)
 }
 
 #' @export
 complete_.Survey <- function(x, ...) {
   f <- get("complete_", asNamespace("tidyr"))
-  x$do(f, lazyeval::all_dots(..., all_named = TRUE), assign = FALSE)
+  x$do(f, list(...), assign = FALSE)
 }
 
 #' @export
 expand_.Survey <- function(x, ...) {
   f <- get("expand_", asNamespace("tidyr"))
-  x$do(f, lazyeval::all_dots(..., all_named = TRUE), assign = FALSE)
+  x$do(f, list(...), assign = FALSE)
 }
 
 #' @export
 fill_.Survey <- function(x, ...) {
   f <- get("fill_", asNamespace("tidyr"))
-  x$do(f, lazyeval::all_dots(..., all_named = TRUE), assign = FALSE)
+  x$do(f, list(...), assign = FALSE)
 }
 
