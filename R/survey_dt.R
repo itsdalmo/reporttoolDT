@@ -26,20 +26,16 @@ Survey_dt <- R6::R6Class("Survey_dt",
       "Perform operations directly on the data.table."
       res <- do.call(f, c(list(self$data), dots))
 
-      if (!is.null(renamed)) {
-        self$update_names(renamed)
-      }
-
       if (identical(data.table::address(res), data.table::address(self$data))) {
-        super$update()
+        self$update(renamed)
         self
       } else if (assign) {
         self$data <- res
-        super$update()
+        self$update(renamed)
         self
       } else {
         if (is.data.frame(res)) {
-          super$initialize_subset(res)
+          self$initialize_subset(res)$update(renamed)
         } else {
           res
         }
