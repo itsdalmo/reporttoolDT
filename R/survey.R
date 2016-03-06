@@ -73,7 +73,7 @@ Survey <- R6::R6Class("Survey",
       private$.labels <- unlist(c(list(self$get_label()), aso))
 
       # Extract data and apply function
-      dots <- lapply(dots, function(x) { if (is.survey(x)) x$get_data() } )
+      dots <- lapply(dots, function(x) { if (is.survey(x)) x$get_data() else x })
       self$do(f, dots, assign = assign)
 
     },
