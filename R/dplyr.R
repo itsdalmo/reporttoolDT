@@ -63,19 +63,46 @@ mutate_.Survey <- function(x, ...) {
 }
 
 #' @export
-mutate_each_.Survey <- function(x, ...) {
-  f <- get("mutate_each_", asNamespace("dplyr"))
-  x$do(f, lazyeval::all_dots(...), assign = FALSE)
-}
-
-#' @export
 summarise_.Survey <- function(x, ...) {
   f <- get("summarise_", asNamespace("dplyr"))
   x$do(f, lazyeval::all_dots(...), assign = FALSE)
 }
 
-#' @export
-summarise_each_.Survey <- function(x, ...) {
-  f <- get("summarise_each_", asNamespace("dplyr"))
-  x$do(f, lazyeval::all_dots(...), assign = FALSE)
+# Binds and joins --------------------------------------------------------------
+
+# Generic bind_rows
+bind_rows <- function(x, ...) {
+  if (!requireNamespace("dplyr")) {
+    stop("dplyr package required to use bind_rows.", call. = FALSE)
+  }
+  UseMethod("bind_rows")
 }
+
+bind_rows.default <- function(...) {
+  dplyr::bind_rows(...)
+}
+
+bind_rows.Survey <- function(x, ...) {
+  f <- get("bind_rows", asNamespace("dplyr"))
+  x$do_merge(f, list(...), assign = FALSE)
+}
+
+
+# Generic bind_cols
+bind_cols <- function(x, ...) {
+  if (!requireNamespace("dplyr")) {
+    stop("dplyr package required to use bind_rows.", call. = FALSE)
+  }
+  UseMethod("bind_cols")
+}
+
+bind_cols.default <- function(...) {
+  dplyr::bind_cols(...)
+}
+
+bind_cols.Survey <- function(x, ...) {
+  f <- get("bind_cols", asNamespace("dplyr"))
+  x$do_merge(f, list(...), assign = FALSE)
+}
+
+
