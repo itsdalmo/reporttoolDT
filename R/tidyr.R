@@ -7,8 +7,8 @@ gather_.Survey <- function(x, ...) {
 #' @export
 spread_.Survey <- function(x, key_col, value_col, ...) {
   f <- get("spread", asNamespace("tidyr"))
-  dots <- c(eval(substitute(key_col)), eval(substitute(value_col)), capture_dots(...))
-  x$do(f, dots, assign = FALSE)
+  # dots <- c(eval(substitute(key_col)), eval(substitute(value_col)), capture_dots(...))
+  x$do(f, capture_dots(key_col, value_col, ...), assign = FALSE)
 }
 
 #' @export
