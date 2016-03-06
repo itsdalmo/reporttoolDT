@@ -45,6 +45,7 @@ Survey <- R6::R6Class("Survey",
         self$set_names(renamed)
       self$set_association()
       self$set_label()
+      self
     },
 
     set_names = function(new_names) {
@@ -75,7 +76,6 @@ Survey <- R6::R6Class("Survey",
       # Extract data and apply function
       dots <- lapply(dots, function(x) { if (is.survey(x)) x$get_data() else x })
       self$do(f, dots, assign = assign)
-
     },
 
     set_label = function(..., lst = NULL) {
