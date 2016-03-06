@@ -36,30 +36,46 @@ Survey <- R6::R6Class("Survey",
       "Return a sliced or subset survey."
       slice <- self$clone(deep = FALSE)
       slice$data <- x
-      slice$update()
-      slice
+      invisible(slice)
     },
 
-    update = function() {
+    update = function(renamed = NULL) {
       "Update the survey. (Associations, labels, etc.)"
+      if (!is.null(renamed))
+        self$set_names(renamed)
       self$set_association()
       self$set_label()
     },
 
-    update_names = function(nms) {
-      "Update colnames/named vectors with new names."
-      if (!length(nms) == length(self$data))
+    set_names = function(new_names) {
+      "Set colnames/named vectors with new names."
+      if (!length(new_names) == length(self$data))
         stop("set_names: New names must be of same length as the data.", call. = FALSE)
       if (data.table::is.data.table(self$data)) {
-        data.table::setnames(self$data, nms)
-        data.table::setattr(private$.associations, "names", nms)
-        data.table::setattr(private$.labels, "names", nms)
+        data.table::setnames(self$data, new_names)
       } else {
-        names(self$data) <- nms
-        private$.labels <- setNames(unname(private$.labels), nms)
-        private$.associations <- setNames(unname(private$.associations), nms)
+        names(self$data) <- new_names
       }
+
+      private$.labels <- setNames(unname(private$.labels), new_names)
+      private$.associations <- setNames(unname(private$.associations), new_names)
       invisible(self)
+    },
+
+    do_merge = function(f, dots, assign = FALSE) {
+      "Do merging operations on a Survey."
+      # Get labels and associations
+      lbl <- lapply(dots, function(x) { if (is.survey(x)) x$get_label() })
+      aso <- lapply(dots, function(x) { if (is.survey(x)) x$get_association() })
+
+      # Unlist and assign to private fields (self$do will remove duplicates)
+      private$.associations <- unlist(c(list(self$get_association()), lbl))
+      private$.labels <- unlist(c(list(self$get_label()), aso))
+
+      # Extract data and apply function
+      dots <- lapply(dots, function(x) { if (is.survey(x)) x$get_data() } )
+      self$do(f, dots, assign = assign)
+
     },
 
     set_label = function(..., lst = NULL) {
