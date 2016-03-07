@@ -17,8 +17,13 @@ renamed_vars <- function(dots) {
 }
 
 # Check which OS we are on -----------------------------------------------------
-on_windows <- function() Sys.info()["sysname"] == "Windows"
-on_osx <- function() Sys.info()["sysname"] == "Darwin"
+on_windows <- function() {
+  Sys.info()["sysname"] == "Windows"
+}
+
+on_osx <- function() {
+  Sys.info()["sysname"] == "Darwin"
+}
 
 # match_all returns ALL matching indices for x in table, ordered by x ----------
 match_all <- function(x, table) {
@@ -42,10 +47,16 @@ filename_no_ext <- function(file)  {
 }
 
 # Check if x is a string (length 1 character vector.) --------------------------
-is.string <- function(x) is.character(x) && length(x) == 1
+is.string <- function(x) {
+  is.character(x) && length(x) == 1
+}
 
 # See if a list or data.frame contains any labelled vectors. -------------------
-any_labelled <- function(x) any(vapply(x, inherits, what = "labelled", logical(1)))
+any_labelled <- function(x) {
+  any(vapply(x, inherits, what = "labelled", logical(1)))
+}
 
 # Like is.list, except it does not return true for data.frame ------------------
-is.list2 <- function(x) inherits(x, "list")
+is.list2 <- function(x) {
+  inherits(x, "list")
+}
