@@ -28,8 +28,8 @@ Survey_tbl <- R6::R6Class("Survey_tbl",
 
   public = list(
     initialize = function(x) {
-      if (!requireNamespace("dplyr")) {
-        stop("dplyr package required to use tbl's.", call. = FALSE)
+      if (!requireNamespace("dplyr", silently = TRUE)) {
+        stop("dplyr package required to use tbl's.")
       }
       super$initialize(dplyr::as.tbl(x))
     },

@@ -73,8 +73,8 @@ summarise_.Survey <- function(x, ...) {
 
 # Generic bind_rows
 bind_rows <- function(x, ...) {
-  if (!requireNamespace("dplyr")) {
-    stop("dplyr package required to use bind_rows.", call. = FALSE)
+  if (!requireNamespace("dplyr", silently = TRUE)) {
+    stop("dplyr package required to use bind_rows.")
   }
   UseMethod("bind_rows")
 }
