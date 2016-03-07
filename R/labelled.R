@@ -41,7 +41,9 @@ from_labelled_impl <- function(dt) {
   # Differentiate between scale and factor variables
   labelled <- vapply(dt, inherits, what = "labelled", logical(1))
   labels <- lapply(dt, function(x) if (!is.null(attr(x, "labels"))) names(attr(x, "labels")) else attr(x, "levels"))
-  scales <- vapply(labels, function(x) { sum(stri_detect(x, regex = default$pattern$detect_scale)) == 10L }, logical(1))
+
+  scale_pattern <- get_default("pattern")$detect_scale
+  scales <- vapply(labels, function(x) { sum(stri_detect(x, regex = scale_pattern)) == 10L }, logical(1))
 
   # Check labelled scales for consistency and convert to factor
   cols <- names(dt)

@@ -36,9 +36,9 @@ test_that("rescaling scores", {
 
 test_that("get_default", {
 
-  expect_identical(get_default("pal"), default$palette)
-  expect_identical(get_default("laten"), default$latents)
-  expect_identical(get_default("latent"), default$latents)
+  expect_identical(get_default("pal"), internal_defaults$palette)
+  expect_identical(get_default("laten"), internal_defaults$latents)
+  expect_identical(get_default("latent"), internal_defaults$latents)
 
 })
 

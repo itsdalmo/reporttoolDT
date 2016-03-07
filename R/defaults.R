@@ -1,97 +1,181 @@
+#' Get default values used internally.
+#'
+#' This function retrieves internally defined values where the names match the
+#' \code{string} argument (not case sensitive). \code{default_latents} and
+#' \code{default_palette} are identical to \code{get_default("latents")}.
+#'
+#' @param string A string which matches the default values you would like to return.
+#' @param exact If the \code{string} matches more than one default value and exact
+#' is set to \code{TRUE} an error occurs. The error lists the full name of all
+#' matching internal defaults. Set this to \code{FALSE} to instead return all
+#' matches instead.
 #' @export
-get_default <- function(string) {
+#' @examples
+#' lats <- get_default("latents")
+#' pal <- get_default("palette")
+#'
+#' identical(lats, default_latents())
+#' identical(pal, default_palette())
 
-  if (!is.string(string)) stop("Input was not a string (character(1)).")
+#' @export
+get_default <- function(string, exact = TRUE) {
+  if (!is.string(string)) {
+    stop("Expecting a string (character(1)) input for argument 'string'.")
+  }
 
-  y <- default[stri_detect(names(default), regex = string, ignore_case = TRUE)]
+  id <- stri_detect(names(internal_defaults), regex = string, ignore_case = TRUE)
+  id <- names(internal_defaults)[id]
+  if (length(id) > 1L && exact) {
+    stop("The string matched more than one element:\n", join_str(stri_c("'", id, "'")))
+  }
 
-  # Drop list if only one entry is returned
-  if (length(y) == 1L) y[[1]] else y
+  res <- internal_defaults[id]
+  if (length(res) == 1L)
+    res <- res[[1]]
+
+  res
 
 }
 
+#' @rdname get_default
+#' @export
+default_palette <- function() get_default("palette", exact = TRUE)
+
+#' @rdname get_default
+#' @export
+default_latents <- function() get_default("latents", exact = TRUE)
+
 # Default values ---------------------------------------------------------------
 
-default <- list(
+internal_defaults <- list(
 
-  "attributes" = c("associations", "labels", "marketshares", "translations", "config"),
-  "palette" =  c("#F8766D", "#00BFC4", "#808080", "#00BF7D", "#9590FF", "#A3A500", "#EA8331"),
-  "latents" = c("image", "expect", "prodq", "servq", "value", "epsi", "loyal"),
-  "na_strings" = c("NA", " ", "", "#DIV/0!", "#NULL!", "#NAVN?", "#NAME?"),
+  # Default palette
+  palette = c("#F8766D", "#00BFC4", "#808080", "#00BF7D", "#9590FF", "#A3A500", "#EA8331"),
 
-  "structure" = list(
-    "survey" = c("df", "cd", "hd", "ents", "mm", "tr", "cfg"),
-    "sheet" = c("data", "contrast data", "historic data", "entities", "measurement model", "translations", "config"),
-    "ents" = c("entity", "n", "valid", "marketshare"),
-    "mm" = c("latent", "manifest", "question", "type", "values"),
-    "tr" = c("original", "replacement"),
-    "cfg" = c("config", "value")),
+  # CSI latent names
+  latents =   c("image", "expect", "prodq", "servq", "value", "epsi", "loyal"),
 
-  "model" = rbind("image" = c(0,0,0,0,0,0,0),
-                  "expect" = c(1,0,0,0,0,0,0),
-                  "prodq" = c(1,1,0,0,0,0,0),
-                  "servq" = c(1,1,1,0,0,0,0),
-                  "value" = c(0,0,1,1,0,0,0),
-                  "epsi" = c(1,0,1,1,1,0,0),
-                  "loyal" = c(0,0,0,0,0,1,0)),
+  # The inner model used in PLS-PM. The 'plspm' package expects a matrix.
+  model = rbind(image  = c(0,0,0,0,0,0,0),
+                expect = c(1,0,0,0,0,0,0),
+                prodq  = c(1,1,0,0,0,0,0),
+                servq  = c(1,1,1,0,0,0,0),
+                value  = c(0,0,1,1,0,0,0),
+                epsi   = c(1,0,1,1,1,0,0),
+                loyal  = c(0,0,0,0,0,1,0)),
 
-  "associations" = list("image" = "q4",
-                        "expect" = "q5",
-                        "prodq" = "q7p",
-                        "servq" = "q7s",
-                        "value" = "q8",
-                        "epsi" = c("q3", "q6", "q16"),
-                        "loyal" = c("q10", "q15", "q15b")),
+  # Common names for variables associated with a given latent.
+  associations = list(image  = "q4",
+                      expect = "q5",
+                      prodq  = "q7p",
+                      servq  = "q7s",
+                      value  = "q8",
+                      epsi   = c("q3", "q6", "q16"),
+                      loyal  = c("q10", "q15", "q15b")),
 
-  "translation" = list(
-    "required" = c("image", "expect", "prodq", "servq", "value", "epsi", "loyal",
-                   "mainentity", "subentity", "manifest", "difference", "question",
-                   "contrast_average", "average", "study_average", "spring", "fall"),
-    "norwegian" = c("Image/inntrykk", "Forventninger", "Produktkvalitet", "Servicekvalitet",
-                    "Verdi for pengene", "Kundetilfredshet", "Lojalitet", "Bank",
-                    "Avdeling", "Kode", "Diff", "Spørsmål", "Snitt nasjonal", "Snitt",
-                    "Snitt webstudien", "Vår", "Høst"),
-    "danish" = c("Image", "Forventninger", "Produktkvalitet", "Servicekvalitet",
-                 "Værdi for pengene", "Kundetilfredshed", "Loyalitet", "Bank",
-                 "Afdeling", "Kode", "Diff", "Spørgsmål", "Snit national", "Snit",
-                 "Snit webstudien", "Forår", "Efterår")),
+  # Translations used for generating reports.
+  translation = list(
+    required = c("image",
+                 "expect",
+                 "prodq",
+                 "servq",
+                 "value",
+                 "epsi",
+                 "loyal",
+                 "mainentity",
+                 "subentity",
+                 "manifest",
+                 "difference",
+                 "question",
+                 "contrast_average",
+                 "average",
+                 "study_average",
+                 "spring",
+                 "fall"),
 
-  "config" = list(
-    "setting" = c("reporttool", "study", "segment", "year", "period", "method",
-                  "language", "cutoff", "latents", "marketshares"),
-    "value" = c("1.4", "Example", "", "2015", "fall", "web", "norwegian", .3, "mean", "no")
-  ),
+    norwegian = c("Image/inntrykk",
+                  "Forventninger",
+                  "Produktkvalitet",
+                  "Servicekvalitet",
+                  "Verdi for pengene",
+                  "Kundetilfredshet",
+                  "Lojalitet",
+                  "Bank",
+                  "Avdeling",
+                  "Kode",
+                  "Diff",
+                  "Spørsmål",
+                  "Snitt nasjonal",
+                  "Snitt",
+                  "Snitt webstudien",
+                  "Vår",
+                  "Høst"),
 
-  "template" = list(
-    "beamer" = list(
-      "dir" = "rmd/beamer",
-      "files" = "beamer_template.tex")),
+    danish = c("Image",
+               "Forventninger",
+               "Produktkvalitet",
+               "Servicekvalitet",
+               "Værdi for pengene",
+               "Kundetilfredshed",
+               "Loyalitet",
+               "Bank",
+               "Afdeling",
+               "Kode",
+               "Diff",
+               "Spørgsmål",
+               "Snit national",
+               "Snit",
+               "Snit webstudien",
+               "Forår",
+               "Efterår")),
 
-  "theme" = list(
-    "beamer" = list(
-      "dir" = "rmd/beamer",
-      "files" = c("beamercolorthememetropolis.sty",
-                  "beamerfontthememetropolis.sty",
-                  "beamerthemem.sty", "logo.eps",
-                  "beamer_preamble.tex"))),
+  # Default config values for the .config private field in Survey's.
+  config = list(
+    required = c("reporttool",
+                 "study",
+                 "segment",
+                 "year",
+                 "period",
+                 "method",
+                 "language",
+                 "cutoff",
+                 "latents",
+                 "marketshares"),
 
-  "pattern" = list(
+    value = c(NA, "Example", NA, format(Sys.time(), "%Y"), NA, "web", "norwegian", NA, NA)),
 
-    "detect_scale" = "^[0-9]{1,2}[[:alpha:][:punct:] ]*",
-    "extract_scale" = "^[0-9]{1,2}\\s*=?\\s*([[:alpha:]]*)",
+  # Locations for package-internal files.
+  template = list(
+    beamer = list(
+      dir = "rmd/beamer",
+      files = "beamer_template.tex")),
 
-    "rmd" = list(
-      "chunk_start" = "^```\\{r",
-      "chunk_end" = "```$",
-      "chunk_eval" = ".*eval\\s*=\\s*((.[^},]+|.[^}]+\\))),?.*",
-      "inline" = "`r[ [:alnum:][:punct:]][^`]+`",
-      "section" = "^#[^#]",
-      "slide" = "^##[^#]"),
+  theme = list(
+    beamer = list(
+      dir = "rmd/beamer",
+      files = c("beamercolorthememetropolis.sty",
+                "beamerfontthememetropolis.sty",
+                "beamerthemem.sty",
+                "logo.eps",
+                "beamer_preamble.tex"))),
 
-    "code" = list(
-      "yaml" = "^##\\+ ---",
-      "inline" = "`r[ [:alnum:][:punct:]][^`]+`",
-      "title" = "^##\\+\\s*#{1,2}[^#]",
-      "text" = "^##\\+\\s.*"))
+  # List (nested) of regex patterns used internally.
+  pattern = list(
+    detect_scale = "^[0-9]{1,2}[[:alpha:][:punct:] ]*",
+    extract_scale = "^[0-9]{1,2}\\s*=?\\s*([[:alpha:]]*)",
+
+    rmd = list(
+      chunk_start = "^```\\{r",
+      chunk_end = "```$",
+      chunk_eval = ".*eval\\s*=\\s*((.[^},]+|.[^}]+\\))),?.*",
+      inline = "`r[ [:alnum:][:punct:]][^`]+`",
+      section = "^#[^#]",
+      slide = "^##[^#]"),
+
+    code = list(
+      yaml = "^##\\+ ---",
+      inline = "`r[ [:alnum:][:punct:]][^`]+`",
+      title = "^##\\+\\s*#{1,2}[^#]",
+      text = "^##\\+\\s.*"))
 
 )
