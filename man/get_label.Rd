@@ -29,7 +29,17 @@ The listed functions provide a familiar interface to the hidden fields of
 a \code{Survey} object. Each returns a named vector with the corresponding values.
 }
 \examples{
-# TODO
-NULL
+# Create a new survey (regular)
+x <- survey_df(data.frame("A" = 1, "B" = 2))
+x <- set_label(x, A = "This is a label")
+get_label(x, "A")
+
+# Same example using R6
+y <- Survey_df$new(data.frame("A" = 1, "B" = 2))
+y$set_label(A = "This is a label")
+y$get_label("A")
+
+# Should be equivalent
+all.equal(x, y)
 }
 

@@ -1,5 +1,19 @@
-#' @importFrom R6 R6Class
+#' @rdname survey
 #' @export
+survey_dt <- function(x) {
+  if (inherits(x, "Survey_dt")) {
+    x
+  } else {
+    Survey_dt$new(x)
+  }
+}
+
+#' @export
+survey.data.table <- function(x) {
+  survey_dt(x)
+}
+
+# Survey (R6 Class) ------------------------------------------------------------
 Survey_dt <- R6::R6Class("Survey_dt",
   inherit = Survey,
   private = list(
@@ -48,17 +62,3 @@ Survey_dt <- R6::R6Class("Survey_dt",
 
   )
 )
-
-#' @export
-survey.data.table <- function(x) {
-  survey_dt(x)
-}
-
-survey_dt <- function(x) {
-  if (inherits(x, "Survey_dt")) {
-    x
-  } else {
-    Survey_dt$new(x)
-  }
-}
-

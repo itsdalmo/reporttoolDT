@@ -1,9 +1,82 @@
-#' @importFrom R6 R6Class
+#' Create a new Survey
+#'
+#' Create a new Survey from a \code{data.frame}, \code{data.table} or \code{tbl}.
+#' The class \code{Survey} provides additional private (hidden) fields pertaining
+#' to the Survey/data, but should otherwise behave like a regular \code{data.frame}.
+#'
+#' @section Privat fields (R6):
+#' \describe{
+#'
+#'    \item{\code{labels}}{A label (question text) associated with a
+#'    given variable in the data.}
+#'
+#'    \item{\code{association}}{Specification of what the variable is associated
+#'    with. This field is used to specify the structural model for the \code{PLS-PM}
+#'    modelling, in addition to other variables of interest for an analysis.}
+#'
+#'    \item{\code{config}}{This field keeps track of configurations made by
+#'    the user when working on the \code{Survey}.}
+#'
+#'    \item{\code{translations}}{A dictionary containing translations to be
+#'    used when generating output based on Survey.}
+#'
+#'    \item{\code{marketshares}}{The marketshares used for individual entities
+#'    when producing weighted averages/counts from the Survey.}
+#'
+#' }
+#'
+#' @section Public methods (R6):
+#' \describe{
+#'
+#'    \item{\code{new}}{Initialize a new \code{Survey}. Expects a \code{data.frame},
+#'    \code{data.table} or \code{tbl} as input.}
+#'
+#'    \item{\code{get_data}}{Return a copy of the data.}
+#'
+#'    \item{\code{model}}{Return a summary of the data for the \code{Survey}.
+#'    This includes labels and associations, and the object (\code{survey_model})
+#'    prints nicely.}
+#'
+#'    \item{\code{entities}}{This method produces a summary of the entities
+#'    (total/valid observations and marketshare) if they have been specified.}
+#'
+#' }
+#'
+#' @note Under the hood, the \code{Survey} is a R6 class - this means that \code{$} is
+#' reserved for accessing the public methods of the class, and not columns in the
+#' data directly. S3 methods are provided (and prefered) to make the \code{Survey}
+#' behave more like regular R objects.
 #' @export
+#' @examples
+#' # Create a new survey (regular)
+#' df <- survey_df(data.frame("A" = 1, "B" = 2))
+#' dt <- survey_dt(data.frame("A" = 1, "B" = 2))
+#'
+#' if (require(dplyr)) {
+#'   tbl <- survey_tbl(data.frame("A" = 1, "B" = 2))
+#' }
+
+survey <- function(x) UseMethod("survey")
+
+#' @rdname survey
+#' @export
+is.survey <- function(x) inherits(x, "Survey")
+
+#' @rdname survey
+#' @export
+as.survey <- function(x) UseMethod("as.survey")
+
+#' @export
+as.survey.Survey <- function(x) x
+
+#' @export
+as.survey.default <- function(x) survey(x)
+
+# Survey (R6 Class) ------------------------------------------------------------
 Survey <- R6::R6Class("Survey",
   private = list(
-    .associations = NULL,
     .labels = NULL,
+    .associations = NULL,
     .config = NULL,
     .translations = NULL,
     .marketshares = NULL
@@ -218,49 +291,7 @@ Survey <- R6::R6Class("Survey",
   )
 )
 
-# as/is ------------------------------------------------------------------------
-#' @export
-survey <- function(x) UseMethod("survey")
-
-#' @export
-is.survey <- function(x) inherits(x, "Survey")
-
-#' @export
-as.survey <- function(x) UseMethod("as.survey")
-
-#' @export
-as.survey.Survey <- function(x) x
-
-#' @export
-as.survey.default <- function(x) survey(x)
-
-# Names ------------------------------------------------------------------------
-#' @export
-names.Survey <- function(x) {
-  x$names()
-}
-
-#' @export
-`names<-.Survey` <- function(x, value) {
-  x$set_names(value)
-}
-
-#' @export
-dimnames.Survey <- function(x) {
-  dimnames(x$data)
-}
-
-#' @export
-dim.Survey <- function(x) {
-  dim(x$data)
-}
-
-#' @export
-length.Survey <- function(x) {
-  length(x$data)
-}
-
-# Subset/alter -----------------------------------------------------------------
+# S3 methods -------------------------------------------------------------------
 #' @export
 `[.Survey` <- function(x, ...) {
   x$do("[", capture_dots(...))
@@ -279,4 +310,42 @@ length.Survey <- function(x) {
 #' @export
 `[[<-.Survey` <- function(x, ...) {
   x$do("[[<-", capture_dots(...), assign = TRUE)
+}
+
+#' @export
+names.Survey <- function(x) {
+  x$names()
+}
+
+#' @export
+`names<-.Survey` <- function(x, value) {
+  x$set_names(value)
+}
+
+#' @export
+head.Survey <- function(x, ...) {
+  f <- get("head", asNamespace("utils"))
+  x$do(f, list(...), assign = FALSE)
+}
+
+#' @export
+tail.Survey <- function(x, ...) {
+  f <- get("tail", asNamespace("utils"))
+  x$do(f, list(...), assign = FALSE)
+}
+
+#' @export
+dimnames.Survey <- function(x) {
+  # NOTE: Might need to use data.table::copy() here.
+  dimnames(x$data)
+}
+
+#' @export
+dim.Survey <- function(x) {
+  dim(x$data)
+}
+
+#' @export
+length.Survey <- function(x) {
+  length(x$data)
 }
