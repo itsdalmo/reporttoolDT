@@ -42,4 +42,7 @@ y$get_label("A")
 # Should be equivalent
 all.equal(x, y)
 }
+\author{
+Kristian D. Olsen
+}
 

@@ -32,4 +32,7 @@ pal <- get_default("palette")
 identical(lats, default_latents())
 identical(pal, default_palette())
 }
+\author{
+Kristian D. Olsen
+}
 

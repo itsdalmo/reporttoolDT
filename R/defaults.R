@@ -9,6 +9,7 @@
 #' is set to \code{TRUE} an error occurs. The error lists the full name of all
 #' matching internal defaults. Set this to \code{FALSE} to instead return all
 #' matches instead.
+#' @author Kristian D. Olsen
 #' @export
 #' @examples
 #' lats <- get_default("latents")

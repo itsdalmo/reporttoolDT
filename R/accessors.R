@@ -6,6 +6,7 @@
 #' @param x A \code{Survey} object.
 #' @param which If this is specified, the function only returns the elements
 #' which match the criteria. This should be a character vector.
+#' @author Kristian D. Olsen
 #' @export
 #' @examples
 #' # Create a new survey (regular)
@@ -71,6 +72,7 @@ get_translation <- function(x, which = NULL) {
 #' \code{...}.
 #' @note These functions return a copy (\code{deep_clone}) of the \code{Survey}.
 #' Use the \code{R6} method directly to avoid copying.
+#' @author Kristian D. Olsen
 #' @export
 #' @examples
 #' # Create a new survey (regular)

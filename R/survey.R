@@ -42,6 +42,7 @@
 #'
 #' }
 #'
+#' @author Kristian D. Olsen
 #' @note Under the hood, the \code{Survey} is a R6 class - this means that \code{$} is
 #' reserved for accessing the public methods of the class, and not columns in the
 #' data directly. S3 methods are provided (and prefered) to make the \code{Survey}
@@ -89,7 +90,7 @@ Survey <- R6::R6Class("Survey",
     initialize = function(x) {
       if (missing(x) || !is.data.frame(x))
         stop("Expecting a data.frame or data.table.", call. = FALSE)
-      if (is.labelled(x)) {
+      if (any_labelled(x)) {
         x <- from_labelled(x, copy = FALSE)
         private$.labels <- attr(x, "labels")
       }

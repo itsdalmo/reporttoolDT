@@ -82,4 +82,7 @@ if (require(dplyr)) {
   tbl <- survey_tbl(data.frame("A" = 1, "B" = 2))
 }
 }
+\author{
+Kristian D. Olsen
+}
 
