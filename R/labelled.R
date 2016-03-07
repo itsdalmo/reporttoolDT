@@ -1,25 +1,25 @@
-#' Flatten SPSS input
+#' Convert from labelled data
 #'
-#' When reading SPSS files with \code{\link{read_data}}, se this function to convert
-#' \code{labelled} to \code{factor} and remove additional attributes from the data.
-#' The function returns a \code{list} (mm and df) and the additional information is stored in
-#' \code{mm}. The process can be returned when writing spss files with \code{\link{write_data}}
-#' (if changes to the data are reflected in the mm), but it is better to not avoid using this
-#' function when doing light data cleaning and writing it after.
+#' When reading SPSS files with \code{\link{read_data}}, the output contains vectors
+#' of class \code{labelled}. This function extracts the labels and attaches them
+#' as an attribute (by the same name) to the data, and converts any \code{labelled}
+#' variables into factors.
 #'
 #' @param df A data.frame as returned from \code{read_data} or \code{haven::read_sav}.
 #' \code{data.frame} is returned from the function.
 #' @author Kristian D. Olsen
-#' @note The results are error-prone. Carefully check the results.
 #' @export
 #' @examples
-#' read_data("test.sav") %>% from_labelled()
+#' df <- haven::read_sav("test.sav")
+#' df <- from_labelled(df)
+#' attr(df, "labels")
 
 from_labelled <- function(df, ...) UseMethod("from_labelled")
 
 from_labelled.data.table <- function(df, copy = TRUE) {
-  if (copy)
+  if (copy) {
     df <- data.table::copy(df)
+  }
   from_labelled_impl(df)
 }
 
@@ -30,7 +30,12 @@ from_labelled.data.frame <- function(df, ...) {
 
 from_labelled.tbl_df <- function(df, ...) {
   df <- data.table::as.data.table(df)
-  dplyr::tbl_df(from_labelled_impl(df))
+  structure(as.data.frame(from_labelled_impl(df)), class = c("tbl_df", "tbl", "data.frame"))
+}
+
+from_labelled.tbl_dt <- function(df, ...) {
+  df <- data.table::as.data.table(df)
+  structure(from_labelled_impl(df), class = c("tbl_dt", "tbl", "data.table", "data.frame"))
 }
 
 from_labelled_impl <- function(dt) {
@@ -57,18 +62,23 @@ from_labelled_impl <- function(dt) {
 
 #' Convert to labelled
 #'
-#' Reverses the process from \code{\link{from_labelled}}, and uses a measurement
-#' model to create labelled variables and add \code{label} to the attributes of
-#' each variable in the data. Meant for use with survey objects from \code{\link{survey}}.
+#' Reverses the process from \code{\link{from_labelled}}, by converting a
+#' \code{\link(survey)} back to a format appropriate for writing as a .sav file
+#' using \code{haven}. I.e., it converts factors to \code{labelled} and includes
+#' the label for each variable.
 #'
-#' @param survey A survey object, or a list with data (df) and a measurement model (mm).
+#' @param df A data.frame, or \code{Survey}.
 #' @author Kristian D. Olsen
-#' @note The results are error-prone. Carefully check the results.
+#' @note Because of a limitation in \code{ReadStat} (it can't write strings longer
+#' than 256 characters), \code{\link{write_data}} will write the long strings as
+#' a separate .Rdata file. If you use \code{\link{read_data}}, you will get them back.
 #' @export
 #' @examples
-#' read_data("test.sav") %>% from_labelled() %>% to_labelled()
+#' df <- read_data("test.sav")
+#' fl <- from_labelled(df)
+#' tl <- to_labelled(fl)
 
-
+# TODO - Update this function.
 to_labelled <- function(survey) {
 
   # Convert to factors/scales
@@ -108,8 +118,8 @@ to_labelled <- function(survey) {
 
 }
 
-# Utilities --------------------------------------------------------------------
-
+# Fixes 10-point scales in from_labelled.
+# TODO: This is an internal function, and should only be applied if specified.
 fix_labelled <- function(x, nm) {
 
   labels <- attr(x, "labels")

@@ -2,12 +2,10 @@
 #'
 #' Thin wrapper for reading from windows/OSX clipboards with the most-used defaults.
 #' The function first reads in the lines, checks if the delimiter is present in the lines
-#' and then converts it to a data.frame. The parameters are passed to this last step (read.table).
+#' and then converts it to a data.frame.
 #'
 #' @param sep The delimiter for columns.
-#' @param header If the data contains headers.
-#' @param dec Decimal sign
-#' @param encoding The encoding to use when writing.
+#' @param header Default assumes the data contains headers. Set to \code{FALSE} if not.
 #' @author Kristian D. Olsen
 #' @note This function only works on Windows or OSX, and the data-size cannot
 #' exceed 128kb in Windows.
@@ -17,9 +15,9 @@
 
 from_clipboard <- function(sep = "\t", header = TRUE) {
 
-  if ((Sys.info()["sysname"] == "Windows")) {
+  if (on_windows()) {
     file <- "clipboard-128"
-  } else if (Sys.info()["sysname"] == "Darwin") {
+  } else if (on_osx()) {
     file <- pipe("pbpaste", "rb")
     on.exit(close(file), add = TRUE)
   } else {

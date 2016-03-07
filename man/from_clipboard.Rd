@@ -9,16 +9,12 @@ from_clipboard(sep = "\\t", header = TRUE)
 \arguments{
 \item{sep}{The delimiter for columns.}
 
-\item{header}{If the data contains headers.}
-
-\item{dec}{Decimal sign}
-
-\item{encoding}{The encoding to use when writing.}
+\item{header}{Default assumes the data contains headers. Set to \code{FALSE} if not.}
 }
 \description{
 Thin wrapper for reading from windows/OSX clipboards with the most-used defaults.
 The function first reads in the lines, checks if the delimiter is present in the lines
-and then converts it to a data.frame. The parameters are passed to this last step (read.table).
+and then converts it to a data.frame.
 }
 \note{
 This function only works on Windows or OSX, and the data-size cannot

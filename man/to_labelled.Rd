@@ -7,18 +7,23 @@
 to_labelled(survey)
 }
 \arguments{
-\item{survey}{A survey object, or a list with data (df) and a measurement model (mm).}
+\item{df}{A data.frame, or \code{Survey}.}
 }
 \description{
-Reverses the process from \code{\link{from_labelled}}, and uses a measurement
-model to create labelled variables and add \code{label} to the attributes of
-each variable in the data. Meant for use with survey objects from \code{\link{survey}}.
+Reverses the process from \code{\link{from_labelled}}, by converting a
+\code{\link(survey)} back to a format appropriate for writing as a .sav file
+using \code{haven}. I.e., it converts factors to \code{labelled} and includes
+the label for each variable.
 }
 \note{
-The results are error-prone. Carefully check the results.
+Because of a limitation in \code{ReadStat} (it can't write strings longer
+than 256 characters), \code{\link{write_data}} will write the long strings as
+a separate .Rdata file. If you use \code{\link{read_data}}, you will get them back.
 }
 \examples{
-read_data("test.sav") \%>\% from_labelled() \%>\% to_labelled()
+df <- read_data("test.sav")
+fl <- from_labelled(df)
+tl <- to_labelled(fl)
 }
 \author{
 Kristian D. Olsen

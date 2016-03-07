@@ -2,7 +2,7 @@
 % Please edit documentation in R/labelled.R
 \name{from_labelled}
 \alias{from_labelled}
-\title{Flatten SPSS input}
+\title{Convert from labelled data}
 \usage{
 from_labelled(df, ...)
 }
@@ -11,18 +11,15 @@ from_labelled(df, ...)
 \code{data.frame} is returned from the function.}
 }
 \description{
-When reading SPSS files with \code{\link{read_data}}, se this function to convert
-\code{labelled} to \code{factor} and remove additional attributes from the data.
-The function returns a \code{list} (mm and df) and the additional information is stored in
-\code{mm}. The process can be returned when writing spss files with \code{\link{write_data}}
-(if changes to the data are reflected in the mm), but it is better to not avoid using this
-function when doing light data cleaning and writing it after.
-}
-\note{
-The results are error-prone. Carefully check the results.
+When reading SPSS files with \code{\link{read_data}}, the output contains vectors
+of class \code{labelled}. This function extracts the labels and attaches them
+as an attribute (by the same name) to the data, and converts any \code{labelled}
+variables into factors.
 }
 \examples{
-read_data("test.sav") \%>\% from_labelled()
+df <- haven::read_sav("test.sav")
+df <- from_labelled(df)
+attr(df, "labels")
 }
 \author{
 Kristian D. Olsen
