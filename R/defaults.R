@@ -17,7 +17,6 @@
 #' identical(lats, default_latents())
 #' identical(pal, default_palette())
 
-#' @export
 get_default <- function(string, exact = TRUE) {
   if (!is.string(string)) {
     stop("Expecting a string (character(1)) input for argument 'string'.")
