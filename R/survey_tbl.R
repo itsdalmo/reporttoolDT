@@ -28,7 +28,7 @@ Survey_tbl <- R6::R6Class("Survey_tbl",
 
   public = list(
     initialize = function(x) {
-      if (!requireNamespace("dplyr", silently = TRUE)) {
+      if (!requireNamespace("dplyr", quietly = TRUE)) {
         stop("dplyr package required to use tbl's.")
       }
       super$initialize(dplyr::as.tbl(x))

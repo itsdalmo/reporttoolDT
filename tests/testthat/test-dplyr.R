@@ -1,105 +1,146 @@
 context("Regular dplyr methods for Survey")
 
-org <- data.frame("Q1" = c("Example 1", "Example 2"), "Score" = c(9, 8), stringsAsFactors = FALSE)
+org <- data.frame(Q1 = c("Example 1", "Example 2"),
+                  Score = c(9, 8),
+                  stringsAsFactors = FALSE)
 
-df_org <- survey_df(org)$set_association(mainentity = "Q1")$set_label(list(Q1 = "test label"))
-dt_org <- survey_dt(org)$set_association(mainentity = "Q1")$set_label(list(Q1 = "test label"))
-tb_org <- survey_tbl(org)$set_association(mainentity = "Q1")$set_label(list(Q1 = "test label"))
-
-is_valid_survey <- function(x) {
-  expect_true(
-    # All dplyr verbs should return a Survey/data.frame.
-    all(c("Survey", "R6") %in% class(x)) &&
-    any(c("Survey_df", "Survey_dt", "Survey_tbl") %in% class(x)) &&
-    is.data.frame(x$data) &&
-
-    # Tests are written so that:
-    # mainentity = Q1 (or whatever it is renamed to)
-    # Q1 should have the label "test label"
-    identical(x$get_association("mainentity"), setNames("mainentity", names(x)[1L])) &&
-    identical(x$get_label(names(x)[1L]), setNames("test label", names(x)[1L]))
-  )
+dummy_survey <- function(x) {
+  x$set_association(mainentity = "Q1")$set_label(list(Q1 = "test label"))
+  x
 }
 
-# ------------------------------------------------------------------------------
+# Mutate -----------------------------------------------------------------------
+test_that("mutate works with Survey_df", {
+  skip_if_not_installed("dplyr")
 
-test_that("mutate", {
+  df <- dummy_survey(survey_df(org))
+  df <- dplyr::mutate(df, test = "test")
 
-  lapply(list(df_org, dt_org, tb_org), function(x) {
-
-    x <- dplyr::mutate(x, test = "val")
-    is_valid_survey(x)
-
-    expect_identical(x$data$test, rep("val", 2))
-    expect_true("test" %in% names(x$get_association()))
-
-  })
+  expect_is(df, "Survey_df")
+  expect_identical(df$data$test, rep("test", 2))
+  expect_true("test" %in% names(df$get_association()))
 
 })
 
-test_that("select", {
+test_that("mutate works with Survey_dt", {
+  skip_if_not_installed("dplyr")
 
-  lapply(list(df_org, dt_org, tb_org), function(x) {
+  dt <- dummy_survey(survey_dt(org))
+  dt <- dplyr::mutate(dt, test = "test")
 
-    x <- dplyr::select(x, Q1)
-    is_valid_survey(x)
-
-    expect_true(ncol(x) == 1L)
-    expect_identical(names(x), "Q1")
-
-  })
+  expect_is(dt, "Survey_dt")
+  expect_identical(dt$data$test, rep("test", 2))
+  expect_true("test" %in% names(dt$get_association()))
 
 })
 
-test_that("filter", {
+test_that("mutate works with Survey_tbl", {
+  skip_if_not_installed("dplyr")
 
-  lapply(list(df_org, dt_org, tb_org), function(x) {
+  tbl <- dummy_survey(survey_tbl(org))
+  tbl <- dplyr::mutate(tbl, test = "test")
 
-    x <- dplyr::filter(x, Score > 8)
-    is_valid_survey(x)
-
-    expect_true(nrow(x) == 1L)
-
-  })
-
-})
-
-test_that("arrange", {
-
-  lapply(list(df_org, dt_org, tb_org), function(x) {
-
-    x <- dplyr::arrange(x, Score)
-    is_valid_survey(x)
-
-    expect_identical(x$data$Q1, c("Example 2", "Example 1"))
-
-  })
+  expect_is(tbl, "Survey_tbl")
+  expect_identical(tbl$data$test, rep("test", 2))
+  expect_true("test" %in% names(tbl$get_association()))
 
 })
 
-test_that("group_by", {
+# Select -----------------------------------------------------------------------
+test_that("select works with Survey_df", {
+  skip_if_not_installed("dplyr")
 
-  lapply(list(df_org, dt_org, tb_org), function(x) {
+  df <- dummy_survey(survey_df(org))
+  df <- dplyr::select(df, Q1)
 
-    x <- dplyr::group_by(x, Q1)
-    is_valid_survey(x)
-
-    expect_identical(as.character(dplyr::groups(x)), "Q1")
-
-  })
-
-})
-
-test_that("rename", {
-
-  lapply(list(df_org, dt_org, tb_org), function(x) {
-
-    x <- dplyr::rename(x, entity = Q1)
-    is_valid_survey(x)
-
-    expect_identical(names(x)[1], "entity")
-
-  })
+  expect_is(df, "Survey_df")
+  expect_true(ncol(df) == 1L)
+  expect_identical(df$get_label(), setNames("test label", "Q1"))
+  expect_identical(names(df), "Q1")
 
 })
 
+test_that("select works with Survey_dt", {
+  skip_if_not_installed("dplyr")
+
+  dt <- dummy_survey(survey_dt(org))
+  dt <- dplyr::select(dt, Q1)
+
+  expect_is(dt, "Survey_dt")
+  expect_true(ncol(dt) == 1L)
+  expect_identical(dt$get_label(), setNames("test label", "Q1"))
+  expect_identical(names(dt), "Q1")
+
+})
+
+test_that("select works with Survey_tbl", {
+  skip_if_not_installed("dplyr")
+
+  tbl <- dummy_survey(survey_tbl(org))
+  tbl <- dplyr::select(tbl, Q1)
+
+  expect_is(tbl, "Survey_tbl")
+  expect_true(ncol(tbl) == 1L)
+  expect_identical(tbl$get_label(), setNames("test label", "Q1"))
+  expect_identical(names(tbl), "Q1")
+
+})
+
+# Other verbs ------------------------------------------------------------------
+# Note: Only checking Survey_tbl for remaining joins. Assuming _df and _dt work.
+test_that("filter works with Survey", {
+  skip_if_not_installed("dplyr")
+
+  tbl <- dummy_survey(survey_tbl(org))
+  tbl <- dplyr::filter(tbl, Score > 8)
+
+  expect_is(tbl, "Survey_tbl")
+  expect_true(nrow(tbl) == 1L)
+
+})
+
+test_that("arrange works with Survey", {
+  skip_if_not_installed("dplyr")
+
+  tbl <- dummy_survey(survey_tbl(org))
+  tbl <- dplyr::arrange(tbl, Score)
+
+  expect_is(tbl, "Survey_tbl")
+  expect_identical(tbl$data$Q1, c("Example 2", "Example 1"))
+
+})
+
+test_that("group_by works with Survey", {
+  skip_if_not_installed("dplyr")
+
+  tbl <- dummy_survey(survey_tbl(org))
+  tbl <- dplyr::group_by(tbl, Q1)
+
+  expect_is(tbl, "Survey_tbl")
+  expect_identical(as.character(dplyr::groups(tbl)), "Q1")
+
+})
+
+test_that("rename works with Survey_tbl (and _df)", {
+  skip_if_not_installed("dplyr")
+
+  tbl <- dummy_survey(survey_tbl(org))
+  tbl <- dplyr::rename(tbl, entity = Q1)
+
+  expect_is(tbl, "Survey_tbl")
+  expect_identical(names(tbl)[1], "entity")
+  expect_identical(tbl$get_association("mainentity"), setNames("mainentity", "entity"))
+
+})
+
+test_that("rename works with Survey_dt", {
+  skip_if_not_installed("dplyr")
+
+  dt <- dummy_survey(survey_dt(org))
+  dt <- dplyr::rename(dt, entity = Q1)
+
+  expect_is(dt, "Survey_dt")
+  expect_identical(names(dt)[1], "entity")
+  expect_identical(dt$get_association("mainentity"), setNames("mainentity", "entity"))
+
+})

@@ -1,11 +1,8 @@
 context("Survey/R6 accessors")
 
 org <- data.frame("Q1" = c("Example 1", "Example 2"), "Score" = c(9, 8), stringsAsFactors = FALSE)
-df_org <- survey_df(org)
-dt_org <- survey_dt(org)
-tb_org <- survey_tbl(org)
 
-
+# Merge attributes -------------------------------------------------------------
 test_that("merge_attributes", {
 
   default <- c("a", "b", "c", "d")
@@ -22,51 +19,66 @@ test_that("merge_attributes", {
 
 })
 
-test_that("setting/getting label works", {
-
-  df <- df_org$clone()$set_label(Q1 = "test")
-  dt <- dt_org$clone()$set_label(Q1 = "test")
-  tb <- tb_org$clone()$set_label(Q1 = "test")
-
+# Label ------------------------------------------------------------------------
+test_that("setting/getting label works for Survey_df", {
+  df <- survey_df(org)$set_label(Q1 = "test")
   expect_identical(df$get_label("Q1"), c("Q1" = "test"))
+})
+
+test_that("setting/getting label works for Survey_dt", {
+  dt <- survey_dt(org)$set_label(Q1 = "test")
   expect_identical(dt$get_label("Q1"), c("Q1" = "test"))
-  expect_identical(tb$get_label("Q1"), c("Q1" = "test"))
-
 })
 
-test_that("setting/getting association works", {
+test_that("setting/getting label works for Survey_tbl", {
+  tbl <- survey_tbl(org)$set_label(Q1 = "test")
+  expect_identical(tbl$get_label("Q1"), c("Q1" = "test"))
+})
 
-  df <- df_org$clone()$set_association(mainentity = c("Q1", "Score"))
-  dt <- df_org$clone()$set_association(mainentity = c("Q1", "Score"))
-  tb <- df_org$clone()$set_association(mainentity = c("Q1", "Score"))
-
+# Label ------------------------------------------------------------------------
+test_that("setting/getting label works for Survey_df", {
+  df <- survey_df(org)$set_association(mainentity = c("Q1", "Score"))
   expect_identical(df$get_association(), c("Q1" = "mainentity", "Score" = "mainentity"))
+})
+
+test_that("setting/getting label works for Survey_dt", {
+  dt <- survey_dt(org)$set_association(mainentity = c("Q1", "Score"))
   expect_identical(dt$get_association(), c("Q1" = "mainentity", "Score" = "mainentity"))
-  expect_identical(tb$get_association(), c("Q1" = "mainentity", "Score" = "mainentity"))
-
 })
 
-test_that("setting/getting marketshare works", {
+test_that("setting/getting label works for Survey_tbl", {
+  tbl <- survey_tbl(org)$set_association(mainentity = c("Q1", "Score"))
+  expect_identical(tbl$get_association(), c("Q1" = "mainentity", "Score" = "mainentity"))
+})
 
-  # Can't set markeshares without specifying mainentity first.
-  expect_error(df_org$clone()$set_marketshare("Example 1" = .5, "Example 2" = .3))
+# Marketshare ------------------------------------------------------------------
+test_that("We can't set marketshares without specifying mainentity first.", {
+  expect_error(survey_df(org)$set_marketshare("Example 1" = .5, "Example 2" = .3))
+})
 
-  df <- df_org$clone()$set_association(mainentity = "Q1")$set_marketshare("Example 1" = .5)
-  dt <- df_org$clone()$set_association(mainentity = "Q1")$set_marketshare("Example 1" = .5)
-  tb <- df_org$clone()$set_association(mainentity = "Q1")$set_marketshare("Example 1" = .5)
-
+test_that("setting/getting marketshare for Survey_df", {
+  df <- survey_df(org)$set_association(mainentity = "Q1")$set_marketshare("Example 1" = .5)
   expect_identical(df$get_marketshare(), c("Example 1" = 0.5, "Example 2" = NA))
-  expect_identical(dt$get_marketshare(), c("Example 1" = 0.5, "Example 2" = NA))
-  expect_identical(tb$get_marketshare(), c("Example 1" = 0.5, "Example 2" = NA))
-
 })
 
+test_that("setting/getting marketshare works for Survey_dt", {
+  dt <- survey_dt(org)$set_association(mainentity = "Q1")$set_marketshare("Example 1" = .5)
+  expect_identical(dt$get_marketshare(), c("Example 1" = 0.5, "Example 2" = NA))
+})
+
+test_that("setting/getting marketshare works for Survey_tbl", {
+  tbl <- survey_tbl(org)$set_association(mainentity = "Q1")$set_marketshare("Example 1" = .5)
+  expect_identical(tbl$get_marketshare(), c("Example 1" = 0.5, "Example 2" = NA))
+})
+
+# Config -----------------------------------------------------------------------
 test_that("setting/getting config works", {
 
   # TODO
 
 })
 
+# Translation ------------------------------------------------------------------
 test_that("setting/getting translation works", {
 
   # TODO
