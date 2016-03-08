@@ -1,0 +1,98 @@
+---
+title: "Introduction to reporttool"
+author: "Kristian D. Olsen"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Introduction
+
+This package is meant for a particular use, which is to work with data from
+surveys to generate batch reports. To do so, we need to keep track of the labels
+(questions) for each variable, in addition to latent associations for use in structural
+modelling (PLS-PM).
+
+To achieve this, `reporttool` provides a `Survey` class which is built using R6,
+and stuffs some extra information into private (hidden) `fields` inside it. For users,
+a `Survey` should look and behave pretty much like a normal `data.frame`, `data.table`
+or `tbl` (dplyr). Internally `Survey`'s helps us keep track of the hidden fields, toward
+the end goal of automating tables, plots and reports.
+
+## Creating a Survey
+
+We can create a new survey with the generic function `survey()`, which creates a
+`Survey` based on the class of the supplied data. All `Survey` objects, also have
+an additional subclass which reflects the underlying data. If we call `survey()` on 
+a `data.table`, the subclass is `Survey_dt`. To coerce a `data.frame` to a 
+`Survey_dt`, we can call `survey_dt()` directly.
+
+Note: Because `Survey` is an R6 class, I have opted to use a capital **S** for
+the class name, and use a lowercase letters for the constructor functions.
+
+
+Read in sample data:
+```{r}
+sav <- haven::read_sav(system.file("extdata", "sample.sav", package = "reporttoolDT"))
+```
+
+To create a `Survey`, we can call `survey()` on the data:
+```{r}
+tbl <- survey(sav)
+class(tbl)
+```
+
+As we can see, simply calling `survey()` on the data will create a `Survey_tbl`,
+this is because `haven` returns a `tbl_df` by default. If we instead wanted a 
+`Survey_dt` (i.e., use `data.table`), we have two options:
+
+```{r}
+dtm <- survey(data.table::as.data.table(sav)) # Option 1: Manual.
+dt <- survey_dt(sav) # Option 2: Use the Survey_dt constructor.
+"Survey_dt" %in% class(dt) && "Survey_dt" %in% class(dtm)
+```
+
+That's it. We have 3 subclasses for `Survey`, these are `Survey_df`, `Survey_dt`
+and `Survey_tbl`. We can either call the generic constructor `survey()`,or a specific 
+one which coerces the input data, these are: `survey_df()`, `survey_dt()` and
+`survey_tbl()` (requires dplyr).
+
+## Working with surveys
+
+When working with surveys, we can use `[` and `[[` just like on a regular `data.frame`:
+```{r}
+df <- survey_df(sav)
+df[["test"]] <- "test"
+df[1L, "test"]
+```
+
+Or `data.table`: 
+```{r}
+dt <- survey_dt(sav)
+head(dt[, test := "test"][1L, test])
+```
+
+When subsetting a `Survey`, the new object will also be a `Survey`:
+```{r}
+dt_slice <- dt[1:5L, .(test)]
+class(dt_slice)
+```
+
+But only if the operation returns an object that inherits from `data.frame`:
+```{r}
+class(dt_slice[, test])
+```
+
+Overall, a `Survey` should behave like the underlying data. The only exception to
+this, is that `$` is reserved for accessing public fields in R6 objects:
+```{r}
+identical(df$test, df[["test"]]) # FALSE
+```
+
+Because the `Survey` class is implemented in R6, they are mutable and allows the 
+`Survey_dt` subclass to have hidden fields behave similar to the `data.table` itself,
+which will be shown in the next section.
+
