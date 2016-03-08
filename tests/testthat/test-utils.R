@@ -62,7 +62,7 @@ test_that("intranet link", {
   if (on_windows()) {
     expect_identical(intranet_link(x), x_w)
   } else {
-    expect_error(intranet_link(x), x_w)
+    expect_error(intranet_link(x))
   }
 
 })
