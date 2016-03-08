@@ -1,0 +1,33 @@
+---
+title: "The Survey class"
+author: "Kristian D. Olsen"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Introduction
+
+This package is meant to make it easy to work with survey-data and create batch reports. 
+In comparison to a normal R `data.frame`, the `Survey` class includes and keeps track of attributes
+associated with a particular survey, such as the label for each variable (the question),
+as well as which variable are *associated* with a particular latent construct.
+
+We can manipualte a `Survey` like a regular `data.frame`, and the internals help
+us keep track of labels/associations, how the data has been treated etc. In the end
+this allows us to automate tables, plots and reports.
+
+## Creating a Survey
+
+```{r, fig.show='hold'}
+# Sample data
+sav <- haven::read_sav(system.file("extdata", "sample.sav", package = "reporttoolDT"))
+
+# We have several choices for creating a Survey.
+df <- survey(sav)
+class(df)
+
+```

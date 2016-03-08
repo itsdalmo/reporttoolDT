@@ -24,5 +24,8 @@ Suggests:
     ggrepel,
     testthat,
     ReporteRs (>= 0.8.6),
-    tidyr
+    tidyr,
+    knitr,
+    rmarkdown
 RoxygenNote: 5.0.1
+VignetteBuilder: knitr
