@@ -79,10 +79,12 @@ bind_rows <- function(x, ...) {
   UseMethod("bind_rows")
 }
 
+#' @export
 bind_rows.default <- function(...) {
   dplyr::bind_rows(...)
 }
 
+#' @export
 bind_rows.Survey <- function(x, ...) {
   f <- get("bind_rows", asNamespace("dplyr"))
   x$do_merge(f, list(...), assign = FALSE)
@@ -97,10 +99,12 @@ bind_cols <- function(x, ...) {
   UseMethod("bind_cols")
 }
 
+#' @export
 bind_cols.default <- function(...) {
   dplyr::bind_cols(...)
 }
 
+#' @export
 bind_cols.Survey <- function(x, ...) {
   f <- get("bind_cols", asNamespace("dplyr"))
   x$do_merge(f, list(...), assign = FALSE)

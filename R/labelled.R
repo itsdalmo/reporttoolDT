@@ -16,6 +16,7 @@
 
 from_labelled <- function(df, ...) UseMethod("from_labelled")
 
+#' @export
 from_labelled.data.table <- function(df, copy = TRUE) {
   if (copy) {
     df <- data.table::copy(df)
@@ -23,16 +24,19 @@ from_labelled.data.table <- function(df, copy = TRUE) {
   from_labelled_impl(df)
 }
 
+#' @export
 from_labelled.data.frame <- function(df, ...) {
   df <- data.table::as.data.table(df)
   as.data.frame(from_labelled_impl(df))
 }
 
+#' @export
 from_labelled.tbl_df <- function(df, ...) {
   df <- data.table::as.data.table(df)
   structure(as.data.frame(from_labelled_impl(df)), class = c("tbl_df", "tbl", "data.frame"))
 }
 
+#' @export
 from_labelled.tbl_dt <- function(df, ...) {
   df <- data.table::as.data.table(df)
   structure(from_labelled_impl(df), class = c("tbl_dt", "tbl", "data.table", "data.frame"))
