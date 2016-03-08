@@ -41,6 +41,7 @@ sav <- haven::read_sav(system.file("extdata", "sample.sav", package = "reporttoo
 
 To create a `Survey`, we can call `survey()` on the data:
 ```{r}
+require(reporttoolDT)
 tbl <- survey(sav)
 class(tbl)
 ```
