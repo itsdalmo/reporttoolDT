@@ -118,7 +118,6 @@ right_join.Survey <- function(x, y, ...) {
   x$do_merge(f, list(y, ...), assign = FALSE)
 }
 
-
 full_join.Survey <- function(x, y, ...) {
   f <- get("full_join", asNamespace("dplyr"))
   x$do_merge(f, list(y, ...), assign = FALSE)

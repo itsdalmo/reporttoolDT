@@ -63,7 +63,7 @@ from_labelled_impl <- function(dt) {
 #' Convert to labelled
 #'
 #' Reverses the process from \code{\link{from_labelled}}, by converting a
-#' \code{\link(survey)} back to a format appropriate for writing as a .sav file
+#' \code{\link{survey}} back to a format appropriate for writing as a .sav file
 #' using \code{haven}. I.e., it converts factors to \code{labelled} and includes
 #' the label for each variable.
 #'

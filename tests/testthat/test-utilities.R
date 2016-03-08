@@ -58,10 +58,11 @@ test_that("intranet link", {
   x <- "https://test.se/Sharepoint/Folder"
   x_w <- "\\\\test.se@SSL/DavWWWRoot/Sharepoint/Folder"
 
-  if (Sys.info()["sysname"] == "Windows") {
+  # Only works on windows
+  if (on_windows()) {
     expect_identical(intranet_link(x), x_w)
   } else {
-    expect_identical(x, x)
+    expect_error(intranet_link(x), x_w)
   }
 
 })

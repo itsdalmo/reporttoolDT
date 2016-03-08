@@ -62,3 +62,6 @@ Survey_dt <- R6::R6Class("Survey_dt",
 
   )
 )
+
+#' @export
+.datatable.aware <- TRUE
