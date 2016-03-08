@@ -1,6 +1,28 @@
-entities <- function(x) UseMethod("model")
+#' Entities (summary)
+#'
+#' This method produces a summary of the entities (total/valid observations and
+#' marketshare) if they have been specified.
+#'
+#' @author Kristian D. Olsen
+#' @export
+#' @examples
+#' df <- survey_df(data.frame("A" = "test", "B" = 2))
+#'
+#' # Regular
+#' x <- set_association(df, mainentity = "A")
+#' entities(x)
+#'
+#' # R6 (mutates)
+#' df$set_association(mainentity = "A")
+#' df$entities()
+
+entities <- function(x) UseMethod("entities")
+
+#' @rdname entities
+#' @export
 entities.Survey <- function(x) x$entities()
 
+#' @rdname entities
 #' @export
 print.survey_entities <- function(ents, width = getOption("width")) {
   cat("Entities\n")
@@ -22,9 +44,29 @@ print.survey_entities <- function(ents, width = getOption("width")) {
 
 }
 
+#' Measurement model
+#'
+#' Return a summary of the data for the \code{Survey}. This includes labels and
+#' associations, and the object (\code{survey_model}) prints nicely.
+#'
+#' @author Kristian D. Olsen
+#' @export
+#' @examples
+#' df <- survey_df(data.frame("A" = 1, "B" = 2))
+#'
+#' # Regular
+#' model(df)
+#'
+#' # R6
+#' df$model()
+
 model <- function(x) UseMethod("model")
+
+#' @rdname model
+#' @export
 model.Survey <- function(x) x$model()
 
+#' @rdname model
 #' @export
 print.survey_model <- function(mm, width = getOption("width")) {
   cat("Measurement model\n")
@@ -49,8 +91,16 @@ print.survey_model <- function(mm, width = getOption("width")) {
 
 }
 
+# Truncate class names (similar to dplyr, used when printing survey_model.)
 trunc_class <- function(x) {
   vapply(x, function(x) {
-    switch(x, character = "(char)", factor = "(fctr)", numeric = "(num)", Date = "(date)", scale = "(scale)", integer = "(int)", "(????)")
+    switch(x,
+           character = "(char)",
+           factor = "(fctr)",
+           numeric = "(num)",
+           Date = "(date)",
+           scale = "(scale)",
+           integer = "(int)",
+           "(????)")
   }, character(1))
 }

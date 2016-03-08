@@ -115,8 +115,9 @@ Survey <- R6::R6Class("Survey",
 
     update = function(renamed = NULL) {
       "Update the survey. (Associations, labels, etc.)"
-      if (!is.null(renamed))
+      if (!is.null(renamed)) {
         self$set_names(renamed)
+      }
       self$set_association()
       self$set_label()
       self
@@ -260,7 +261,7 @@ Survey <- R6::R6Class("Survey",
     },
 
     entities = function() {
-      me <- names(self$get_associations("mainentity"))
+      me <- names(self$get_association("mainentity"))
       if (!length(me) || is.null(me)) stop("'mainentity' has not been specified yet. See help(set_association).", call. = FALSE)
 
       cutoff <- as.numeric(self$get_config("cutoff"))
@@ -269,7 +270,7 @@ Survey <- R6::R6Class("Survey",
       df <- data.table::as.data.table(self$get_data())
       df <- df[, list("n" = .N, "valid" = if (valid) sum(percent_missing <= cutoff) else NA_integer_), keyby = me]
 
-      ms <- self$get_marketshares()
+      ms <- self$get_marketshare()
       if (!is.null(ms)) {
         ms <- setNames(list(names(ms), unname(ms)), c(me, "marketshare"))
         ms <- data.table::as.data.table(ms)

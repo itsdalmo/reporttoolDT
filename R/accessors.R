@@ -138,10 +138,10 @@ merge_attributes <- function(default, lst = NULL) {
   if (is.null(names(default)))
     default <- setNames(rep(NA, length(default)), default)
 
+  lst <- unlist(lst)
   if (!is.null(lst) && length(lst) >= 1L) {
-    lst <- unlist(lst)
     inv <- is.null(names(lst)) || any(names(lst) == "")
-    if (inv) stop("merge_attributes: 'lst' contains unnamed arguments.")
+    if (inv) stop("Input (... or 'lst') contains unnamed arguments.")
   }
 
   x <- c(lst, default)
