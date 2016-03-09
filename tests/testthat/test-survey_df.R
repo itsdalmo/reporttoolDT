@@ -30,16 +30,23 @@ test_that("[[<- works with Survey_df", {
 
 })
 
-test_that("[<- works with Survey_df", {
+test_that("[ works with Survey_df", {
 
   df <- dummy_survey(survey_df(org))
-  df[, "test"] <- "test"
+  df <- df[, "Q1", drop = FALSE]
 
   expect_is(df, "Survey_df")
-  expect_true("test" %in% df$names())
-  expect_true("test" %in% names(df$get_association()))
+  expect_identical(names(df), "Q1")
 
 })
+
+test_that("[[ works with Survey_df", {
+
+  df <- dummy_survey(survey_df(org))
+  expect_identical(df[["Score"]], c(9, 8))
+
+})
+
 
 test_that("names<- works with Survey_df", {
 

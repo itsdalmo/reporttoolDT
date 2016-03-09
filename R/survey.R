@@ -266,7 +266,7 @@ Survey <- R6::R6Class("Survey",
       if (!length(me) || is.null(me)) stop("'mainentity' has not been specified yet. See help(set_association).", call. = FALSE)
 
       cutoff <- as.numeric(self$get_config("cutoff"))
-      valid <- !is.null(cutoff) && "percent_missing" %in% names(x)
+      valid <- !is.null(cutoff) && "percent_missing" %in% self$names()
 
       df <- data.table::as.data.table(self$get_data())
       df <- df[, list("n" = .N, "valid" = if (valid) sum(percent_missing <= cutoff) else NA_integer_), keyby = me]

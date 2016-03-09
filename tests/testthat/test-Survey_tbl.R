@@ -32,15 +32,20 @@ test_that("[[<- works with Survey_tbl", {
 
 })
 
-test_that("[<- works with Survey_tbl", {
-  skip_if_not_installed("dplyr")
+test_that("[ works with Survey_tbl", {
 
   tbl <- dummy_survey(survey_tbl(org))
-  tbl[, "test"] <- "test"
+  tbl <- tbl[, "Q1", drop = FALSE]
 
   expect_is(tbl, "Survey_tbl")
-  expect_true("test" %in% tbl$names())
-  expect_true("test" %in% names(tbl$get_association()))
+  expect_identical(names(tbl), "Q1")
+
+})
+
+test_that("[[ works with Survey_tbl", {
+
+  tbl <- dummy_survey(survey_tbl(org))
+  expect_identical(tbl[["Score"]], c(9, 8))
 
 })
 
