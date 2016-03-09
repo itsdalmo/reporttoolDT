@@ -26,3 +26,25 @@ replace_all <- function(x, lst, by = x, ignore_case = FALSE) {
   }
   x
 }
+
+# # TODO: Convenience functions for recoding spreads.
+# spread_10 <- function(x) {
+#   if (!is.numeric(x)) {
+#     stop("Expecting a numeric or integer as input.")
+#   } else if (any_fractions(x)) {
+#     stop("Input contains fractional values. Cannot coerce to integer.")
+#   }
+#
+#   return()
+#
+# }
+#
+# spread_100 <- function(x) {
+#   if (!is.numeric(x)) {
+#     stop("Expecting a numeric or integer as input.")
+#   }
+#
+#   return()
+#
+# }
+
