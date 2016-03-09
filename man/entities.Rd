@@ -6,16 +6,16 @@
 \alias{print.survey_entities}
 \title{Entities (summary)}
 \usage{
-entities(x)
+entities(srv)
 
-\method{entities}{Survey}(x)
+\method{entities}{Survey}(srv)
 
-\method{print}{survey_entities}(ents, ...)
+\method{print}{survey_entities}(x, ...)
 }
 \arguments{
-\item{x}{A \code{Survey}.}
+\item{srv}{A \code{Survey}.}
 
-\item{ents}{The \code{survey_entities}, as returned by \code{entities()}.}
+\item{x}{The \code{survey_entities}, as returned by \code{entities()}.}
 
 \item{...}{Further arguments passed to \code{print}.}
 }

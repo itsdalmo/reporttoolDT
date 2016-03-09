@@ -2,7 +2,7 @@
 #'
 #' This method produces a summary of the entities (total/valid observations and
 #' marketshare) if they have been specified.
-#' @param x A \code{Survey}.
+#' @param srv A \code{Survey}.
 #' @author Kristian D. Olsen
 #' @export
 #' @examples
@@ -16,23 +16,23 @@
 #' df$set_association(mainentity = "A")
 #' df$entities()
 
-entities <- function(x) UseMethod("entities")
+entities <- function(srv) UseMethod("entities")
 
 #' @rdname entities
 #' @export
-entities.Survey <- function(x) x$entities()
+entities.Survey <- function(srv) srv$entities()
 
 #' @rdname entities
-#' @param ents The \code{survey_entities}, as returned by \code{entities()}.
+#' @param x The \code{survey_entities}, as returned by \code{entities()}.
 #' @param ... Further arguments passed to \code{print}.
 #' @export
-print.survey_entities <- function(ents, ...) {
+print.survey_entities <- function(x, ...) {
   cat("Entities\n")
-  n <- nrow(ents); if (!n || is.null(n)) return()
+  n <- nrow(x); if (!n || is.null(n)) return()
   cat("Observations: ", n, "\n\n", sep = "")
 
-  ents$entity <- as.character(ents$entity)
-  res <- Map("c", ents, c("Total", colSums(ents[-1], na.rm = FALSE)))
+  x$entity <- as.character(x$entity)
+  res <- Map("c", x, c("Total", colSums(x[-1], na.rm = FALSE)))
   res$marketshare <- ifelse(is.na(res$marketshare), NA, stri_c(as.numeric(res$marketshare) * 100L, "%", sep = " "))
 
   # Add titles and format before print
@@ -50,7 +50,7 @@ print.survey_entities <- function(ents, ...) {
 #'
 #' Return a summary of the data for the \code{Survey}. This includes labels and
 #' associations, and the object (\code{survey_model}) prints nicely.
-#' @param x A \code{Survey}.
+#' @param srv A \code{Survey}.
 #' @author Kristian D. Olsen
 #' @export
 #' @examples
@@ -62,29 +62,29 @@ print.survey_entities <- function(ents, ...) {
 #' # R6
 #' df$model()
 
-model <- function(x) UseMethod("model")
+model <- function(srv) UseMethod("model")
 
 #' @rdname model
 #' @export
-model.Survey <- function(x) x$model()
+model.Survey <- function(srv) srv$model()
 
 #' @rdname model
-#' @param mm The \code{survey_model}, as returned by \code{model()}.
+#' @param x The \code{survey_model}, as returned by \code{model()}.
 #' @param ... Further arguments passed to \code{print}.
 #' @param width Restrict the width of the output (by truncating labels).
 #' @export
-print.survey_model <- function(mm, ..., width = getOption("width")) {
+print.survey_model <- function(x, ..., width = getOption("width")) {
   cat("Measurement model\n")
-  n <- nrow(mm); if (!n || is.null(n)) return()
+  n <- nrow(x); if (!n || is.null(n)) return()
   cat("Observations: ", n, "\n\n", sep = "")
 
-  res <- stri_c(stri_c(format(1:n), ":"), format(mm$manifest), sep = " ")
-  res <- stri_c(res, format(trunc_class(mm$type)), sep = " ")
-  res <- stri_c(res, ifelse(is.na(mm$latent), " ", "*"))
+  res <- stri_c(stri_c(format(1:n), ":"), format(x$manifest), sep = " ")
+  res <- stri_c(res, format(trunc_class(x$type)), sep = " ")
+  res <- stri_c(res, ifelse(is.na(x$latent), " ", "*"))
 
   w <- width - stri_length(res[1L]) - 2L
 
-  txt <- mm$question
+  txt <- x$question
   txt <- ifelse(stri_length(txt) > w, stri_c(stri_sub(txt, to = w - 3), "..."), txt)
   res <- stri_c(res, ifelse(is.na(txt), " ", txt), sep = " ")
 

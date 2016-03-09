@@ -325,12 +325,14 @@ names.Survey <- function(x) {
   x$set_names(value)
 }
 
+#' @importFrom utils head
 #' @export
 head.Survey <- function(x, ...) {
   f <- get("head", asNamespace("utils"))
   x$do(f, list(...), assign = FALSE)
 }
 
+#' @importFrom utils tail
 #' @export
 tail.Survey <- function(x, ...) {
   f <- get("tail", asNamespace("utils"))

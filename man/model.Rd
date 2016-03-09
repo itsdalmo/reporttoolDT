@@ -6,16 +6,16 @@
 \alias{print.survey_model}
 \title{Measurement model}
 \usage{
-model(x)
+model(srv)
 
-\method{model}{Survey}(x)
+\method{model}{Survey}(srv)
 
-\method{print}{survey_model}(mm, ..., width = getOption("width"))
+\method{print}{survey_model}(x, ..., width = getOption("width"))
 }
 \arguments{
-\item{x}{A \code{Survey}.}
+\item{srv}{A \code{Survey}.}
 
-\item{mm}{The \code{survey_model}, as returned by \code{model()}.}
+\item{x}{The \code{survey_model}, as returned by \code{model()}.}
 
 \item{...}{Further arguments passed to \code{print}.}
 
