@@ -19,7 +19,7 @@ as an attribute (by the same name) to the data, and converts any \code{labelled}
 variables into factors.
 }
 \examples{
-df <- haven::read_sav("test.sav")
+df <- haven::read_sav(system.file("extdata", "sample.sav", package = "reporttoolDT"))
 df <- from_labelled(df)
 attr(df, "labels")
 }

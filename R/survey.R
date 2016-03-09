@@ -42,6 +42,7 @@
 #'
 #' }
 #'
+#' @param x A \code{data.frame}, \code{data.table} or \code{tbl} (requires dplyr).
 #' @author Kristian D. Olsen
 #' @note Under the hood, the \code{Survey} is a R6 class - this means that \code{$} is
 #' reserved for accessing the public methods of the class, and not columns in the

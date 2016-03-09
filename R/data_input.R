@@ -11,8 +11,8 @@
 #' exceed 128kb in Windows.
 #' @export
 #' @examples
-#' if (on_windows() || on_osx()) {
-#'  x <- from_clipboard()
+#' \dontrun{
+#' x <- from_clipboard()
 #' }
 
 from_clipboard <- function(sep = "\t", header = TRUE) {
@@ -60,7 +60,7 @@ from_clipboard <- function(sep = "\t", header = TRUE) {
 #' (or you are reading a Rdata file) a list is returned instead.
 #' @export
 #' @examples
-#' x <- read_data("test.xlsx")
+#' x <- read_data(system.file("extdata", "sample.sav", package = "reporttoolDT"))
 
 read_data <- function(file, ..., encoding = "UTF-8", decimal = ".") {
 

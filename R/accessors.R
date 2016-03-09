@@ -15,7 +15,7 @@
 #' get_label(x, "A")
 #'
 #' # Same example using R6
-#' y <- Survey_df$new(data.frame("A" = 1, "B" = 2))
+#' y <- survey_df(data.frame("A" = 1, "B" = 2))
 #' y$set_label(A = "This is a label")
 #' y$get_label("A")
 #'
@@ -81,7 +81,7 @@ get_translation <- function(x, which = NULL) {
 #' get_label(x, "A")
 #'
 #' # Same example using R6
-#' y <- Survey_df$new(data.frame("A" = 1, "B" = 2))
+#' y <- survey_df(data.frame("A" = 1, "B" = 2))
 #' y$set_label(A = "This is a label")
 #' y$get_label("A")
 #'

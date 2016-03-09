@@ -70,6 +70,7 @@ model.Survey <- function(x) x$model()
 
 #' @rdname model
 #' @param mm The \code{survey_model}, as returned by \code{model()}.
+#' @param ... Further arguments passed to \code{print}.
 #' @param width Restrict the width of the output (by truncating labels).
 #' @export
 print.survey_model <- function(mm, ..., width = getOption("width")) {

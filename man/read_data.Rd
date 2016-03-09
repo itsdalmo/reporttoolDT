@@ -27,7 +27,7 @@ csv, csv2 and xlsx. Under the hood, it uses \code{readxl}, \code{readr} and
 \code{haven}.
 }
 \examples{
-x <- read_data("test.xlsx")
+x <- read_data(system.file("extdata", "sample.sav", package = "reporttoolDT"))
 }
 \author{
 Kristian D. Olsen

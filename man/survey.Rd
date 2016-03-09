@@ -21,6 +21,9 @@ survey_dt(x)
 
 survey_tbl(x)
 }
+\arguments{
+\item{x}{A \code{data.frame}, \code{data.table} or \code{tbl} (requires dplyr).}
+}
 \description{
 Create a new Survey from a \code{data.frame}, \code{data.table} or \code{tbl}.
 The class \code{Survey} provides additional private (hidden) fields pertaining

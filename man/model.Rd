@@ -17,6 +17,8 @@ model(x)
 
 \item{mm}{The \code{survey_model}, as returned by \code{model()}.}
 
+\item{...}{Further arguments passed to \code{print}.}
+
 \item{width}{Restrict the width of the output (by truncating labels).}
 }
 \description{

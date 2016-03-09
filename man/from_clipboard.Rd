@@ -21,7 +21,9 @@ This function only works on Windows or OSX, and the data-size cannot
 exceed 128kb in Windows.
 }
 \examples{
+\dontrun{
 x <- from_clipboard()
+}
 }
 \author{
 Kristian D. Olsen
