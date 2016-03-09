@@ -71,28 +71,11 @@ test_that("default_latents", {
 })
 
 test_that("clean_path", {
-
   expect_error(clean_path(c("test", "file")))
-  expect_identical(clean_path("."), getwd())
-  expect_identical(clean_path("./"), getwd())
-
 })
 
 test_that("filename_no_ext", {
   expect_identical(filename_no_ext("test.sav"), "test")
 })
 
-test_that("intranet link", {
-
-  x <- "https://test.se/Sharepoint/Folder"
-  x_w <- "\\\\test.se@SSL/DavWWWRoot/Sharepoint/Folder"
-
-  # Only works on windows
-  if (on_windows()) {
-    expect_identical(intranet_link(x), x_w)
-  } else {
-    expect_error(intranet_link(x))
-  }
-
-})
 
