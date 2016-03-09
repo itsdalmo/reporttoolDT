@@ -46,7 +46,7 @@ rescale_score <- function(var) {
 intranet_link <- function(https) {
 
   if (!on_windows()) {
-    stop("This can only convert the address to an address for a network drive on Windows.")
+    warning("This function only returns a path for network drives on Windows.")
   }
   is_url <- stri_detect(https, regex = "^https?://.*[^/]\\.[a-z]+/.*")
   if (!is_url) stop("Input was not a URL:\n", https, "\n(Make sure to include http://).")

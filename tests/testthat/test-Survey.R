@@ -29,6 +29,25 @@ test_that("We can initialize from tbl (dplyr)", {
 
 })
 
+test_that("Initializing on a Survey returns the Survey", {
+  df <- survey_df(org)
+  dt <- survey_dt(org)
+  tbl <- survey_tbl(org)
+
+  expect_true(
+    identical(survey_df(df), df) &&
+    identical(survey_dt(dt), dt) &&
+    identical(survey_tbl(tbl), tbl)
+  )
+
+})
+
+test_that("We can initialize a Survey using as.survey", {
+  df <- as.survey(org)
+  expect_is(df, "Survey")
+  expect_identical(as.survey(df), df)
+})
+
 # Initialize w/labels ----------------------------------------------------------
 test_that("We can initialize with Survey_df with labels", {
 

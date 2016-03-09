@@ -99,6 +99,17 @@ test_that("filter works with Survey", {
 
 })
 
+test_that("summarise works with Survey", {
+  skip_if_not_installed("dplyr")
+
+  tbl <- dummy_survey(survey_tbl(org))
+  tbl <- dplyr::summarise(tbl, Score = mean(Score))
+
+  expect_is(tbl, "Survey_tbl")
+  expect_equal(tbl$data$Score, 8.5)
+
+})
+
 test_that("arrange works with Survey", {
   skip_if_not_installed("dplyr")
 
@@ -110,6 +121,14 @@ test_that("arrange works with Survey", {
 
 })
 
+test_that("tbl_vars works with Survey", {
+  skip_if_not_installed("dplyr")
+
+  tbl <- dummy_survey(survey_tbl(org))
+  expect_identical(dplyr::tbl_vars(tbl), names(tbl))
+
+})
+
 test_that("group_by works with Survey", {
   skip_if_not_installed("dplyr")
 
@@ -118,6 +137,18 @@ test_that("group_by works with Survey", {
 
   expect_is(tbl, "Survey_tbl")
   expect_identical(as.character(dplyr::groups(tbl)), "Q1")
+
+})
+
+test_that("ungroup works with Survey", {
+  skip_if_not_installed("dplyr")
+
+  tbl <- dummy_survey(survey_tbl(org))
+  tbl <- dplyr::group_by(tbl, Q1)
+  tbl <- dplyr::ungroup(tbl)
+
+  expect_is(tbl, "Survey_tbl")
+  expect_identical(dplyr::groups(tbl), NULL)
 
 })
 

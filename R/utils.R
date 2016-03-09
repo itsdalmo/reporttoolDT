@@ -32,13 +32,20 @@ match_all <- function(x, table) {
 
 # normalizes paths and removes trailing /'s ------------------------------------
 clean_path <- function(path) {
-  if (!is.string(path)) {
-    stop("Path must be a string.")
-  }
+  if (!is.string(path)) stop("Path must be a string.")
+
+  # Normalize if path is not absolute.
   if (!stri_detect(path, regex = "^(/|[A-Za-z]:|\\\\|~)")) {
-    path <- normalizePath(path, "/", mustWork = FALSE)
+    path <- normalizePath(path, winslash = "/", mustWork = FALSE)
   }
-  stri_replace(path, "", regex = "/$")
+
+  # Remove trailing slashes
+  if (stri_detect(path, regex = "/$")) {
+    path <- stri_replace(path, "", regex = "/$")
+  }
+
+  path
+
 }
 
 # Retrieve the filename sans extension -----------------------------------------

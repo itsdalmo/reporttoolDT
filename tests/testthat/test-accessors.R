@@ -23,32 +23,38 @@ test_that("merge_attributes", {
 test_that("setting/getting label works for Survey_df", {
   df <- survey_df(org)$set_label(Q1 = "test")
   expect_identical(df$get_label("Q1"), c("Q1" = "test"))
+  expect_identical(df$get_label("Q1"), get_label(df, "Q1"))
 })
 
 test_that("setting/getting label works for Survey_dt", {
   dt <- survey_dt(org)$set_label(Q1 = "test")
   expect_identical(dt$get_label("Q1"), c("Q1" = "test"))
+  expect_identical(dt$get_label("Q1"), get_label(dt, "Q1"))
 })
 
 test_that("setting/getting label works for Survey_tbl", {
   tbl <- survey_tbl(org)$set_label(Q1 = "test")
   expect_identical(tbl$get_label("Q1"), c("Q1" = "test"))
+  expect_identical(tbl$get_label("Q1"), get_label(tbl, "Q1"))
 })
 
-# Label ------------------------------------------------------------------------
+# Associations -----------------------------------------------------------------
 test_that("setting/getting label works for Survey_df", {
   df <- survey_df(org)$set_association(mainentity = c("Q1", "Score"))
   expect_identical(df$get_association(), c("Q1" = "mainentity", "Score" = "mainentity"))
+  expect_identical(df$get_association(), get_association(df))
 })
 
 test_that("setting/getting label works for Survey_dt", {
   dt <- survey_dt(org)$set_association(mainentity = c("Q1", "Score"))
   expect_identical(dt$get_association(), c("Q1" = "mainentity", "Score" = "mainentity"))
+  expect_identical(dt$get_association(), get_association(dt))
 })
 
 test_that("setting/getting label works for Survey_tbl", {
   tbl <- survey_tbl(org)$set_association(mainentity = c("Q1", "Score"))
   expect_identical(tbl$get_association(), c("Q1" = "mainentity", "Score" = "mainentity"))
+  expect_identical(tbl$get_association(), get_association(tbl))
 })
 
 # Marketshare ------------------------------------------------------------------
@@ -59,16 +65,19 @@ test_that("We can't set marketshares without specifying mainentity first.", {
 test_that("setting/getting marketshare for Survey_df", {
   df <- survey_df(org)$set_association(mainentity = "Q1")$set_marketshare("Example 1" = .5)
   expect_identical(df$get_marketshare(), c("Example 1" = 0.5, "Example 2" = NA))
+  expect_identical(df$get_marketshare(), get_marketshare(df))
 })
 
 test_that("setting/getting marketshare works for Survey_dt", {
   dt <- survey_dt(org)$set_association(mainentity = "Q1")$set_marketshare("Example 1" = .5)
   expect_identical(dt$get_marketshare(), c("Example 1" = 0.5, "Example 2" = NA))
+  expect_identical(dt$get_marketshare(), get_marketshare(dt))
 })
 
 test_that("setting/getting marketshare works for Survey_tbl", {
   tbl <- survey_tbl(org)$set_association(mainentity = "Q1")$set_marketshare("Example 1" = .5)
   expect_identical(tbl$get_marketshare(), c("Example 1" = 0.5, "Example 2" = NA))
+  expect_identical(tbl$get_marketshare(), get_marketshare(tbl))
 })
 
 # Config -----------------------------------------------------------------------
