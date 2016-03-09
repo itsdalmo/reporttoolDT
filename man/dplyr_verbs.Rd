@@ -34,6 +34,11 @@ mutate_.Survey(x, ...)
 
 summarise_.Survey(x, ...)
 }
+\arguments{
+\item{x}{A survey object.}
+
+\item{...}{Further arguments passed to \code{dplyr}.}
+}
 \description{
 Surveys include support for \code{dplyr}. See \code{dplyr} documentation
 for further information.

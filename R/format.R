@@ -2,7 +2,7 @@
 #'
 #' This method produces a summary of the entities (total/valid observations and
 #' marketshare) if they have been specified.
-#'
+#' @param x A \code{Survey}.
 #' @author Kristian D. Olsen
 #' @export
 #' @examples
@@ -23,8 +23,10 @@ entities <- function(x) UseMethod("entities")
 entities.Survey <- function(x) x$entities()
 
 #' @rdname entities
+#' @param ents The \code{survey_entities}, as returned by \code{entities()}.
+#' @param ... Further arguments passed to \code{print}.
 #' @export
-print.survey_entities <- function(ents, width = getOption("width")) {
+print.survey_entities <- function(ents, ...) {
   cat("Entities\n")
   n <- nrow(ents); if (!n || is.null(n)) return()
   cat("Observations: ", n, "\n\n", sep = "")
@@ -48,7 +50,7 @@ print.survey_entities <- function(ents, width = getOption("width")) {
 #'
 #' Return a summary of the data for the \code{Survey}. This includes labels and
 #' associations, and the object (\code{survey_model}) prints nicely.
-#'
+#' @param x A \code{Survey}.
 #' @author Kristian D. Olsen
 #' @export
 #' @examples
@@ -67,8 +69,10 @@ model <- function(x) UseMethod("model")
 model.Survey <- function(x) x$model()
 
 #' @rdname model
+#' @param mm The \code{survey_model}, as returned by \code{model()}.
+#' @param width Restrict the width of the output (by truncating labels).
 #' @export
-print.survey_model <- function(mm, width = getOption("width")) {
+print.survey_model <- function(mm, ..., width = getOption("width")) {
   cat("Measurement model\n")
   n <- nrow(mm); if (!n || is.null(n)) return()
   cat("Observations: ", n, "\n\n", sep = "")

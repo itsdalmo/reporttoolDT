@@ -6,6 +6,8 @@
 #' NOTE: In order for these verbs to function properly, dplyr must be attached
 #' with \code{library} or \code{require} before \code{reporttoolDT}. (I think).
 #'
+#' @param x A survey object.
+#' @param ... Further arguments passed to \code{dplyr}.
 #' @author Kristian D. Olsen
 #' @name dplyr_verbs
 
@@ -96,6 +98,8 @@ summarise_.Survey <- function(x, ...) {
 #' NOTE: In order for these verbs to function properly, dplyr must be attached
 #' with \code{library} or \code{require} before \code{reporttoolDT}. (I think).
 #'
+#' @param x A survey object.
+#' @param ... Further arguments passed to \code{dplyr}.
 #' @author Kristian D. Olsen
 #' @name dplyr_binds
 
@@ -109,8 +113,8 @@ bind_rows <- function(x, ...) {
 }
 
 #' @export
-bind_rows.default <- function(...) {
-  dplyr::bind_rows(...)
+bind_rows.default <- function(x, ...) {
+  dplyr::bind_rows(x, ...)
 }
 
 #' @rdname dplyr_binds
@@ -131,8 +135,8 @@ bind_cols <- function(x, ...) {
 }
 
 #' @export
-bind_cols.default <- function(...) {
-  dplyr::bind_cols(...)
+bind_cols.default <- function(x, ...) {
+  dplyr::bind_cols(x, ...)
 }
 
 #' @rdname dplyr_binds
@@ -151,6 +155,9 @@ bind_cols.Survey <- function(x, ...) {
 #' NOTE: In order for these verbs to function properly, dplyr must be attached
 #' with \code{library} or \code{require} before \code{reporttoolDT}. (I think).
 #'
+#' @param x A \code{Survey} object.
+#' @param y A \code{Survey}, regular \code{data.frame}, \code{data.table} or \code{tbl}.
+#' @param ... Further arguments passed to \code{dplyr}.
 #' @author Kristian D. Olsen
 #' @name dplyr_joins
 

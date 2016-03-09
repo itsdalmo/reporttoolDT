@@ -10,7 +10,14 @@ model(x)
 
 \method{model}{Survey}(x)
 
-\method{print}{survey_model}(mm, width = getOption("width"))
+\method{print}{survey_model}(mm, ..., width = getOption("width"))
+}
+\arguments{
+\item{x}{A \code{Survey}.}
+
+\item{mm}{The \code{survey_model}, as returned by \code{model()}.}
+
+\item{width}{Restrict the width of the output (by truncating labels).}
 }
 \description{
 Return a summary of the data for the \code{Survey}. This includes labels and

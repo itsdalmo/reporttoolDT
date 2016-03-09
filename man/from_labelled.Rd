@@ -4,11 +4,13 @@
 \alias{from_labelled}
 \title{Convert from labelled data}
 \usage{
-from_labelled(df, ...)
+from_labelled(df, copy = TRUE)
 }
 \arguments{
 \item{df}{A data.frame as returned from \code{read_data} or \code{haven::read_sav}.
 \code{data.frame} is returned from the function.}
+
+\item{copy}{Return a copy if input is a \code{data.table}.}
 }
 \description{
 When reading SPSS files with \code{\link{read_data}}, the output contains vectors

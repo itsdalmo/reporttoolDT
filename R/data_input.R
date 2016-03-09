@@ -11,7 +11,9 @@
 #' exceed 128kb in Windows.
 #' @export
 #' @examples
-#' x <- from_clipboard()
+#' if (on_windows() || on_osx()) {
+#'  x <- from_clipboard()
+#' }
 
 from_clipboard <- function(sep = "\t", header = TRUE) {
 

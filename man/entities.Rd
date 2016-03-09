@@ -10,7 +10,14 @@ entities(x)
 
 \method{entities}{Survey}(x)
 
-\method{print}{survey_entities}(ents, width = getOption("width"))
+\method{print}{survey_entities}(ents, ...)
+}
+\arguments{
+\item{x}{A \code{Survey}.}
+
+\item{ents}{The \code{survey_entities}, as returned by \code{entities()}.}
+
+\item{...}{Further arguments passed to \code{print}.}
 }
 \description{
 This method produces a summary of the entities (total/valid observations and

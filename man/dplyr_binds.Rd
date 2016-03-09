@@ -16,6 +16,11 @@ bind_cols(x, ...)
 
 \method{bind_cols}{Survey}(x, ...)
 }
+\arguments{
+\item{x}{A survey object.}
+
+\item{...}{Further arguments passed to \code{dplyr}.}
+}
 \description{
 \code{dplyr} bind methods for Survey.
 }

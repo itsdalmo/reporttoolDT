@@ -19,6 +19,13 @@ semi_join.Survey(x, y, ...)
 
 anti_join.Survey(x, y, ...)
 }
+\arguments{
+\item{x}{A \code{Survey} object.}
+
+\item{y}{A \code{Survey}, regular \code{data.frame}, \code{data.table} or \code{tbl}.}
+
+\item{...}{Further arguments passed to \code{dplyr}.}
+}
 \description{
 \code{dplyr} join methods for Survey.
 }
