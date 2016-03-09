@@ -42,7 +42,7 @@ Survey_dt <- R6::R6Class("Survey_dt",
 
       if (identical(data.table::address(res), data.table::address(self$data))) {
         self$update(renamed)
-        self
+        invisible(self)
       } else if (assign) {
         self$data <- res
         self$update(renamed)
