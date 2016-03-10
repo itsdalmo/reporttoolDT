@@ -79,3 +79,7 @@ any_labelled <- function(x) {
 is.list2 <- function(x) {
   inherits(x, "list")
 }
+
+# Hadley's %||% ----------------------------------------------------------------
+`%||%` <- function(a, b) if (!is.null(a)) a else b
+
