@@ -13,6 +13,7 @@ Imports:
     data.table,
     ggplot2 (>= 2.1),
     haven,
+    lazyeval,
     openxlsx,
     R6,
     readr,
