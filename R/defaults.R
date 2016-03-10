@@ -23,7 +23,7 @@ get_default <- function(string, exact = TRUE) {
     stop("Expecting a string (character(1)) input for argument 'string'.")
   }
 
-  id <- stri_detect(names(internal_defaults), regex = string, ignore_case = TRUE)
+  id <- stri_detect(names(internal_defaults), fixed = string, ignore_case = TRUE)
   id <- names(internal_defaults)[id]
   if (length(id) > 1L && exact) {
     stop("The string matched more than one element:\n", join_str(stri_c("'", id, "'")))
