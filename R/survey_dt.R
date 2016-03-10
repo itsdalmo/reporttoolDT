@@ -36,32 +36,73 @@ Survey_dt <- R6::R6Class("Survey_dt",
       super$initialize(x)
     },
 
-    do = function(f, dots, renamed = NULL, assign = FALSE) {
-      "Perform operations directly on the data.table."
-      res <- do.call(f, c(list(self$data), dots))
-
-      if (identical(data.table::address(res), data.table::address(self$data))) {
-        self$update(renamed)
-        invisible(self)
-      } else if (assign) {
-        self$data <- res
-        self$update(renamed)
-        self
-      } else {
-        if (is.data.frame(res)) {
-          self$initialize_subset(res)$update(renamed)
-        } else {
-          res
-        }
-      }
-    },
-
     names = function() {
       data.table::copy(names(self$data))
     }
 
   )
 )
+
+
+#' data.table: melt
+#'
+#' Same as the \code{data.table} function \code{melt}. This is a new generic,
+#' because the \code{data.table} version calls \code{reshape2} unless the input
+#' is a \code{data.table}.
+#'
+#' @param data A \code{Survey} or \code{data.frame}.
+#' @param ... Additional parameters passed to \code{melt}.
+#' @inheritParams data.table::melt
+#' @author Kristian D. Olsen
+#' @export
+#' @examples
+#' # Create a new survey
+#' x <- survey_dt(data.frame("A" = "A", "B" = 2, "C" = 3))
+#' x <- melt(x, "A", c("B", "C"))
+#' x
+
+melt <- function(data, ...) UseMethod("melt")
+
+#' @rdname melt
+#' @export
+melt.default <- data.table::melt
+
+#' @rdname melt
+#' @export
+melt.Survey <- function(data, ...) {
+  f <- get("melt", asNamespace("data.table"))
+  data$do(f, capture_dots(...))
+}
+
+#' data.table: dcast
+#'
+#' Same as the \code{data.table} function \code{dcast}. This is a new generic,
+#' because the \code{data.table} version calls \code{reshape2} unless the input
+#' is a \code{data.table}.
+#'
+#' @param data A \code{Survey} or \code{data.frame}.
+#' @param ... Additional parameters passed to \code{dcast}.
+#' @inheritParams data.table::dcast
+#' @author Kristian D. Olsen
+#' @export
+#' @examples
+#' # Create a new survey
+#' x <- survey_dt(data.frame("A" = "A", "B" = 2, "C" = 3))
+#' x <- melt(x, "A", c("B", "C"))
+#' dcast(x, A ~ variable)
+
+dcast <- function(data, ...) UseMethod("dcast")
+
+#' @rdname dcast
+#' @export
+dcast.default <- data.table::dcast
+
+#' @rdname dcast
+#' @export
+dcast.Survey <- function(data, ...) {
+  f <- get("dcast", asNamespace("data.table"))
+  data$do(f, capture_dots(...))
+}
 
 #' @export
 .datatable.aware <- TRUE

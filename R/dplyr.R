@@ -26,7 +26,7 @@ select_.Survey <- function(x, ...) {
     vars <- replace_all(names(x), vars)
 
   f <- get("select_", asNamespace("dplyr"))
-  x$do(f, dots, renamed = vars, assign = FALSE)
+  x$do(f, dots, renamed = vars)
 }
 
 #' @rdname dplyr_verbs
@@ -38,21 +38,21 @@ rename_.Survey <- function(x, ...) {
     vars <- replace_all(x$names(), vars)
 
   f <- get("rename_", asNamespace("dplyr"))
-  x$do(f, dots, renamed = vars, assign = FALSE)
+  x$do(f, dots, renamed = vars)
 }
 
 #' @rdname dplyr_verbs
 #' @export
 filter_.Survey <- function(x, ...) {
   f <- get("filter_", asNamespace("dplyr"))
-  x$do(f, lazyeval::all_dots(...), assign = FALSE)
+  x$do(f, lazyeval::all_dots(...))
 }
 
 #' @rdname dplyr_verbs
 #' @export
 arrange_.Survey <- function(x, ...) {
   f <- get("arrange_", asNamespace("dplyr"))
-  x$do(f, lazyeval::all_dots(...), assign = FALSE)
+  x$do(f, lazyeval::all_dots(...))
 }
 
 #' @rdname dplyr_verbs
@@ -60,35 +60,35 @@ arrange_.Survey <- function(x, ...) {
 group_by_.Survey <- function(x, ...) {
   # TODO: "add" is not passed to next call. Error message.
   f <- get("group_by_", asNamespace("dplyr"))
-  x$do(f, list(...), assign = FALSE)
+  x$do(f, list(...))
 }
 
 #' @rdname dplyr_verbs
 #' @export
 groups.Survey <- function(x, ...) {
   f <- get("groups", asNamespace("dplyr"))
-  x$do(f, lazyeval::all_dots(...), assign = FALSE)
+  x$do(f, lazyeval::all_dots(...))
 }
 
 #' @rdname dplyr_verbs
 #' @export
 ungroup.Survey <- function(x, ...) {
   f <- get("ungroup", asNamespace("dplyr"))
-  x$do(f, lazyeval::all_dots(...), assign = FALSE)
+  x$do(f, lazyeval::all_dots(...))
 }
 
 #' @rdname dplyr_verbs
 #' @export
 mutate_.Survey <- function(x, ...) {
   f <- get("mutate_", asNamespace("dplyr"))
-  x$do(f, lazyeval::all_dots(...), assign = FALSE)
+  x$do(f, lazyeval::all_dots(...))
 }
 
 #' @rdname dplyr_verbs
 #' @export
 summarise_.Survey <- function(x, ...) {
   f <- get("summarise_", asNamespace("dplyr"))
-  x$do(f, lazyeval::all_dots(...), assign = FALSE)
+  x$do(f, lazyeval::all_dots(...))
 }
 
 #' dplyr: Methods for Survey.
@@ -121,7 +121,7 @@ bind_rows.default <- function(x, ...) {
 #' @export
 bind_rows.Survey <- function(x, ...) {
   f <- get("bind_rows", asNamespace("dplyr"))
-  x$do_merge(f, list(...), assign = FALSE)
+  x$do_merge(f, list(...))
 }
 
 
@@ -143,7 +143,7 @@ bind_cols.default <- function(x, ...) {
 #' @export
 bind_cols.Survey <- function(x, ...) {
   f <- get("bind_cols", asNamespace("dplyr"))
-  x$do_merge(f, list(...), assign = FALSE)
+  x$do_merge(f, list(...))
 }
 
 # Joins ------------------------------------------------------------------------
@@ -165,33 +165,33 @@ bind_cols.Survey <- function(x, ...) {
 #' @export
 left_join.Survey <- function(x, y, ...) {
   f <- get("left_join", asNamespace("dplyr"))
-  x$do_merge(f, list(y, ...), assign = FALSE)
+  x$do_merge(f, list(y, ...))
 }
 
 #' @rdname dplyr_joins
 #' @export
 right_join.Survey <- function(x, y, ...) {
   f <- get("right_join", asNamespace("dplyr"))
-  x$do_merge(f, list(y, ...), assign = FALSE)
+  x$do_merge(f, list(y, ...))
 }
 
 #' @rdname dplyr_joins
 #' @export
 full_join.Survey <- function(x, y, ...) {
   f <- get("full_join", asNamespace("dplyr"))
-  x$do_merge(f, list(y, ...), assign = FALSE)
+  x$do_merge(f, list(y, ...))
 }
 
 #' @rdname dplyr_joins
 #' @export
 semi_join.Survey <- function(x, y, ...) {
   f <- get("semi_join", asNamespace("dplyr"))
-  x$do_merge(f, list(y, ...), assign = FALSE)
+  x$do_merge(f, list(y, ...))
 }
 
 #' @rdname dplyr_joins
 #' @export
 anti_join.Survey <- function(x, y, ...) {
   f <- get("anti_join", asNamespace("dplyr"))
-  x$do_merge(f, list(y, ...), assign = FALSE)
+  x$do_merge(f, list(y, ...))
 }

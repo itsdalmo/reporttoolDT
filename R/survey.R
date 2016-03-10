@@ -75,6 +75,7 @@ as.survey.Survey <- function(x) x
 as.survey.default <- function(x) survey(x)
 
 # Survey (R6 Class) ------------------------------------------------------------
+#' @importFrom R6 R6Class
 Survey <- R6::R6Class("Survey",
   private = list(
     .labels = NULL,
@@ -88,6 +89,14 @@ Survey <- R6::R6Class("Survey",
 
     data = NULL,
 
+    get_data = function(copy = TRUE) {
+      if (copy && data.table::is.data.table(self$data)) {
+        data.table::copy(self$data)
+      } else {
+        self$data
+      }
+    },
+
     initialize = function(x) {
       if (missing(x) || !is.data.frame(x))
         stop("Expecting a data.frame or data.table.", call. = FALSE)
@@ -99,14 +108,6 @@ Survey <- R6::R6Class("Survey",
       self$update()
     },
 
-    get_data = function(copy = TRUE) {
-      if (copy && data.table::is.data.table(self$data)) {
-        data.table::copy(self$data)
-      } else {
-        self$data
-      }
-    },
-
     initialize_subset = function(x) {
       "Return a sliced or subset survey."
       slice <- self$clone(deep = FALSE)
@@ -114,6 +115,7 @@ Survey <- R6::R6Class("Survey",
       slice
     },
 
+    # Mutate the Survey --------------------------------------------------------
     update = function(renamed = NULL) {
       "Update the survey. (Associations, labels, etc.)"
       if (!is.null(renamed)) {
@@ -122,6 +124,37 @@ Survey <- R6::R6Class("Survey",
       self$set_association()
       self$set_label()
       self
+    },
+
+    do = function(f, dots, renamed = NULL) {
+      "Perform operations directly on the Survey."
+      res <- do.call(f, c(list(self$data), dots))
+
+      if (identical(data.table::address(res), data.table::address(self$data))) {
+        self$update(renamed)
+        invisible(self)
+      } else {
+        if (is.data.frame(res)) {
+          self$initialize_subset(res)$update(renamed)
+        } else {
+          res
+        }
+      }
+    },
+
+    do_merge = function(f, dots, assign = FALSE) {
+      "Do merging operations on a Survey."
+      # Get labels and associations
+      lbl <- lapply(dots, function(x) { if (is.survey(x)) x$get_label() })
+      aso <- lapply(dots, function(x) { if (is.survey(x)) x$get_association() })
+
+      # Unlist and assign to private fields (self$do will remove duplicates)
+      private$.associations <- unlist(c(list(self$get_association()), lbl))
+      private$.labels <- unlist(c(list(self$get_label()), aso))
+
+      # Extract data and apply function
+      dots <- lapply(dots, function(x) { if (is.survey(x)) x$get_data() else x })
+      self$do(f, dots)
     },
 
     set_names = function(new_names) {
@@ -139,21 +172,53 @@ Survey <- R6::R6Class("Survey",
       invisible(self)
     },
 
-    do_merge = function(f, dots, assign = FALSE) {
-      "Do merging operations on a Survey."
-      # Get labels and associations
-      lbl <- lapply(dots, function(x) { if (is.survey(x)) x$get_label() })
-      aso <- lapply(dots, function(x) { if (is.survey(x)) x$get_association() })
-
-      # Unlist and assign to private fields (self$do will remove duplicates)
-      private$.associations <- unlist(c(list(self$get_association()), lbl))
-      private$.labels <- unlist(c(list(self$get_label()), aso))
-
-      # Extract data and apply function
-      dots <- lapply(dots, function(x) { if (is.survey(x)) x$get_data() else x })
-      self$do(f, dots, assign = assign)
+    names = function() {
+      names(self$data)
     },
 
+    # Model and entities -------------------------------------------------------
+    model = function() {
+      "Return the measurement model"
+      mm <- list(
+        latent = private$.associations,
+        manifest = self$names(),
+        question = private$.labels,
+        type = vapply(self$data, function(x) class(x)[1], character(1)),
+        levels = vapply(self$data, function(x) {
+          l <- levels(x); if (is.null(l)) NA_character_ else stri_c(l, collapse = "\n")
+        }, character(1))
+      )
+
+      na <- rep(NA, ncol(self$data))
+      mm <- lapply(mm, function(x) { if (is.null(x)) na else x })
+      mm <- as.data.frame(mm, stringsAsFactors = FALSE)
+      structure(mm, class = c("survey_model", "data.frame"))
+    },
+
+    entities = function() {
+      me <- names(self$get_association("mainentity"))
+      if (!length(me) || is.null(me)) stop("'mainentity' has not been specified yet. See help(set_association).", call. = FALSE)
+
+      cutoff <- as.numeric(self$get_config("cutoff"))
+      valid <- !is.null(cutoff) && "percent_missing" %in% self$names()
+
+      df <- data.table::as.data.table(self$get_data())
+      df <- df[, list("n" = .N, "valid" = if (valid) sum(percent_missing <= cutoff) else NA_integer_), keyby = me]
+
+      ms <- self$get_marketshare()
+      if (!is.null(ms)) {
+        ms <- setNames(list(names(ms), unname(ms)), c(me, "marketshare"))
+        ms <- data.table::as.data.table(ms)
+        df <- df[ms[, marketshare := as.numeric(marketshare)]]
+      } else {
+        df[, marketshare := NA_real_]
+      }
+
+      data.table::setnames(df, me, "entity")
+      structure(as.data.frame(df), class = c("survey_entities", "data.frame"))
+    },
+
+    # set/get private fields ---------------------------------------------------
     set_label = function(..., lst = NULL) {
       "Set labels."
       new <- merge_attributes(self$names(), lst = c(list(...), lst, private$.labels))
@@ -243,51 +308,6 @@ Survey <- R6::R6Class("Survey",
       res
     },
 
-    model = function() {
-      "Return the measurement model"
-      mm <- list(
-        latent = private$.associations,
-        manifest = self$names(),
-        question = private$.labels,
-        type = vapply(self$data, function(x) class(x)[1], character(1)),
-        levels = vapply(self$data, function(x) {
-          l <- levels(x); if (is.null(l)) NA_character_ else stri_c(l, collapse = "\n")
-        }, character(1))
-      )
-
-      na <- rep(NA, ncol(self$data))
-      mm <- lapply(mm, function(x) { if (is.null(x)) na else x })
-      mm <- as.data.frame(mm, stringsAsFactors = FALSE)
-      structure(mm, class = c("survey_model", "data.frame"))
-    },
-
-    entities = function() {
-      me <- names(self$get_association("mainentity"))
-      if (!length(me) || is.null(me)) stop("'mainentity' has not been specified yet. See help(set_association).", call. = FALSE)
-
-      cutoff <- as.numeric(self$get_config("cutoff"))
-      valid <- !is.null(cutoff) && "percent_missing" %in% self$names()
-
-      df <- data.table::as.data.table(self$get_data())
-      df <- df[, list("n" = .N, "valid" = if (valid) sum(percent_missing <= cutoff) else NA_integer_), keyby = me]
-
-      ms <- self$get_marketshare()
-      if (!is.null(ms)) {
-        ms <- setNames(list(names(ms), unname(ms)), c(me, "marketshare"))
-        ms <- data.table::as.data.table(ms)
-        df <- df[ms[, marketshare := as.numeric(marketshare)]]
-      } else {
-        df[, marketshare := NA_real_]
-      }
-
-      data.table::setnames(df, me, "entity")
-      structure(as.data.frame(df), class = c("survey_entities", "data.frame"))
-    },
-
-    names = function() {
-      names(self$data)
-    },
-
     print = function(...) {
       print(self$data)
     }
@@ -307,12 +327,12 @@ Survey <- R6::R6Class("Survey",
 
 #' @export
 `[<-.Survey` <- function(x, ...) {
-  x$do("[<-", capture_dots(...), assign = TRUE)
+  x$do("[<-", capture_dots(...))
 }
 
 #' @export
 `[[<-.Survey` <- function(x, ...) {
-  x$do("[[<-", capture_dots(...), assign = TRUE)
+  x$do("[[<-", capture_dots(...))
 }
 
 #' @export
@@ -329,14 +349,14 @@ names.Survey <- function(x) {
 #' @export
 head.Survey <- function(x, ...) {
   f <- get("head", asNamespace("utils"))
-  x$do(f, list(...), assign = FALSE)
+  x$do(f, list(...))
 }
 
 #' @importFrom utils tail
 #' @export
 tail.Survey <- function(x, ...) {
   f <- get("tail", asNamespace("utils"))
-  x$do(f, list(...), assign = FALSE)
+  x$do(f, list(...))
 }
 
 #' @export
