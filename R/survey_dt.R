@@ -43,7 +43,6 @@ Survey_dt <- R6::R6Class("Survey_dt",
   )
 )
 
-
 #' data.table: melt
 #'
 #' Same as the \code{data.table} function \code{melt}. This is a new generic,

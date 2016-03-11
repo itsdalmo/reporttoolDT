@@ -22,3 +22,15 @@ Survey_df <- R6::R6Class("Survey_df",
     }
   )
 )
+
+# S3 methods -------------------------------------------------------------------
+
+#' @export
+rbind.Survey <- function(x, ...) {
+  x$do_merge("rbind", list(...))
+}
+
+#' @export
+cbind.Survey <- function(x, ...) {
+  x$do_merge("cbind", list(...))
+}

@@ -23,7 +23,7 @@ select_.Survey <- function(x, ...) {
   dots <- lazyeval::all_dots(...)
   vars <- renamed_vars(dots)
   if (length(vars))
-    vars <- replace_all(names(x), vars)
+    vars <- recode_(names(x), vars)
 
   f <- get("select_", asNamespace("dplyr"))
   x$do(f, dots, renamed = vars)
@@ -35,7 +35,7 @@ rename_.Survey <- function(x, ...) {
   dots <- lazyeval::all_dots(...)
   vars <- renamed_vars(dots)
   if (length(vars))
-    vars <- replace_all(x$names(), vars)
+    vars <- recode_(x$names(), vars)
 
   f <- get("rename_", asNamespace("dplyr"))
   x$do(f, dots, renamed = vars)
