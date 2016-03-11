@@ -135,18 +135,15 @@ internal_defaults <- list(
 
   # Default config values for the .config private field in Survey's.
   config = list(
-    required = c("reporttool",
-                 "study",
+    required = c("name",
                  "segment",
                  "year",
                  "period",
                  "method",
-                 "language",
                  "cutoff",
-                 "latents",
-                 "marketshares"),
+                 "model"),
 
-    value = c(NA, "Example", NA, format(Sys.time(), "%Y"), NA, "web", "norwegian", NA, NA)),
+    value = c("Example", NA, format(Sys.time(), "%Y"), NA, "web", NA, NA)),
 
   # Locations for package-internal files.
   template = list(
