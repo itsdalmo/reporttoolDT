@@ -31,6 +31,9 @@
 #'    \item{\code{new}}{Initialize a new \code{Survey}. Expects a \code{data.frame},
 #'    \code{data.table} or \code{tbl} as input.}
 #'
+#'    \item{\code{do}}{Do arbitrary operations on the \code{Survey}. First argument
+#'    should be the function, second a \code{list} of arguments for \code{do.call}.}
+#'
 #'    \item{\code{get_data}}{Return a copy of the data.}
 #'
 #'    \item{\code{model}}{Return a summary of the data for the \code{Survey}.
@@ -142,15 +145,15 @@ Survey <- R6::R6Class("Survey",
       }
     },
 
-    do_merge = function(f, dots, assign = FALSE) {
+    do_merge = function(f, dots) {
       "Do merging operations on a Survey."
       # Get labels and associations
       lbl <- lapply(dots, function(x) { if (is.survey(x)) x$get_label() })
       aso <- lapply(dots, function(x) { if (is.survey(x)) x$get_association() })
 
       # Unlist and assign to private fields (self$do will remove duplicates)
-      private$.associations <- unlist(c(list(self$get_association()), lbl))
-      private$.labels <- unlist(c(list(self$get_label()), aso))
+      private$.labels <- merge_vectors(self$get_label(), lbl)
+      private$.associations <- merge_vectors(self$get_association(), aso)
 
       # Extract data and apply function
       dots <- lapply(dots, function(x) { if (is.survey(x)) x$get_data() else x })
@@ -167,8 +170,8 @@ Survey <- R6::R6Class("Survey",
         names(self$data) <- new_names
       }
 
-      private$.labels <- setNames(unname(private$.labels), new_names)
-      private$.associations <- setNames(unname(private$.associations), new_names)
+      private$.labels <- setNames(self$get_label(), new_names)
+      private$.associations <- setNames(self$get_association(), new_names)
       invisible(self)
     },
 
@@ -221,7 +224,7 @@ Survey <- R6::R6Class("Survey",
     # set/get private fields ---------------------------------------------------
     set_label = function(..., lst = NULL) {
       "Set labels."
-      new <- merge_attributes(self$names(), lst = c(list(...), lst, private$.labels))
+      new <- merge_vectors(..., lst, self$get_label(), default = self$names())
       private$.labels <- new
       invisible(self)
     },
@@ -229,8 +232,10 @@ Survey <- R6::R6Class("Survey",
     get_label = function(which = NULL) {
       "Get labels."
       res <- private$.labels
-      if (!is.null(which))
+      if (!is.null(res) && !is.null(which)) {
         res <- res[match_all(which, names(res))]
+        if (!length(res)) res <- NULL
+      }
       res
     },
 
@@ -238,9 +243,12 @@ Survey <- R6::R6Class("Survey",
       "Set associations."
       # Associations are specified as value = c(vars), i.e. we have to reverse name and value.
       lst <- c(list(...), lst)
-      lst <- lapply(names(lst), function(nm) { x <- lst[[nm]]; setNames(rep(nm, length(x)), x) })
+      lst <- lapply(names(lst), function(nm) {
+        x <- lst[[nm]]
+        setNames(rep(stri_trans_tolower(nm), length(x)), x)
+        })
 
-      new <- merge_attributes(self$names(), lst = c(lst, private$.associations))
+      new <- merge_vectors(lst, self$get_association(), default = self$names())
       private$.associations <- new
       invisible(self)
     },
@@ -248,24 +256,26 @@ Survey <- R6::R6Class("Survey",
     get_association = function(which = NULL) {
       "Get associations."
       res <- private$.associations
-      if (!is.null(which))
+      if (!is.null(res) && !is.null(which)) {
         res <- res[match_all(which, res)]
+        if (!length(res)) res <- NULL
+      }
       res
     },
 
     set_marketshare = function(..., lst = NULL) {
       "Set marketshares."
-      me <- self$get_association("mainentity")
-      if (is.null(me) || !length(me)) {
+      ent <- self$get_association("mainentity")
+      if (is.null(ent)) {
         stop("'mainentity' is not specified. See help(set_association).", call. = FALSE)
-      } else if (length(me) > 1L) {
+      } else if (length(ent) > 1L) {
         stop("More than one 'mainentity' specified. See help(set_association).", call. = FALSE)
       } else {
-        me <- self$data[[names(me)]]
-        me <- if (is.factor(me)) levels(me) else unique(me)
+        ent <- self$data[[names(ent)]]
+        ent <- if (is.factor(ent)) levels(ent) else unique(ent)
       }
 
-      new <- merge_attributes(me, lst = c(list(...), lst, private$.marketshares))
+      new <- merge_vectors(..., lst, self$get_marketshare(), default = ent)
       private$.marketshares <- new
       invisible(self)
     },
@@ -273,38 +283,57 @@ Survey <- R6::R6Class("Survey",
     get_marketshare = function(which = NULL) {
       "Get marketshares."
       res <- private$.marketshares
-      if (!is.null(which))
-        res <- res[match_all(which, res)]
+      if (!is.null(res) && !is.null(which)) {
+        res <- res[match_all(which, names(res))]
+        if (!length(res)) res <- NULL
+      }
       res
     },
 
     set_config = function(..., lst = NULL) {
-      "Set associations."
-      new <- merge_attributes(default$config$setting, lst = c(list(...), lst, private$.config))
+      "Set config."
+      def <- get_default("config")
+      def <- setNames(def$value, def$required)
+      new <- merge_vectors(..., lst, self$get_config(), default = def)
       private$.config <- new
       invisible(self)
     },
 
     get_config = function(which = NULL) {
-      "Get marketshares."
-      res <- private$.marketshares
-      if (!is.null(which))
-        res <- res[match_all(which, res)]
+      "Get config."
+      res <- private$.config
+      if (!is.null(res) && !is.null(which)) {
+        res <- res[match_all(which, names(res))]
+        if (!length(res)) res <- NULL
+      }
       res
     },
 
-    set_translation = function(..., lst = NULL) {
-      "Set associations."
-      new <- merge_attributes(default$translation$required, lst = c(list(...), lst, private$.translations))
+    set_translation = function(..., lst = NULL, language = NULL) {
+      "Set translation."
+      def <- get_default("translation")
+
+      # Get language from internal_defaults (partial match/case insensitive)
+      if (!is.null(language)) {
+        found <- stri_detect(names(def), fixed = language, ignore_case = TRUE)
+        if (!any(found)) stop("The specified language was not found.")
+        def <- setNames(def[[which(found)]], def$required)
+      } else {
+        def <- def$required
+      }
+
+      new <- merge_vectors(..., lst, self$get_translation(), default = def)
       private$.translations <- new
       invisible(self)
     },
 
     get_translation = function(which = NULL) {
-      "Get marketshares."
+      "Get translation."
       res <- private$.translations
-      if (!is.null(which))
-        res <- res[match_all(which, res)]
+      if (!is.null(res) && !is.null(which)) {
+        res <- res[match_all(which, names(res))]
+        if (!length(res)) res <- NULL
+      }
       res
     },
 

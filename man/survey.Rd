@@ -65,6 +65,9 @@ behave more like regular R objects.
    \item{\code{new}}{Initialize a new \code{Survey}. Expects a \code{data.frame},
    \code{data.table} or \code{tbl} as input.}
 
+   \item{\code{do}}{Do arbitrary operations on the \code{Survey}. First argument
+   should be the function, second a \code{list} of arguments for \code{do.call}.}
+
    \item{\code{get_data}}{Return a copy of the data.}
 
    \item{\code{model}}{Return a summary of the data for the \code{Survey}.

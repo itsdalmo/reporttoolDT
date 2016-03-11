@@ -7,15 +7,15 @@ test_that("merge_attributes", {
 
   default <- c("a", "b", "c", "d")
   lst <- c("a" = 1, list(c("b" = 2), "d" = 4))
-  res <- merge_attributes(default, lst)
+  res <- merge_vectors(lst, default = default)
   expect_identical(res, c("a" = 1, "b" = 2, "c" = NA, "d" = 4))
 
   lst[[2]] <- c(lst[[2]], "a" = "test")
-  res <- merge_attributes(default, lst) # Mode ends up being character.
+  res <- merge_vectors(lst, default = default) # Mode ends up being character.
   expect_identical(res, c("a" = "1", "b" = "2", "c" = NA, "d" = "4"))
 
-  expect_error(merge_attributes("a", lst = 1))
-  expect_error(merge_attributes("a", lst = list(1)))
+  expect_error(merge_vectors("a", lst = 1))
+  expect_error(merge_vectors("a", lst = list(1)))
 
 })
 

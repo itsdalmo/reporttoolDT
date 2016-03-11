@@ -134,18 +134,26 @@ set_translation <- function(x, ..., lst = NULL) {
 # Utility function that merges named vectors for private fields in Survey's.
 # Duplicates are dropped from the end of the named vector (after unlisting).
 
-merge_attributes <- function(default, lst = NULL) {
-  if (is.null(names(default)))
-    default <- setNames(rep(NA, length(default)), default)
+merge_vectors <- function(..., default = NULL) {
+  dots <- list(...)
+  if (!length(dots)) stop("No vectors supplied.")
 
-  lst <- unlist(lst)
-  if (!is.null(lst) && length(lst) >= 1L) {
-    inv <- is.null(names(lst)) || any(names(lst) == "")
-    if (inv) stop("Input (... or 'lst') contains unnamed arguments.")
+  # Use unnamed default's as names for a vector of NA's.
+  # (So we can pass colummnames as a default.)
+  if (!is.null(default) && is.null(names(default))) {
+    default <- setNames(rep(NA, length(default)), default)
   }
 
-  x <- c(lst, default)
-  x <- x[!duplicated(names(x), fromLast = FALSE)]
-  x[names(default)]
+  res <- c(unlist(dots), default)
+  if (is.null(names(res)) || any(names(res) == ""))
+    stop("All elements must be named.")
+
+  # Return should be ordered by default if it exists
+  res <- res[!duplicated(names(res), fromLast = FALSE)]
+  if (!is.null(default)) {
+    res[names(default)]
+  } else {
+    res
+  }
 
 }
