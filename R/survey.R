@@ -104,9 +104,13 @@ Survey <- R6::R6Class("Survey",
       if (missing(x) || !is.data.frame(x))
         stop("Expecting a data.frame or data.table.", call. = FALSE)
       if (any_labelled(x)) {
-        x <- from_labelled(x, copy = FALSE)
-        private$.labels <- attr(x, "labels")
+        # NOTE: from_labelled returns a data.frame. This can cause issues if data
+        # is read from sav, converted to data.table and then initialized using survey().
+        x <- officeR::from_labelled(x)
       }
+      # Copy labels from attr (returns null if they do not exist.)
+      private$.labels <- attr(x, "labels")
+
       self$data <- x
       self$update()
     },
