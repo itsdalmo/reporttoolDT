@@ -1,7 +1,7 @@
 context("Initializing a Survey")
 
 org <- data.frame("Q1" = c("Example 1", "Example 2"), "Score" = c(9, 8), stringsAsFactors = FALSE)
-sav <- haven::read_sav(system.file("extdata", "sample.sav", package = "reporttoolDT"))
+sav <- officeR::read_data(system.file("extdata", "sample.sav", package = "reporttoolDT"))
 
 # Initialize -------------------------------------------------------------------
 test_that("We can initialize from data.frame", {
