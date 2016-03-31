@@ -12,21 +12,18 @@ Depends:
 Imports:
     data.table,
     ggplot2 (>= 2.1),
-    haven,
     lazyeval,
-    openxlsx,
+    officeR,
     R6,
-    readr,
-    readxl,
     stringi,
+    tools,
     utils
 Suggests:
     dplyr,
     ggrepel,
-    testthat,
-    ReporteRs (>= 0.8.6),
-    tidyr,
     knitr,
-    rmarkdown
+    rmarkdown,
+    testthat,
+    tidyr
 RoxygenNote: 5.0.1
 VignetteBuilder: knitr
