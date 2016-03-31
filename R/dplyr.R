@@ -128,7 +128,7 @@ bind_rows.Survey <- function(x, ...) {
 #' @rdname dplyr_binds
 #' @export
 bind_cols <- function(x, ...) {
-  if (!requireNamespace("dplyr")) {
+  if (!requireNamespace("dplyr", quietly = TRUE)) {
     stop("dplyr package required to use bind_rows.", call. = FALSE)
   }
   UseMethod("bind_cols")
