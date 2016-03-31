@@ -10,7 +10,6 @@ env:
 
 r_github_packages:
 - jimhester/covr
-- itsdalmo/officeR
 
 after_success:
 - Rscript -e 'covr::codecov()'
