@@ -25,5 +25,7 @@ Suggests:
     rmarkdown,
     testthat,
     tidyr
+Remotes:
+    itsdalmo/officeR
 RoxygenNote: 5.0.1
 VignetteBuilder: knitr
