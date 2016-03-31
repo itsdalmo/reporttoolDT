@@ -19,14 +19,14 @@
 #' identical(pal, default_palette())
 
 get_default <- function(string, exact = TRUE) {
-  if (!is.string(string)) {
+  if (!is_string(string)) {
     stop("Expecting a string (character(1)) input for argument 'string'.")
   }
 
   id <- stri_detect(names(internal_defaults), fixed = string, ignore_case = TRUE)
   id <- names(internal_defaults)[id]
   if (length(id) > 1L && exact) {
-    stop("The string matched more than one element:\n", join_str(stri_c("'", id, "'")))
+    stop("The string matched more than one element:\n", str_list(stri_c("'", id, "'")))
   }
 
   res <- internal_defaults[id]
@@ -156,9 +156,10 @@ internal_defaults <- list(
       dir = "rmd/beamer",
       files = c("beamercolorthememetropolis.sty",
                 "beamerfontthememetropolis.sty",
-                "beamerthemem.sty",
-                "logo.eps",
-                "beamer_preamble.tex"))),
+                "beamerinnerthememetropolis.sty",
+                "beamerouterthememetropolis.sty",
+                "beamerthememetropolis.sty",
+                "pgfplotsthemetol.sty"))),
 
   # List (nested) of regex patterns used internally.
   pattern = list(
