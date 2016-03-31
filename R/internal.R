@@ -35,31 +35,6 @@ rescale_score <- function(var) {
   suppressWarnings(ifelse(var %in% 1:10, (as.numeric(var)-1)*(100/9), NA))
 }
 
-#' Convert HTTP link to network drive
-#'
-#' Simply converts a HTTP link to a link for a mounted network drive on Windows.
-#'
-#' @param https The link to convert. Must include \code{http://} or \code{https://}.
-#' @author Kristian D. Olsen
-#' @export
-
-intranet_link <- function(https) {
-
-  if (!on_windows()) {
-    warning("This function only returns a path for network drives on Windows.")
-  }
-  is_url <- stri_detect(https, regex = "^https?://.*[^/]\\.[a-z]+/.*")
-  if (!is_url) stop("Input was not a URL:\n", https, "\n(Make sure to include http://).")
-
-  # Extract the domain and folder
-  domain <- stri_replace(https, "$1", regex = "^https?://(.[^/]*)/.*")
-  folder <- stri_replace(https, "$1", regex = stri_c(".*", domain, "(.*)"))
-
-  # Return
-  stri_c("\\\\", domain, "@SSL/DavWWWRoot", folder)
-
-}
-
 #' Conjunct strings
 #'
 #' See examples.
@@ -69,11 +44,11 @@ intranet_link <- function(https) {
 #' @author Kristian D. Olsen
 #' @export
 #' @examples
-#' x <- join_str(c("A", "B", "C"), conjunction = "or")
+#' x <- str_list(c("A", "B", "C"), conjunction = "or")
 #' identical(x, c("A, B or C"))
 
 # TODO: Needs a better name.
-join_str <- function(x, conjunction = "and") {
+str_list <- function(x, conjunction = "and") {
   stopifnot(is.character(x))
   if (length(x) == 1L) return(x)
   stri_c(stri_c(x[1:(length(x)-1)], collapse = ", "), conjunction, x[length(x)], sep = " ")
@@ -95,13 +70,13 @@ join_str <- function(x, conjunction = "and") {
 #' @export
 #' @examples
 #' x <- paste(letters[1:10], collapse = "")
-#' a <- trim_str(x, n = 8)
-#' b <- trim_str(x, n = 11, pad = " ")
+#' a <- str_just(x, n = 8)
+#' b <- str_just(x, n = 11, pad = " ")
 #' identical(a, "abcde...")
 #' identical(b, "abcdefghij ")
 
 # TODO: Needs a better name.
-trim_str <- function(x, n = 50, trail = "...", pad = NULL, side = "right") {
+str_just <- function(x, n = 50, trail = "...", pad = NULL, side = "right") {
   stopifnot(is.character(x))
   smax <- n - stri_length(trail)
   smin <- if (!is.null(pad)) n else 0

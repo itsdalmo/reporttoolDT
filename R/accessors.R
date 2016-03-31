@@ -145,8 +145,7 @@ merge_vectors <- function(..., default = NULL) {
   }
 
   res <- c(unlist(dots), default)
-  if (is.null(names(res)) || any(names(res) == ""))
-    stop("All elements must be named.")
+  if (!is_named(res)) stop("All elements must be named.")
 
   # Return should be ordered by default if it exists
   res <- res[!duplicated(names(res), fromLast = FALSE)]

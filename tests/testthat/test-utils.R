@@ -5,18 +5,18 @@ test_that("any_fractions", {
   expect_false(any_fractions(c(1L, NA, 11)))
 })
 
-test_that("join_str", {
-  expect_error(join_str(1))
-  expect_identical(join_str("A"), "A")
-  expect_identical(join_str(c("A", "B")), "A and B")
+test_that("str_list", {
+  expect_error(str_list(1))
+  expect_identical(str_list("A"), "A")
+  expect_identical(str_list(c("A", "B")), "A and B")
 })
 
-test_that("trim_str", {
+test_that("str_just", {
   x <- paste(letters[1:10], collapse = "")
-  expect_error(trim_str(1))
-  expect_identical(trim_str(x, n = 8), "abcde...")
-  expect_identical(trim_str(x, n = 11, pad = " "), "abcdefghij ")
-  expect_identical(trim_str(NA_character_), NA_character_)
+  expect_error(str_just(1))
+  expect_identical(str_just(x, n = 8), "abcde...")
+  expect_identical(str_just(x, n = 11, pad = " "), "abcdefghij ")
+  expect_identical(str_just(NA_character_), NA_character_)
 })
 
 test_that("clean scores", {
@@ -55,8 +55,8 @@ test_that("clean_path", {
   expect_error(clean_path(c("test", "file")))
 })
 
-test_that("filename_no_ext", {
-  expect_identical(filename_no_ext("test.sav"), "test")
+test_that("basename_sans_ext", {
+  expect_identical(basename_sans_ext("test.sav"), "test")
 })
 
 

@@ -37,7 +37,7 @@ recode_ <- function(x, dots, by = x, ...) {
     dots <- as.list(dots)
   if (length(x) != length(by)) {
     stop("Arguments 'x' and 'by' must be the same length.", call. = FALSE)
-  } else if (!is.list2(dots) || is.null(names(dots)) || any(names(dots) == "")) {
+  } else if (!is_list(dots) || !is_named(dots)) {
     stop("'dots' must be a named list.")
   }
 
@@ -109,13 +109,13 @@ recode_impl <- function(x, subsets) {
   is_null <- vapply(subsets, is.null, logical(1))
   if (any(is_null)) {
     null <- stri_c("'", names(subsets)[is_null], "'")
-    stop("Arguments evaluated to NULL:\n", join_str(null))
+    stop("Arguments evaluated to NULL:\n", str_list(null))
   }
 
   is_logical <- vapply(subsets, is.logical, logical(1))
   if (any(!is_logical)) {
     logical <- stri_c("'", names(subsets)[!is_logical], "'")
-    stop("Arguments did not evaluate to a logical:\n", join_str(logical))
+    stop("Arguments did not evaluate to a logical:\n", str_list(logical))
   }
 
   # Return early if there is nothing to recode

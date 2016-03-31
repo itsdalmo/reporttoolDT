@@ -32,7 +32,7 @@ match_all <- function(x, table) {
 
 # normalizes paths and removes trailing /'s ------------------------------------
 clean_path <- function(path) {
-  if (!is.string(path)) stop("Path must be a string.")
+  if (!is_string(path)) stop("Path must be a string.")
 
   # Normalize if path is not absolute.
   if (!stri_detect(path, regex = "^(/|[A-Za-z]:|\\\\|~)")) {
@@ -49,13 +49,19 @@ clean_path <- function(path) {
 }
 
 # Retrieve the filename sans extension -----------------------------------------
-filename_no_ext <- function(file)  {
-  stri_replace(basename(file), "$1", regex = stri_c("(.*)\\.", tools::file_ext(file), "$"))
+basename_sans_ext <- function(file)  {
+  tools::file_path_sans_ext(basename(file))
 }
 
 # Check if x is a string (length 1 character vector.) --------------------------
-is.string <- function(x) {
+is_string <- function(x) {
   is.character(x) && length(x) == 1
+}
+
+# See if a vector is named -----------------------------------------------------
+is_named <- function(x) {
+  nms <- names(x)
+  !is.null(nms) && !any(is.na(nms)) && !any(nms == "")
 }
 
 # See if a numeric vactor contains fractions/decimals (i.e., not an integer) ---
@@ -76,7 +82,7 @@ any_labelled <- function(x) {
 }
 
 # Like is.list, except it does not return true for data.frame ------------------
-is.list2 <- function(x) {
+is_list <- function(x) {
   inherits(x, "list")
 }
 
