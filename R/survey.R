@@ -115,13 +115,6 @@ Survey <- R6::R6Class("Survey",
       self$update()
     },
 
-    initialize_subset = function(x) {
-      "Return a sliced or subset survey."
-      slice <- self$clone(deep = FALSE)
-      slice$data <- x
-      slice
-    },
-
     # Mutate the Survey --------------------------------------------------------
     update = function(renamed = NULL) {
       "Update the survey. (Associations, labels, etc.)"
@@ -135,14 +128,17 @@ Survey <- R6::R6Class("Survey",
 
     do = function(f, dots, renamed = NULL) {
       "Perform operations directly on the Survey."
-      res <- do.call(f, c(list(self$data), dots))
+      # Original call is 2 layers up at this point. parent.frame(n = 2L)
+      res <- do.call(f, c(list(self$data), dots), envir = parent.frame(n = 2L))
 
       if (identical(data.table::address(res), data.table::address(self$data))) {
         self$update(renamed)
         invisible(self)
       } else {
         if (is.data.frame(res)) {
-          self$initialize_subset(res)$update(renamed)
+          slice <- self$clone(deep = FALSE)
+          slice$data <- res
+          slice$update(renamed)
         } else {
           res
         }
