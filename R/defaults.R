@@ -158,8 +158,7 @@ internal_defaults <- list(
                 "beamerfontthememetropolis.sty",
                 "beamerinnerthememetropolis.sty",
                 "beamerouterthememetropolis.sty",
-                "beamerthememetropolis.sty",
-                "pgfplotsthemetol.sty"))),
+                "beamerthememetropolis.sty"))),
 
   # List (nested) of regex patterns used internally.
   pattern = list(
