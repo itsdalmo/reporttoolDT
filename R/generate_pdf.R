@@ -99,7 +99,7 @@ generate_pdf <- function(x, rmd = NULL, entity = NULL, dir = NULL, ...) {
                       output_format = beamer_template(...),
                       intermediates_dir = file.path(dir, "Markdown"),
                       output_dir = file.path(dir, "PDF"),
-                      quiet = TRUE,
+                      quiet = FALSE,
                       envir = envir,
                       encoding = "UTF-8")
 
@@ -113,15 +113,17 @@ beamer_template <- function(toc = TRUE, keep_tex = FALSE) {
 
   # Update beamer_presentation
   format <- rmarkdown::beamer_presentation(
+    template = "default",
+    latex_engine = "xelatex",
     toc = toc,
     keep_tex = keep_tex,
+    slide_level = 2L,
     theme = "metropolis",
     fonttheme = "metropolis",
-    colortheme = "metropolis",
-    pandoc_args = c("--latex-engine=xelatex")
+    colortheme = "metropolis"
     )
 
-  # Change the default chunk-options
+  # Set knitr options for PDF output
   format$knitr$opts_chunk$echo <- FALSE
   format$knitr$opts_chunk$message <- FALSE
   format$knitr$opts_chunk$warning <- FALSE
