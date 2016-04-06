@@ -12,13 +12,20 @@
 #' identical(x, c(1, 10))
 
 clean_score <- function(var) {
-  # TODO - Extract "10" from "Agree 10" as well as "10 Agree"
-  if (is.factor(var)) var <- as.character(var)
-  var <- stri_replace(var, replacement = "$1", regex = "([0-1]+).*$")
-  suppressWarnings(as.numeric(var))
+  if (is.factor(var))
+    var <- as.character(var)
+  if (!is.character(var))
+    stop("'var' should be a factor or character vector.")
+
+  # Set values greater than 10L to NA
+  var <- stringi::stri_extract_first(var, regex = "([0-1]{1,2})")
+  var[var > 10L | var < 1L] <- NA
+
+  # Return
+  suppressWarnings(as.integer(var))
 }
 
-#' Rescale 10-point likert scales.
+#' Rescale 1-10 integer to 0-100 numeric.
 #'
 #' Takes vectors representing 10-point likert scales and transforms them to
 #' 100-point scales (\code{numeric}). Formula: \code{(x-1)*(100/9)}
@@ -27,12 +34,12 @@ clean_score <- function(var) {
 #' @author Kristian D. Olsen
 #' @export
 #' @examples
-#' x <- rescale_score(c(1L, 10L))
+#' x <- rescale_100(c(1L, 10L))
 #' identical(x, c(0, 100))
 
-rescale_score <- function(var) {
-  if (is.factor(var)) stop("Cannot coerce factor to numeric.", call. = FALSE)
-  suppressWarnings(ifelse(var %in% 1:10, (as.numeric(var)-1)*(100/9), NA))
+rescale_100 <- function(var) {
+  if (!is.integer(var)) stop("'var' should be an integer.", call. = FALSE)
+  suppressWarnings(ifelse(var %in% 1:10, (var-1)*(100/9), NA))
 }
 
 #' Conjunct strings
