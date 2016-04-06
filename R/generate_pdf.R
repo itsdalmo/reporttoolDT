@@ -73,7 +73,7 @@ generate_pdf <- function(x, rmd = NULL, entity = NULL, dir = NULL, ...) {
     # Only create reports for entities which have observations.
     ent <- names(get_association(x, "mainentity"))
     if (!length(ent)) stop("'mainentity' is not specified for the Survey.")
-    ent <- unique(as.character(x$data[[ent]]))
+    ent <- unique(as.character(x[[ent]]))
     ent <- ent[stringi::stri_order(ent)]
   } else {
     # If 'x' is not a survey, create one report based on the Rmd template.
