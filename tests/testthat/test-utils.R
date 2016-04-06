@@ -5,35 +5,6 @@ test_that("any_fractions", {
   expect_false(any_fractions(c(1L, NA, 11)))
 })
 
-test_that("str_list", {
-  expect_error(str_list(1))
-  expect_identical(str_list("A"), "A")
-  expect_identical(str_list(c("A", "B")), "A and B")
-})
-
-test_that("str_just", {
-  x <- paste(letters[1:10], collapse = "")
-  expect_error(str_just(1))
-  expect_identical(str_just(x, n = 8), "abcde...")
-  expect_identical(str_just(x, n = 11, pad = " "), "abcdefghij ")
-  expect_identical(str_just(NA_character_), NA_character_)
-})
-
-test_that("clean scores", {
-
-  expect_true(clean_score("1 aa") == "1")
-  expect_identical(clean_score(c("1 aa", "bb 1", "10 cc")), c(1, NA, 10))
-
-})
-
-test_that("rescaling scores", {
-
-  expect_true(clean_score("1 aa") == "1")
-  expect_identical(clean_score(c("1 aa", "bb 1", "10 cc")), c(1, NA, 10))
-  expect_identical(rescale_score(c("1", 10)), c(0, 100))
-
-})
-
 test_that("get_default", {
 
   expect_error(get_default(1L))
@@ -59,4 +30,30 @@ test_that("basename_sans_ext", {
   expect_identical(basename_sans_ext("test.sav"), "test")
 })
 
+# Scoping issues ---------------------------------------------------------------
+org <- data.frame("Q1" = c("Example 1", "Example 2"), "Score" = c(9, 8), stringsAsFactors = FALSE)
 
+test_that("capture_dots can be used inside functions", {
+  df <- survey_df(org)$set_association(mainentity = "Q1")
+  variable <- "Score"
+  f <- function(x) {
+    env <- list2env(list(srv = x, parent = environment()))
+    variable <- "Q1"
+    x[[variable]]
+  }
+  expect_identical(f(df$data), f(df))
+
+})
+
+test_that("capture_dots uses regular scoping", {
+  df <- survey_df(org)$set_association(mainentity = "Q1")
+  f <- function(x) {
+    variable <- "Q1"
+    x[[variable]]
+  }
+  f2 <- function(x) {
+    f(x)
+  }
+  expect_identical(f2(df$data), f2(df))
+
+})

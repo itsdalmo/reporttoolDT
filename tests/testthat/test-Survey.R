@@ -3,6 +3,7 @@ context("Public methods and descriptives for Survey")
 org <- data.frame("Q1" = c("Example 1", "Example 2"), "Score" = c(9, 8), stringsAsFactors = FALSE)
 sav <- officeR::read_data(system.file("extdata", "sample.sav", package = "reporttoolDT"))
 
+
 # Public methods ---------------------------------------------------------------
 test_that("Entities", {
   df <- survey_df(org)$set_association(mainentity = "Q1")
