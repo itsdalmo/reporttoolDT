@@ -18,7 +18,7 @@ Survey_df <- R6::R6Class("Survey_df",
   inherit = Survey,
   public = list(
     initialize = function(x, fields = NULL) {
-      if (!is.data.frame(x) || data.table::is.data.table(x))
+      if (!is.data.frame(x) || data.table::is.data.table(x) || is_tbl(x))
         x <- as.data.frame(x)
       super$initialize(x, fields)
     },
