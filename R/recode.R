@@ -129,7 +129,7 @@ recode_impl <- function(x, subsets) {
   overlap <- unlist(lapply(subsets, which))
   overlap <- any(duplicated(overlap))
   if (overlap) {
-    warning("Values are being recoded multiple times. Check results.")
+    warning("Values are being recoded multiple times. Check results.", call. = FALSE)
   }
 
   # Convert x to character and recode
