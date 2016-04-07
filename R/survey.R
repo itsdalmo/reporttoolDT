@@ -145,6 +145,10 @@ Survey <- R6::R6Class("Survey",
       } else {
         slice <- self$as_df(clone = TRUE)
       }
+      if (!identical(class(slice), class(self))) {
+        new <- class(slice); old <- class(self)
+        warning("Class has changed from ", setdiff(old, new), " to ", setdiff(new, old), call. = FALSE)
+      }
       slice$data <- x
       slice
     },
