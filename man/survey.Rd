@@ -11,9 +11,9 @@
 \usage{
 survey(x)
 
-is.survey(x)
-
 as.survey(x)
+
+is.survey(x)
 
 survey_df(x)
 

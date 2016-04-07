@@ -63,9 +63,8 @@
 
 survey <- function(x) UseMethod("survey")
 
-#' @rdname survey
 #' @export
-is.survey <- function(x) inherits(x, "Survey")
+survey.Survey <- function(x) x
 
 #' @rdname survey
 #' @export
@@ -77,30 +76,48 @@ as.survey.Survey <- function(x) x
 #' @export
 as.survey.default <- function(x) survey(x)
 
+#' @rdname survey
+#' @export
+is.survey <- function(x) inherits(x, "Survey")
+
+
 # Survey (R6 Class) ------------------------------------------------------------
 #' @importFrom R6 R6Class
 Survey <- R6::R6Class("Survey",
   private = list(
     .labels = NULL,
-    .associations = NULL,
     .config = NULL,
+    .associations = NULL,
     .translations = NULL,
-    .marketshares = NULL
+    .marketshares = NULL,
+
+    # Get/set all private fields -----------------------------------------------
+    all_fields = function() {
+      list(
+        labels = private$.labels,
+        config = private$.config,
+        associations = private$.associations,
+        translations = private$.translations,
+        marketshares = private$.marketshares
+      )
+    },
+
+    # TODO: Check consistency with data?
+    set_fields = function(fields) {
+        private$.labels = fields$labels
+        private$.config = fields$config
+        private$.associations = fields$associations
+        private$.translations = fields$translations
+        private$.marketshares = fields$marketshares
+    }
+
   ),
 
   public = list(
 
     data = NULL,
 
-    get_data = function(copy = TRUE) {
-      if (copy && data.table::is.data.table(self$data)) {
-        data.table::copy(self$data)
-      } else {
-        self$data
-      }
-    },
-
-    initialize = function(x) {
+    initialize = function(x, fields = NULL) {
       if (missing(x) || !is.data.frame(x))
         stop("Expecting a data.frame or data.table.", call. = FALSE)
       if (any_labelled(x)) {
@@ -111,8 +128,33 @@ Survey <- R6::R6Class("Survey",
       # Copy labels from attr (returns null if they do not exist.)
       private$.labels <- attr(x, "labels")
 
+      # Set fields if provided
+      if (!is.null(fields))
+        private$set_fields(fields)
+
       self$data <- x
       self$update()
+    },
+
+    initialize_subset = function(x) {
+      "(Re)Initialize a sliced/subset survey."
+      if (requireNamespace("dplyr") && is_tbl(x)) {
+        slice <- self$as_tbl(clone = TRUE)
+      } else if (data.table::is.data.table(x)) {
+        slice <- self$as_dt(clone = TRUE)
+      } else {
+        slice <- self$as_df(clone = TRUE)
+      }
+      slice$data <- x
+      slice
+    },
+
+    get_data = function(copy = TRUE) {
+      if (copy && data.table::is.data.table(self$data)) {
+        data.table::copy(self$data)
+      } else {
+        self$data
+      }
     },
 
     # Mutate the Survey --------------------------------------------------------
@@ -132,13 +174,10 @@ Survey <- R6::R6Class("Survey",
       res <- do.call(f, c(list(self$data), dots), envir = parent.frame(n = 2L))
 
       if (identical(data.table::address(res), data.table::address(self$data))) {
-        self$update(renamed)
-        invisible(self)
+        invisible(self$update(renamed))
       } else {
         if (is.data.frame(res)) {
-          slice <- self$clone(deep = FALSE)
-          slice$data <- res
-          slice$update(renamed)
+          self$initialize_subset(res)$update(renamed)
         } else {
           res
         }
@@ -221,7 +260,7 @@ Survey <- R6::R6Class("Survey",
       structure(as.data.frame(df), class = c("survey_entities", "data.frame"))
     },
 
-    # set/get private fields ---------------------------------------------------
+    # set/get individual private fields ----------------------------------------
     set_label = function(..., lst = NULL) {
       "Set labels."
       new <- merge_vectors(..., lst, self$get_label(), default = self$names())

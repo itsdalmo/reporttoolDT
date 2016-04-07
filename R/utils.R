@@ -16,6 +16,12 @@ renamed_vars <- function(dots) {
   nms
 }
 
+# Check whether data is a tbl --------------------------------------------------
+is_tbl <- function(x) {
+  inherits(x, c("tbl", "tbl_df", "tbl_dt"))
+}
+
+
 # Check which OS we are on -----------------------------------------------------
 on_windows <- function() {
   Sys.info()["sysname"] == "Windows"

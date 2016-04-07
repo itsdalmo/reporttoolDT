@@ -1,8 +1,8 @@
 #' @rdname survey
 #' @export
 survey_dt <- function(x) {
-  if (inherits(x, "Survey_dt")) {
-    x
+  if (is.survey(x)) {
+    x$as_dt()
   } else {
     Survey_dt$new(x)
   }
@@ -27,15 +27,27 @@ Survey_dt <- R6::R6Class("Survey_dt",
   ),
 
   public = list(
-    initialize = function(x) {
+    initialize = function(x, fields = NULL) {
       if (data.table::is.data.table(x)) {
         x <- data.table::copy(x)
       } else {
         x <- data.table::as.data.table(x)
       }
-      super$initialize(x)
+      super$initialize(x, fields)
     },
-
+    as_df = function(...) {
+      Survey_df$new(self$get_data(), fields = private$all_fields())
+    },
+    as_dt = function(clone = FALSE) {
+      if (clone) {
+        self$clone(deep = FALSE)
+      } else {
+        self
+      }
+    },
+    as_tbl = function(...) {
+      Survey_tbl$new(self$get_data(), fields = private$all_fields())
+    },
     names = function() {
       data.table::copy(names(self$data))
     }

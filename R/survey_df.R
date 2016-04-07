@@ -1,8 +1,8 @@
 #' @rdname survey
 #' @export
 survey_df <- function(x) {
-  if (inherits(x, "Survey_df")) {
-    x
+  if (is.survey(x)) {
+    x$as_df()
   } else {
     Survey_df$new(x)
   }
@@ -17,8 +17,23 @@ survey.data.frame <- function(x) {
 Survey_df <- R6::R6Class("Survey_df",
   inherit = Survey,
   public = list(
-    initialize = function(x) {
-      super$initialize(as.data.frame(x))
+    initialize = function(x, fields = NULL) {
+      if (!is.data.frame(x) || data.table::is.data.table(x))
+        x <- as.data.frame(x)
+      super$initialize(x, fields)
+    },
+    as_df = function(clone = FALSE) {
+      if (clone) {
+        self$clone(deep = FALSE)
+      } else {
+        self
+      }
+    },
+    as_dt = function(...) {
+      Survey_dt$new(self$get_data(), fields = private$all_fields())
+    },
+    as_tbl = function(...) {
+      Survey_tbl$new(self$get_data(), fields = private$all_fields())
     }
   )
 )

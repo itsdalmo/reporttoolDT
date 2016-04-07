@@ -28,10 +28,11 @@ test_that("gather works with Survey_dt", {
   skip_if_not_installed("dplyr")
   skip_if_not_installed("tidyr")
 
+  # tidyr does not have data.table methods. Returns a data.frame.
   dt <- dummy_survey(survey_dt(org))
   dt <- tidyr::gather(dt, var, score, -Q1)
 
-  expect_is(dt, "Survey_dt")
+  expect_is(dt, "Survey_df")
   expect_identical(names(dt), c("Q1", "var", "score"))
   expect_identical(dt$data$score, c(9, 8, 80, 70))
 
@@ -69,11 +70,12 @@ test_that("spread works with Survey_dt", {
   skip_if_not_installed("dplyr")
   skip_if_not_installed("tidyr")
 
+  # tidyr does not have data.table methods. Returns a data.frame.
   dt <- dummy_survey(survey_dt(org))
   dt <- tidyr::gather(dt, var, score, -Q1)
   dt <- tidyr::spread(dt, var, score)
 
-  expect_is(dt, "Survey_dt")
+  expect_is(dt, "Survey_df")
   expect_identical(names(dt), c("Q1", "Score1", "Score2"))
   expect_equal(dt$data, org)
 

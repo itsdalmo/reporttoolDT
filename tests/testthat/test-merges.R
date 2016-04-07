@@ -16,7 +16,7 @@ test_that("bind_rows work with Survey_df", {
   df <- dummy_survey(survey_df(org))
   df <- bind_rows(df, dplyr::mutate(df, test = "test"))
 
-  expect_is(df, "Survey_df")
+  expect_is(df, "Survey_tbl")
   expect_identical(names(df), c("Q1", "Score", "test"))
   expect_identical(df$data$test, c(NA, NA, "test", "test"))
 
@@ -28,7 +28,7 @@ test_that("bind_rows work with Survey_dt", {
   dt <- dummy_survey(survey_dt(org))
   dt <- bind_rows(dt, dplyr::mutate(dt, test = "test"))
 
-  expect_is(dt, "Survey_dt")
+  expect_is(dt, "Survey_tbl")
   expect_identical(names(dt), c("Q1", "Score", "test"))
   expect_identical(dt$data$test, c(NA, NA, "test", "test"))
 
@@ -53,7 +53,7 @@ test_that("bind_cols work with Survey_df", {
   df <- dummy_survey(survey_df(org))
   df <- bind_cols(df, dplyr::mutate(df, test = "test"))
 
-  expect_is(df, "Survey_df")
+  expect_is(df, "Survey_tbl")
   expect_identical(df$get_association("mainentity"), setNames(c("mainentity", "mainentity"), c("Q1", "Q1")))
   expect_identical(df$get_label("Q1"), setNames(c("test label", "test label"), c("Q1", "Q1")))
 
@@ -65,7 +65,7 @@ test_that("bind_cols work with Survey_dt", {
   dt <- dummy_survey(survey_dt(org))
   dt <- bind_cols(dt, dplyr::mutate(dt, test = "test"))
 
-  expect_is(dt, "Survey_dt")
+  expect_is(dt, "Survey_tbl")
   expect_identical(dt$get_association("mainentity"), setNames(c("mainentity", "mainentity"), c("Q1", "Q1")))
   expect_identical(dt$get_label("Q1"), setNames(c("test label", "test label"), c("Q1", "Q1")))
 
@@ -103,7 +103,7 @@ test_that("left_join work with Survey_dt", {
   dt <- dummy_survey(survey_dt(org))
   dt <- dplyr::left_join(dt, dplyr::mutate(dt[1, ], test = "test"))
 
-  expect_is(dt, "Survey_dt")
+  expect_is(dt, "Survey_tbl")
   expect_identical(dt$get_association("mainentity"),  setNames("mainentity", "Q1"))
   expect_identical(dt$data$test, c("test", NA))
   expect_identical(dt$get_label("Q1"),  setNames("test label", "Q1"))

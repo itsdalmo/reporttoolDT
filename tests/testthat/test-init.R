@@ -34,11 +34,9 @@ test_that("Initializing on a Survey returns the Survey", {
   dt <- survey_dt(org)
   tbl <- survey_tbl(org)
 
-  expect_true(
-    identical(survey_df(df), df) &&
-      identical(survey_dt(dt), dt) &&
-      identical(survey_tbl(tbl), tbl)
-  )
+  expect_equal(survey_df(df), df)
+  expect_equal(survey_dt(dt), dt)
+  expect_equal(survey_tbl(tbl), tbl)
 
 })
 

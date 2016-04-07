@@ -1,8 +1,8 @@
 #' @rdname survey
 #' @export
 survey_tbl <- function(x) {
-  if (inherits(x, "Survey_tbl")) {
-    x
+  if (is.survey(x)) {
+    x$as_tbl()
   } else {
     Survey_tbl$new(x)
   }
@@ -27,11 +27,29 @@ Survey_tbl <- R6::R6Class("Survey_tbl",
   ),
 
   public = list(
-    initialize = function(x) {
+    initialize = function(x, fields = NULL) {
       if (!requireNamespace("dplyr", quietly = TRUE)) {
         stop("dplyr package required to use tbl's.")
       }
-      super$initialize(dplyr::as.tbl(x))
+      if (!is_tbl(x))
+        x <- dplyr::as.tbl(x)
+      super$initialize(x, fields)
+    },
+    as_df = function(...) {
+      Survey_df$new(self$get_data(), fields = private$all_fields())
+    },
+    as_dt = function(...) {
+      Survey_dt$new(self$get_data(), fields = private$all_fields())
+    },
+    as_tbl = function(clone = FALSE) {
+      if (clone) {
+        self$clone(deep = FALSE)
+      } else {
+        self
+      }
+    },
+    names = function() {
+      data.table::copy(names(self$data))
     }
 
   )

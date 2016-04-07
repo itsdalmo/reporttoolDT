@@ -20,7 +20,7 @@ test_that("complete works with Survey_dt", {
   df$data$Q1 <- factor(df$data$Q1, levels = lvl)
   df <- tidyr::complete(df, Q1)
 
-  expect_is(df, "Survey_df")
+  expect_is(df, "Survey_tbl")
   expect_identical(as.character(df$data$Q1), lvl)
 
 })
@@ -34,7 +34,7 @@ test_that("complete works with Survey_dt", {
   dt$data$Q1 <- factor(dt$data$Q1, levels = lvl)
   dt <- tidyr::complete(dt, Q1)
 
-  expect_is(dt, "Survey_dt")
+  expect_is(dt, "Survey_tbl")
   expect_identical(as.character(dt$data$Q1), lvl)
 
 })
