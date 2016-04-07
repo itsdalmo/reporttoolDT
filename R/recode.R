@@ -72,7 +72,7 @@ recode_.factor <- function(x, dots, by = x, drop = TRUE, add = FALSE, arrange = 
   # Factor levels
   if (drop) lvls <- setdiff(lvls, setdiff(unique(as.character(x)), unique(res)))
   if (add) lvls <- union(lvls, names(dots))
-  if (arrange) lvls <- lvls[stri_order(lvls)]
+  if (arrange) lvls <- lvls[stringi::stri_order(lvls)]
 
   factor(res, levels = lvls)
 }
