@@ -8,6 +8,7 @@
 \alias{recode_.numeric}
 \alias{spread_10}
 \alias{spread_100}
+\alias{spread_age}
 \title{Recode}
 \usage{
 recode(x, ..., by = x, drop = TRUE, add = FALSE, factor = FALSE,
@@ -25,6 +26,8 @@ recode_(x, dots, by = x, ...)
 spread_10(x)
 
 spread_100(x)
+
+spread_age(x, small = FALSE)
 }
 \arguments{
 \item{x}{The vector to be recoded.}
@@ -46,6 +49,8 @@ factor after recoding. Named recodes will be used as levels.}
 
 \item{dots}{A named list with either values that can be used with \code{\%in\%} or
 a boolean values.}
+
+\item{small}{Set to \code{TRUE} if you want small (5 year) age groups.}
 }
 \description{
 A simple function for recoding, which aims to replace nested \code{ifelse} statements.

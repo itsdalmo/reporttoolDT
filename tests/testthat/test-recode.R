@@ -133,3 +133,15 @@ test_that("spread_100 works", {
   expect_identical(spread_100(x), factor(c("-60", "60-75", "75-100")))
   expect_error(spread_100("test"))
 })
+
+test_that("spread_age works", {
+  x <- c(15, 54, 76)
+
+  # as.character to avoid specifying levels. 15 turns into NA because
+  # large age groups do not include 15.
+  expect_identical(as.character(spread_age(x)), c(NA, "45-59", "60+"))
+  expect_identical(as.character(spread_age(x, small = TRUE)), c("15-24", "50-54", "75+"))
+  expect_error(spread_age("test"))
+  expect_error(spread_age(50.5))
+
+})

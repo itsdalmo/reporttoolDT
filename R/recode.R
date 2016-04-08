@@ -16,6 +16,7 @@
 #' @param factor Convert \code{numeric} or \code{character} vectors to
 #' factor after recoding. Named recodes will be used as levels.
 #' @param arrange Set to \code{TRUE} to alphabetically sort the factor levels.
+#' @param small Set to \code{TRUE} if you want small (5 year) age groups.
 #' @author Kristian D. Olsen
 #' @export
 #' @examples
@@ -103,6 +104,30 @@ spread_100 <- function(x) {
   recode_(x, rec, factor = TRUE)
 
 }
+
+#' @rdname recode
+#' @export
+spread_age <- function(x, small = FALSE) {
+  if (!is.numeric(x)) {
+    stop("Expecting a numeric vector.")
+  } else if (!is.integer(x)) {
+    if (any_fractions(x))
+      stop("This function should not be used with fractions, only wholenumbers.")
+    x <- as.integer(x)
+  }
+
+  if (small) {
+    rec <- list(
+      "15-24" = 15:24L, "25-29" = 25:29L, "30-34" = 30:34L, "35-39" = 35:39L,
+      "40-44" = 40:44L, "45-49" = 45:49L, "50-54" = 50:54L, "55-59" = 55:59L,
+      "60-64" = 60:64L, "65-69" = 65:69L, "70-74" = 70:74L, "75+" = x >= 75L)
+  } else {
+    rec <- list("16-29" = 16:29L, "30-44" = 30:44L, "45-59" = 45:59L, "60+" = x >= 60L)
+  }
+
+  recode_(x, rec, factor = TRUE)
+}
+
 
 recode_impl <- function(x, subsets) {
 
