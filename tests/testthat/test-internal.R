@@ -17,14 +17,14 @@ test_that("str_just", {
 test_that("clean scores", {
 
   x <- c("1 Not happy", "Very happy 10", "Invalid 11", "Don't know")
-  expect_identical(clean_score(x), c(1L, 10L, NA, NA))
+  expect_identical(clean_scale(x), c(1L, 10L, NA, NA))
 
 })
 
 test_that("rescaling scores", {
 
   x <- c("1 Not happy", "Very happy 10", "Invalid 11", "Don't know")
-  expect_identical(clean_score(x), c(1L, 10L, NA, NA))
-  expect_identical(rescale_100(clean_score(x)), c(0, 100, NA, NA))
+  expect_identical(clean_scale(x), c(1L, 10L, NA, NA))
+  expect_identical(rescale_100(clean_scale(x)), c(0, 100, NA, NA))
 
 })

@@ -8,21 +8,23 @@
 #' @author Kristian D. Olsen
 #' @export
 #' @examples
-#' x <- clean_score(c("1 Not happy", "10 Very happy"))
+#' x <- clean_scale(c("1 Not happy", "10 Very happy"))
 #' identical(x, c(1, 10))
 
-clean_score <- function(var) {
+clean_scale <- function(var) {
   if (is.factor(var))
     var <- as.character(var)
   if (!is.character(var))
     stop("'var' should be a factor or character vector.")
 
   # Set values greater than 10L to NA
-  var <- stringi::stri_extract_first(var, regex = "([0-1]{1,2})")
-  var[var > 10L | var < 1L] <- NA
+  var <- stringi::stri_extract_first(var, regex = "[0-9]{1,2}")
+  var <- suppressWarnings(as.integer(var))
 
-  # Return
-  suppressWarnings(as.integer(var))
+  # 10 point scale and return.
+  var[var > 10L | var < 1L] <- NA
+  var
+
 }
 
 #' Rescale 1-10 integer to 0-100 numeric.
