@@ -16,7 +16,7 @@ test_that("[<- works with Survey_tbl", {
 
   expect_is(tbl, "Survey_tbl")
   expect_true("test" %in% tbl$names())
-  expect_true("test" %in% names(tbl$get_association()))
+  expect_true("test" %in% tbl$get_association())
 
 })
 
@@ -28,7 +28,7 @@ test_that("[[<- works with Survey_tbl", {
 
   expect_is(tbl, "Survey_tbl")
   expect_true("test" %in% tbl$names())
-  expect_true("test" %in% names(tbl$get_association()))
+  expect_true("test" %in% tbl$get_association())
 
 })
 
@@ -57,6 +57,6 @@ test_that("names<- works with Survey_tbl", {
 
   expect_is(tbl, "Survey_tbl")
   expect_identical(tbl$get_label("entity"), setNames("test label", "entity"))
-  expect_identical(tbl$get_association("mainentity"), setNames("mainentity", "entity"))
+  expect_identical(tbl$get_association("mainentity"), setNames("entity", "mainentity"))
 
 })

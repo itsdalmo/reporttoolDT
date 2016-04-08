@@ -71,7 +71,7 @@ generate_pdf <- function(x, rmd = NULL, entity = NULL, dir = NULL, ...) {
   # Create one report per entity for Surveys.
   if (is.survey(x)) {
     # Only create reports for entities which have observations.
-    ent <- names(get_association(x, "mainentity"))
+    ent <- get_association(x, "mainentity")
     if (!length(ent)) stop("'mainentity' is not specified for the Survey.")
     ent <- unique(as.character(x[[ent]]))
     ent <- ent[stringi::stri_order(ent)]

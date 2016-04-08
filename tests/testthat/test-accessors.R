@@ -38,17 +38,17 @@ test_that("setting/getting label works for Survey_tbl", {
 # Associations -----------------------------------------------------------------
 test_that("setting/getting association works for Survey_df", {
   df <- set_association(survey_df(org), mainentity = c("Q1", "Score"))
-  expect_identical(get_association(df), c("Q1" = "mainentity", "Score" = "mainentity"))
+  expect_identical(get_association(df), c("mainentity" = "Q1" , "mainentity" = "Score"))
 })
 
 test_that("setting/getting association works for Survey_dt", {
   dt <- set_association(survey_dt(org), mainentity = c("Q1", "Score"))
-  expect_identical(get_association(dt), c("Q1" = "mainentity", "Score" = "mainentity"))
+  expect_identical(get_association(dt), c("mainentity" = "Q1" , "mainentity" = "Score"))
 })
 
 test_that("setting/getting association works for Survey_tbl", {
   tbl <- set_association(survey_tbl(org), mainentity = c("Q1", "Score"))
-  expect_identical(get_association(tbl), c("Q1" = "mainentity", "Score" = "mainentity"))
+  expect_identical(get_association(tbl), c("mainentity" = "Q1" , "mainentity" = "Score"))
 })
 
 # Marketshare ------------------------------------------------------------------

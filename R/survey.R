@@ -192,11 +192,11 @@ Survey <- R6::R6Class("Survey",
       "Do merging operations on a Survey."
       # Get labels and associations
       lbl <- lapply(dots, function(x) { if (is.survey(x)) x$get_label() })
-      aso <- lapply(dots, function(x) { if (is.survey(x)) x$get_association() })
+      aso <- lapply(dots, function(x) { if (is.survey(x)) x$get_association(invert = FALSE) })
 
       # Unlist and assign to private fields (self$do will remove duplicates)
-      private$.labels <- merge_vectors(self$get_label(), lbl)
-      private$.associations <- merge_vectors(self$get_association(), aso)
+      private$.labels <- merge_vectors(private$.labels, lbl)
+      private$.associations <- merge_vectors(private$.associations, aso)
 
       # Extract data and apply function
       dots <- lapply(dots, function(x) { if (is.survey(x)) x$get_data() else x })
@@ -213,8 +213,8 @@ Survey <- R6::R6Class("Survey",
         names(self$data) <- new_names
       }
 
-      private$.labels <- setNames(self$get_label(), new_names)
-      private$.associations <- setNames(self$get_association(), new_names)
+      private$.labels <- setNames(private$.labels, new_names)
+      private$.associations <- setNames(private$.associations, new_names)
       invisible(self)
     },
 
@@ -242,7 +242,7 @@ Survey <- R6::R6Class("Survey",
     },
 
     entities = function() {
-      me <- names(self$get_association("mainentity"))
+      me <- self$get_association("mainentity")
       if (!length(me) || is.null(me)) stop("'mainentity' has not been specified yet. See help(set_association).", call. = FALSE)
 
       cutoff <- as.numeric(self$get_config("cutoff"))
@@ -267,7 +267,7 @@ Survey <- R6::R6Class("Survey",
     # set/get individual private fields ----------------------------------------
     set_label = function(..., lst = NULL) {
       "Set labels."
-      new <- merge_vectors(..., lst, self$get_label(), default = self$names())
+      new <- merge_vectors(..., lst, private$.labels, default = self$names())
       private$.labels <- new
       invisible(self)
     },
@@ -291,17 +291,21 @@ Survey <- R6::R6Class("Survey",
         setNames(rep(stri_trans_tolower(nm), length(x)), x)
         })
 
-      new <- merge_vectors(lst, self$get_association(), default = self$names())
+      new <- merge_vectors(lst, private$.associations, default = self$names())
       private$.associations <- new
       invisible(self)
     },
 
-    get_association = function(which = NULL) {
+    get_association = function(which = NULL, invert = TRUE) {
       "Get associations."
       res <- private$.associations
       if (!is.null(res) && !is.null(which)) {
         res <- res[match_all(which, res)]
         if (!length(res)) res <- NULL
+      }
+      # Invert names/values when returning
+      if (invert) {
+        res <- setNames(names(res), unname(res))
       }
       res
     },
@@ -314,11 +318,11 @@ Survey <- R6::R6Class("Survey",
       } else if (length(ent) > 1L) {
         stop("More than one 'mainentity' specified. See help(set_association).", call. = FALSE)
       } else {
-        ent <- self$data[[names(ent)]]
+        ent <- self$data[[ent]]
         ent <- if (is.factor(ent)) levels(ent) else unique(ent)
       }
 
-      new <- merge_vectors(..., lst, self$get_marketshare(), default = ent)
+      new <- merge_vectors(..., lst, private$.marketshares, default = ent)
       private$.marketshares <- new
       invisible(self)
     },
@@ -337,7 +341,7 @@ Survey <- R6::R6Class("Survey",
       "Set config."
       def <- get_default("config")
       def <- setNames(def$value, def$required)
-      new <- merge_vectors(..., lst, self$get_config(), default = def)
+      new <- merge_vectors(..., lst, private$.config, default = def)
       private$.config <- new
       invisible(self)
     },
@@ -365,7 +369,7 @@ Survey <- R6::R6Class("Survey",
         def <- def$required
       }
 
-      new <- merge_vectors(..., lst, self$get_translation(), default = def)
+      new <- merge_vectors(..., lst, private$.translations, default = def)
       private$.translations <- new
       invisible(self)
     },

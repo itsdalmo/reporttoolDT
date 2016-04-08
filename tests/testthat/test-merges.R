@@ -54,7 +54,7 @@ test_that("bind_cols work with Survey_df", {
   df <- bind_cols(df, dplyr::mutate(df, test = "test"))
 
   expect_is(df, "Survey_tbl")
-  expect_identical(df$get_association("mainentity"), setNames(c("mainentity", "mainentity"), c("Q1", "Q1")))
+  expect_identical(df$get_association("mainentity"), setNames(c("Q1", "Q1"), c("mainentity", "mainentity")))
   expect_identical(df$get_label("Q1"), setNames(c("test label", "test label"), c("Q1", "Q1")))
 
 })
@@ -66,7 +66,7 @@ test_that("bind_cols work with Survey_dt", {
   dt <- bind_cols(dt, dplyr::mutate(dt, test = "test"))
 
   expect_is(dt, "Survey_tbl")
-  expect_identical(dt$get_association("mainentity"), setNames(c("mainentity", "mainentity"), c("Q1", "Q1")))
+  expect_identical(dt$get_association("mainentity"), setNames(c("Q1", "Q1"), c("mainentity", "mainentity")))
   expect_identical(dt$get_label("Q1"), setNames(c("test label", "test label"), c("Q1", "Q1")))
 
 })
@@ -78,7 +78,7 @@ test_that("bind_cols work with Survey_tbl", {
   tbl <- bind_cols(tbl, dplyr::mutate(tbl, test = "test"))
 
   expect_is(tbl, "Survey_tbl")
-  expect_identical(tbl$get_association("mainentity"), setNames(c("mainentity", "mainentity"), c("Q1", "Q1")))
+  expect_identical(tbl$get_association("mainentity"), setNames(c("Q1", "Q1"), c("mainentity", "mainentity")))
   expect_identical(tbl$get_label("Q1"), setNames(c("test label", "test label"), c("Q1", "Q1")))
 
 })
@@ -91,7 +91,7 @@ test_that("left_join work with Survey_df", {
   df <- dplyr::left_join(df, dplyr::mutate(df[1, ], test = "test"))
 
   expect_is(df, "Survey_df")
-  expect_identical(df$get_association("mainentity"),  setNames("mainentity", "Q1"))
+  expect_identical(df$get_association("mainentity"),  setNames("Q1", "mainentity"))
   expect_identical(df$data$test, c("test", NA))
   expect_identical(df$get_label("Q1"),  setNames("test label", "Q1"))
 
@@ -104,7 +104,7 @@ test_that("left_join work with Survey_dt", {
   dt <- dplyr::left_join(dt, dplyr::mutate(dt[1, ], test = "test"))
 
   expect_is(dt, "Survey_tbl")
-  expect_identical(dt$get_association("mainentity"),  setNames("mainentity", "Q1"))
+  expect_identical(dt$get_association("mainentity"),  setNames("Q1", "mainentity"))
   expect_identical(dt$data$test, c("test", NA))
   expect_identical(dt$get_label("Q1"),  setNames("test label", "Q1"))
 
@@ -117,7 +117,7 @@ test_that("left_join work with Survey_tbl", {
   tbl <- dplyr::left_join(tbl, dplyr::mutate(tbl[1, ], test = "test"))
 
   expect_is(tbl, "Survey_tbl")
-  expect_identical(tbl$get_association("mainentity"),  setNames("mainentity", "Q1"))
+  expect_identical(tbl$get_association("mainentity"),  setNames("Q1", "mainentity"))
   expect_identical(tbl$data$test, c("test", NA))
   expect_identical(tbl$get_label("Q1"),  setNames("test label", "Q1"))
 

@@ -20,7 +20,7 @@ test_that("Hidden fields are updated when Survey_df is renamed.", {
 
   df <- survey_df(org)
   df <- df$set_names(c("a", "b"))
-  expect_identical(names(df$get_association()), c("a", "b"))
+  expect_identical(unname(df$get_association()), c("a", "b"))
 
 })
 
@@ -28,7 +28,7 @@ test_that("Hidden fields are updated when Survey_dt is renamed.", {
 
   dt <- survey_dt(org)
   dt <- dt$set_names(c("a", "b"))
-  expect_identical(names(dt$get_association()), c("a", "b"))
+  expect_identical(unname(dt$get_association()), c("a", "b"))
 
 })
 
@@ -37,7 +37,7 @@ test_that("Hidden fields are updated when Survey_dt is renamed.", {
 
   tbl <- survey_tbl(org)
   tbl <- tbl$set_names(c("a", "b"))
-  expect_identical(names(tbl$get_association()), c("a", "b"))
+  expect_identical(unname(tbl$get_association()), c("a", "b"))
 
 })
 

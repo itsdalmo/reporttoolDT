@@ -6,6 +6,9 @@
 #' @param x A \code{Survey} object.
 #' @param which If this is specified, the function only returns the elements
 #' which match the criteria. This should be a character vector.
+#' @param invert For \code{get_association} the default output is returned with
+#' the association as a name and variable names as the values. Set to \code{FALSE}
+#' to override.
 #' @author Kristian D. Olsen
 #' @export
 #' @examples
@@ -30,10 +33,10 @@ get_label <- function(x, which = NULL) {
 
 #' @rdname get_label
 #' @export
-get_association <- function(x, which = NULL) {
+get_association <- function(x, which = NULL, invert = TRUE) {
   if (!is.survey(x))
     return()
-  x$get_association(which)
+  x$get_association(which, invert = invert)
 }
 
 #' @rdname get_label

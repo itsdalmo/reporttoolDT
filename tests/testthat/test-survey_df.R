@@ -15,7 +15,7 @@ test_that("[<- works with Survey_df", {
 
   expect_is(df, "Survey_df")
   expect_true("test" %in% df$names())
-  expect_true("test" %in% names(df$get_association()))
+  expect_true("test" %in% df$get_association())
 
 })
 
@@ -26,7 +26,7 @@ test_that("[[<- works with Survey_df", {
 
   expect_is(df, "Survey_df")
   expect_true("test" %in% df$names())
-  expect_true("test" %in% names(df$get_association()))
+  expect_true("test" %in% df$get_association())
 
 })
 
@@ -55,7 +55,7 @@ test_that("names<- works with Survey_df", {
 
   expect_is(df, "Survey_df")
   expect_identical(df$get_label("entity"), setNames("test label", "entity"))
-  expect_identical(df$get_association("mainentity"), setNames("mainentity", "entity"))
+  expect_identical(df$get_association("mainentity"), setNames("entity", "mainentity"))
 
 })
 

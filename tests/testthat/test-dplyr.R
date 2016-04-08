@@ -18,7 +18,7 @@ test_that("mutate works with Survey_df", {
 
   expect_is(df, "Survey_df")
   expect_identical(df$data$test, rep("test", 2))
-  expect_true("test" %in% names(df$get_association()))
+  expect_true("test" %in% df$get_association())
 
 })
 
@@ -30,7 +30,7 @@ test_that("mutate works with Survey_dt", {
 
   expect_is(dt, "Survey_dt")
   expect_identical(dt$data$test, rep("test", 2))
-  expect_true("test" %in% names(dt$get_association()))
+  expect_true("test" %in% dt$get_association())
 
 })
 
@@ -42,7 +42,7 @@ test_that("mutate works with Survey_tbl", {
 
   expect_is(tbl, "Survey_tbl")
   expect_identical(tbl$data$test, rep("test", 2))
-  expect_true("test" %in% names(tbl$get_association()))
+  expect_true("test" %in% tbl$get_association())
 
 })
 
@@ -160,7 +160,7 @@ test_that("rename works with Survey_tbl (and _df)", {
 
   expect_is(tbl, "Survey_tbl")
   expect_identical(names(tbl)[1], "entity")
-  expect_identical(tbl$get_association("mainentity"), setNames("mainentity", "entity"))
+  expect_identical(tbl$get_association("mainentity"), setNames("entity", "mainentity"))
 
 })
 
@@ -172,6 +172,6 @@ test_that("rename works with Survey_dt", {
 
   expect_is(dt, "Survey_dt")
   expect_identical(names(dt)[1], "entity")
-  expect_identical(dt$get_association("mainentity"), setNames("mainentity", "entity"))
+  expect_identical(dt$get_association("mainentity"), setNames("entity", "mainentity"))
 
 })

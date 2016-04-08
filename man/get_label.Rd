@@ -10,7 +10,7 @@
 \usage{
 get_label(x, which = NULL)
 
-get_association(x, which = NULL)
+get_association(x, which = NULL, invert = TRUE)
 
 get_marketshare(x, which = NULL)
 
@@ -23,6 +23,10 @@ get_translation(x, which = NULL)
 
 \item{which}{If this is specified, the function only returns the elements
 which match the criteria. This should be a character vector.}
+
+\item{invert}{For \code{get_association} the default output is returned with
+the association as a name and variable names as the values. Set to \code{FALSE}
+to override.}
 }
 \description{
 The listed functions provide a familiar interface to the hidden fields of
