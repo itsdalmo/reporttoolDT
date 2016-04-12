@@ -104,6 +104,8 @@ trunc_class <- function(x) {
            factor = "(fctr)",
            numeric = "(num)",
            Date = "(date)",
+           POSIXct = "(date)",
+           POSIXt = "(date)",
            scale = "(scale)",
            integer = "(int)",
            "(????)")
