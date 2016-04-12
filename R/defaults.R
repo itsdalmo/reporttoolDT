@@ -161,22 +161,12 @@ internal_defaults <- list(
                 "beamerthememetropolis.sty"))),
 
   # List (nested) of regex patterns used internally.
-  pattern = list(
-    detect_scale = "^[0-9]{1,2}[[:alpha:][:punct:] ]*",
-    extract_scale = "^[0-9]{1,2}\\s*=?\\s*([[:alpha:]]*)",
-
-    rmd = list(
-      chunk_start = "^```\\{r",
-      chunk_end = "```$",
-      chunk_eval = ".*eval\\s*=\\s*((.[^},]+|.[^}]+\\))),?.*",
-      inline = "`r[ [:alnum:][:punct:]][^`]+`",
+  pat_rmd = list(
+      chunk_start = "^[\t >]*```+\\s*\\{[.]?([a-zA-Z]+.*)\\}\\s*$",
+      chunk_end = "^[\t >]*```+\\s*$",
+      yaml_start = "----*",
+      yaml_end = "----*",
+      inline = "`r +([^`]+)\\s*`",
       section = "^#[^#]",
-      slide = "^##[^#]"),
-
-    code = list(
-      yaml = "^##\\+ ---",
-      inline = "`r[ [:alnum:][:punct:]][^`]+`",
-      title = "^##\\+\\s*#{1,2}[^#]",
-      text = "^##\\+\\s.*"))
-
+      slide = "^##[^#]")
 )
