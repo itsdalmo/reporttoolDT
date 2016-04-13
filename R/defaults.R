@@ -164,8 +164,8 @@ internal_defaults <- list(
   pat_rmd = list(
       chunk_start = "^[\t >]*```+\\s*\\{[.]?([a-zA-Z]+.*)\\}\\s*$",
       chunk_end = "^[\t >]*```+\\s*$",
-      yaml_start = "----*",
-      yaml_end = "----*",
+      yaml_start = "^---\\s*$",
+      yaml_end = "^---\\s*$",
       inline = "`r +([^`]+)\\s*`",
       section = "^#[^#]",
       slide = "^##[^#]")
