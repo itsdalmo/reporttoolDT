@@ -167,6 +167,6 @@ internal_defaults <- list(
       yaml_start = "^---\\s*$",
       yaml_end = "^---\\s*$",
       inline = "`r +([^`]+)\\s*`",
-      section = "^#[^#]",
-      slide = "^##[^#]")
+      section = "^#\\s+(.*)$",
+      slide = "^##\\s+(.*)$")
 )

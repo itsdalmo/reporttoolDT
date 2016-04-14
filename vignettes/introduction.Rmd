@@ -36,7 +36,7 @@ the class name, and use a lowercase letters for the constructor functions.
 
 Read in sample data:
 ```{r}
-sav <- haven::read_sav(system.file("extdata", "sample.sav", package = "reporttoolDT"))
+sav <- officeR::read_data(system.file("extdata", "sample.sav", package = "reporttoolDT"))
 ```
 
 To create a `Survey`, we can call `survey()` on the data:
