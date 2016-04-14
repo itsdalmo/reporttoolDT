@@ -21,7 +21,11 @@ test_that("recode_", {
 test_that("recode works successively", {
 
   x <- 1:3
-  y <- recode(x, "<3.5" = . < 3.5, "<2.5" = . < 2.5, "<1.5" = . < 1.5, factor = FALSE)
+  expect_warning(
+    y <- recode(x, "<3.5" = . < 3.5, "<2.5" = . < 2.5, "<1.5" = . < 1.5, factor = FALSE),
+    "recoded multiple times"
+  )
+
 
   expect_identical(y, c("<1.5", "<2.5", "<3.5"))
 

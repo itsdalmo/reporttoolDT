@@ -13,7 +13,7 @@ test_that("[<- works with Survey_df", {
   df <- dummy_survey(survey_df(org))
   df[, "test"] <- "test"
 
-  expect_is(df, "Survey_df")
+  expect_s3_class(df, "Survey_df")
   expect_true("test" %in% df$names())
   expect_true("test" %in% df$get_association())
 
@@ -24,7 +24,7 @@ test_that("[[<- works with Survey_df", {
   df <- dummy_survey(survey_df(org))
   df[["test"]] <- "test"
 
-  expect_is(df, "Survey_df")
+  expect_s3_class(df, "Survey_df")
   expect_true("test" %in% df$names())
   expect_true("test" %in% df$get_association())
 
@@ -35,7 +35,7 @@ test_that("[ works with Survey_df", {
   df <- dummy_survey(survey_df(org))
   df <- df[, "Q1", drop = FALSE]
 
-  expect_is(df, "Survey_df")
+  expect_s3_class(df, "Survey_df")
   expect_identical(names(df), "Q1")
 
 })
@@ -53,7 +53,7 @@ test_that("names<- works with Survey_df", {
   df <- dummy_survey(survey_df(org))
   names(df) <- c("entity", "score")
 
-  expect_is(df, "Survey_df")
+  expect_s3_class(df, "Survey_df")
   expect_identical(df$get_label("entity"), setNames("test label", "entity"))
   expect_identical(df$get_association("mainentity"), setNames("entity", "mainentity"))
 

@@ -44,28 +44,28 @@ test_that("Hidden fields are updated when Survey_dt is renamed.", {
 # Descriptives -----------------------------------------------------------------
 test_that("head/tail works for Survey_df", {
   df <- survey_df(org)
-  expect_is(head(df, 1), "Survey_df")
+  expect_s3_class(head(df, 1), "Survey_df")
   expect_equal(head(df, 1), df[1, ])
 
-  expect_is(tail(df, 1), "Survey_df")
+  expect_s3_class(tail(df, 1), "Survey_df")
   expect_equal(tail(df, 1), df[2, ])
 })
 
 test_that("head/tail works for Survey_dt", {
   dt <- survey_dt(org)
-  expect_is(head(dt, 1), "Survey_dt")
+  expect_s3_class(head(dt, 1), "Survey_dt")
   expect_equal(head(dt, 1), dt[1, ])
 
-  expect_is(tail(dt, 1), "Survey_dt")
+  expect_s3_class(tail(dt, 1), "Survey_dt")
   expect_equal(tail(dt, 1), dt[2, ])
 })
 
 test_that("head/tail works for Survey_tbl", {
   tbl <- survey_tbl(org)
-  expect_is(head(tbl, 1), "Survey_tbl")
+  expect_s3_class(head(tbl, 1), "Survey_tbl")
   expect_equal(head(tbl, 1), tbl[1, ])
 
-  expect_is(tail(tbl, 1), "Survey_tbl")
+  expect_s3_class(tail(tbl, 1), "Survey_tbl")
   expect_equal(tail(tbl, 1), tbl[2, ])
 })
 

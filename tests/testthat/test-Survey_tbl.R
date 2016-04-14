@@ -14,7 +14,7 @@ test_that("[<- works with Survey_tbl", {
   tbl <- dummy_survey(survey_tbl(org))
   tbl[, "test"] <- "test"
 
-  expect_is(tbl, "Survey_tbl")
+  expect_s3_class(tbl, "Survey_tbl")
   expect_true("test" %in% tbl$names())
   expect_true("test" %in% tbl$get_association())
 
@@ -26,7 +26,7 @@ test_that("[[<- works with Survey_tbl", {
   tbl <- dummy_survey(survey_tbl(org))
   tbl[["test"]] <- "test"
 
-  expect_is(tbl, "Survey_tbl")
+  expect_s3_class(tbl, "Survey_tbl")
   expect_true("test" %in% tbl$names())
   expect_true("test" %in% tbl$get_association())
 
@@ -37,7 +37,7 @@ test_that("[ works with Survey_tbl", {
   tbl <- dummy_survey(survey_tbl(org))
   tbl <- tbl[, "Q1", drop = FALSE]
 
-  expect_is(tbl, "Survey_tbl")
+  expect_s3_class(tbl, "Survey_tbl")
   expect_identical(names(tbl), "Q1")
 
 })
@@ -55,7 +55,7 @@ test_that("names<- works with Survey_tbl", {
   tbl <- dummy_survey(survey_tbl(org))
   names(tbl) <- c("entity", "score")
 
-  expect_is(tbl, "Survey_tbl")
+  expect_s3_class(tbl, "Survey_tbl")
   expect_identical(tbl$get_label("entity"), setNames("test label", "entity"))
   expect_identical(tbl$get_association("mainentity"), setNames("entity", "mainentity"))
 

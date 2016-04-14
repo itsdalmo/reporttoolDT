@@ -18,9 +18,13 @@ test_that("complete works with Survey_dt", {
   df <- dummy_survey(survey_df(org))
   lvl <- c("Example 1", "Example 2", "Example 3")
   df$data$Q1 <- factor(df$data$Q1, levels = lvl)
-  df <- tidyr::complete(df, Q1)
+  expect_warning(
+    df <- tidyr::complete(df, Q1),
+    "Class has changed"
+  )
 
-  expect_is(df, "Survey_tbl")
+
+  expect_s3_class(df, "Survey_tbl")
   expect_identical(as.character(df$data$Q1), lvl)
 
 })
@@ -32,9 +36,13 @@ test_that("complete works with Survey_dt", {
   dt <- dummy_survey(survey_dt(org))
   lvl <- c("Example 1", "Example 2", "Example 3")
   dt$data$Q1 <- factor(dt$data$Q1, levels = lvl)
-  dt <- tidyr::complete(dt, Q1)
+  expect_warning(
+    dt <- tidyr::complete(dt, Q1),
+    "Class has changed"
+  )
 
-  expect_is(dt, "Survey_tbl")
+
+  expect_s3_class(dt, "Survey_tbl")
   expect_identical(as.character(dt$data$Q1), lvl)
 
 })
@@ -48,7 +56,7 @@ test_that("complete works with Survey_tbl", {
   tbl$data$Q1 <- factor(tbl$data$Q1, levels = lvl)
   tbl <- tidyr::complete(tbl, Q1)
 
-  expect_is(tbl, "Survey_tbl")
+  expect_s3_class(tbl, "Survey_tbl")
   expect_identical(as.character(tbl$data$Q1), lvl)
 
 })
