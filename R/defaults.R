@@ -166,6 +166,7 @@ internal_defaults <- list(
       chunk_end = "^[\t >]*```+\\s*$",
       yaml_start = "^---\\s*$",
       yaml_end = "^---\\s*$",
+      yaml = "^\\s*([[:alnum:]]+):\\s*(.*)$",
       inline = "`r +([^`]+)\\s*`",
       section = "^#\\s+(.*)$",
       slide = "^##\\s+(.*)$")
