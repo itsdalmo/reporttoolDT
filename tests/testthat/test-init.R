@@ -46,6 +46,12 @@ test_that("We can initialize a Survey using as.survey", {
   expect_identical(as.survey(df), df)
 })
 
+test_that("We can initialize a Survey using survey()", {
+  df <- survey(org)
+  expect_s3_class(df, "Survey_df")
+  expect_identical(survey(df), df) # survey(survey()) returns survey.
+})
+
 # Initialize w/labels ----------------------------------------------------------
 test_that("We can initialize with Survey_df with labels", {
 

@@ -7,12 +7,16 @@ sav <- officeR::read_data(system.file("extdata", "sample.sav", package = "report
 # Public methods ---------------------------------------------------------------
 test_that("Entities", {
   df <- survey_df(org)$set_association(mainentity = "Q1")
-  expect_identical(df$entities(), entities(df))
+  en <- df$entities()
+  expect_identical(en, entities(df))
+  expect_output(print(en), "Entities")
 })
 
 test_that("Model", {
   df <- survey_df(org)
-  expect_identical(df$model(), model(df))
+  mm <- df$model()
+  expect_identical(mm, model(df))
+  expect_output(print(mm), "Measurement model")
 })
 
 # Renaming ---------------------------------------------------------------------

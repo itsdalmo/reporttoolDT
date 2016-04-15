@@ -24,10 +24,16 @@ test_that("default_latents", {
 
 test_that("clean_path", {
   expect_error(clean_path(c("test", "file")))
+  expect_identical(clean_path("./"), getwd())
+  expect_identical(clean_path(stri_c(getwd(), "/")), getwd())
 })
 
 test_that("basename_sans_ext", {
   expect_identical(basename_sans_ext("test.sav"), "test")
+})
+
+test_that("%||%", {
+  expect_identical(NULL %||% "test", "test")
 })
 
 # Scoping issues ---------------------------------------------------------------
