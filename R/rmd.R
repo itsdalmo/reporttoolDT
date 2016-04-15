@@ -6,8 +6,7 @@ evaluate_rmd <- function(rmd, env = new.env()) {
 
   # Loop through blocks and evaluate them (in turn).
   for (i in seq_along(blk)) {
-    b_i <- blk[[i]]
-    out <- c(out, eval_block(b_i, env = env, split = !inherits(b_i, "yaml")))
+    out <- c(out, eval_block(blk[[i]], env = env))
   }
 
   # Drop missing and return
@@ -26,10 +25,10 @@ rmd_handler <- evaluate::new_output_handler(
 )
 
 # Evaluate blocks by type ------------------------------------------------------
-eval_block <- function(blk, env, split) UseMethod("eval_block")
+eval_block <- function(blk, env, ...) UseMethod("eval_block")
 
 # CHUNK (split is unused.)
-eval_block.chunk <- function(blk, env, split = FALSE) {
+eval_block.chunk <- function(blk, env) {
   lines <- blk$content
   code <- lines[-c(1L, length(lines))]
   pat <- get_default("pat_rmd")
@@ -51,8 +50,8 @@ eval_block.chunk <- function(blk, env, split = FALSE) {
 
 }
 
-# MARKDOWN
-eval_block.markdown <- function(blk, env, split = TRUE) {
+# Eval markdown and split it into with sections, titles and content ------------
+eval_block.markdown <- function(blk, env, yaml = inherits(blk, "yaml")) {
   lines <- blk$content
   pat <- get_default("pat_rmd")
 
@@ -78,7 +77,7 @@ eval_block.markdown <- function(blk, env, split = TRUE) {
   # Return NULL if all lines are empty.
   if (all(lines == "")) return()
 
-  if (split) {
+  if (!yaml) {
     split_markdown(lines)
   } else {
     list(lines)
@@ -86,7 +85,6 @@ eval_block.markdown <- function(blk, env, split = TRUE) {
 
 }
 
-# Split markdown blocks into sections, titles and content ----------------------
 split_markdown <- function(x) {
   n <- length(x)
   pat <- get_default("pat_rmd")
@@ -129,8 +127,24 @@ split_markdown <- function(x) {
 
 }
 
-# YAML
+# Eval YAML and split it into a list with each setting -------------------------
 eval_block.yaml <- eval_block.markdown
+
+split_yaml <- function(x) {
+  pat <- get_default("pat_rmd")
+
+  # Remove yaml delimiters. Extract frontmatter.
+  x <- x[!stri_detect(x, regex = pat$yaml_start)]
+
+  value <- stri_replace(x, "$2", regex = pat$yaml)
+  names <- stri_replace(x, "$1", regex = pat$yaml)
+
+  # Remove quotationmarks from values
+  value <- stringi::stri_replace_all(value, "", regex = "[\"\']")
+
+  # Return
+  setNames(as.list(value), names)
+}
 
 # Split RMD file into blocks ---------------------------------------------------
 split_file <- function(rmd, pattern = get_default("pat_rmd")) {
