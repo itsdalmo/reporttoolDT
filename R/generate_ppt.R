@@ -18,14 +18,22 @@
 #' }
 
 generate_ppt <- function(rmd, file, env = parent.frame()) {
-  res <- evaluate_rmd(rmd, env = env)
   ppt <- officeR::ppt_workbook(template = NULL) # Default template
   pat <- get_default("pat_rmd")
+
+  # First entry is always the YAML. Rest is results.
+  res <- evaluate_rmd(rmd, env = env)
+  yaml <- res[[1L]]; res <- res[-1L]
+
+  # Use YAML information in a title slide
+  ts <- split_yaml(yaml)
+  ppt <- officeR::add_ts(ppt, ts$title, ts$subtitle, ts$author, ts$date)
 
   # Loop through results and add to ppt. (Excluding yaml)
   # (Note that subtitles will be used as titles if there are no sections.)
   title <- NULL; subtitle <- NULL
-  for (blk in res[-1L]) {
+
+  for (blk in res) {
 
     if (is.character(blk)) {
       # Check if it contains a title or subtitle
@@ -39,6 +47,7 @@ generate_ppt <- function(rmd, file, env = parent.frame()) {
         } else {
           subtitle <- stri_replace(blk, "$1", regex = pat$slide)
         }
+        next # (sub)title updated. Skip to next block.
       } else {
         blk <- stri_c(blk, collapse = "\n")
 
