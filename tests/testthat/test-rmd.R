@@ -38,8 +38,11 @@ test_that("evaluate_rmd returns the expected output.", {
 })
 
 test_that("We can create Powerpoint output from .Rmd", {
+  skip_if_not_installed("ReporteRs")
+
   fileName <- file.path(tempdir(), "pptx.pptx")
   generate_ppt(md, file = fileName)
+
   expect_true(file.exists(fileName))
   unlink(fileName, recursive = TRUE, force = TRUE)
 })
