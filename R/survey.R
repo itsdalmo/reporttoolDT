@@ -84,6 +84,9 @@ is.survey <- function(x) inherits(x, "Survey")
 # Survey (R6 Class) ------------------------------------------------------------
 #' @importFrom R6 R6Class
 Survey <- R6::R6Class("Survey",
+
+
+  # Private methods ------------------------------------------------------------
   private = list(
     .labels = NULL,
     .config = NULL,
@@ -91,7 +94,7 @@ Survey <- R6::R6Class("Survey",
     .translations = NULL,
     .marketshares = NULL,
 
-    # Get/set all private fields -----------------------------------------------
+
     all_fields = function() {
       list(
         labels = private$.labels,
@@ -113,6 +116,7 @@ Survey <- R6::R6Class("Survey",
 
   ),
 
+  # Public methods -------------------------------------------------------------
   public = list(
 
     data = NULL,
@@ -121,8 +125,6 @@ Survey <- R6::R6Class("Survey",
       if (missing(x) || !is.data.frame(x))
         stop("Expecting a data.frame or data.table.", call. = FALSE)
       if (any_labelled(x)) {
-        # NOTE: from_labelled returns a data.frame. This can cause issues if data
-        # is read from sav, converted to data.table and then initialized using survey().
         x <- officeR::from_labelled(x)
       }
       # Copy labels from attr (returns null if they do not exist.)
@@ -153,15 +155,15 @@ Survey <- R6::R6Class("Survey",
       slice
     },
 
-    get_data = function(copy = TRUE) {
-      if (copy && data.table::is.data.table(self$data)) {
-        data.table::copy(self$data)
-      } else {
-        self$data
-      }
+    names = function() {
+      names(self$data)
     },
 
-    # Mutate the Survey --------------------------------------------------------
+    print = function(...) {
+      print(self$data)
+    },
+
+    # Operations ---------------------------------------------------------------
     update = function(renamed = NULL) {
       "Update the survey. (Associations, labels, etc.)"
       if (!is.null(renamed)) {
@@ -218,53 +220,16 @@ Survey <- R6::R6Class("Survey",
       invisible(self)
     },
 
-    names = function() {
-      names(self$data)
-    },
-
-    # Model and entities -------------------------------------------------------
-    model = function() {
-      "Return the measurement model"
-      mm <- list(
-        latent = private$.associations,
-        manifest = self$names(),
-        question = private$.labels,
-        type = vapply(self$data, function(x) class(x)[1], character(1)),
-        levels = vapply(self$data, function(x) {
-          l <- levels(x); if (is.null(l)) NA_character_ else stri_c(l, collapse = "\n")
-        }, character(1))
-      )
-
-      na <- rep(NA, ncol(self$data))
-      mm <- lapply(mm, function(x) { if (is.null(x)) na else x })
-      mm <- as.data.frame(mm, stringsAsFactors = FALSE)
-      structure(mm, class = c("survey_model", "data.frame"))
-    },
-
-    entities = function() {
-      me <- self$get_association("mainentity")
-      if (!length(me) || is.null(me)) stop("'mainentity' has not been specified yet. See help(set_association).", call. = FALSE)
-
-      cutoff <- as.numeric(self$get_config("cutoff"))
-      valid <- !is.null(cutoff) && "percent_missing" %in% self$names()
-
-      df <- data.table::as.data.table(self$get_data())
-      df <- df[, list("n" = .N, "valid" = if (valid) sum(percent_missing <= cutoff) else NA_integer_), keyby = me]
-
-      ms <- self$get_marketshare()
-      if (!is.null(ms)) {
-        ms <- setNames(list(names(ms), unname(ms)), c(me, "marketshare"))
-        ms <- data.table::as.data.table(ms)
-        df <- df[ms[, marketshare := as.numeric(marketshare)]]
+    # Accessors ----------------------------------------------------------------
+    get_data = function(copy = TRUE) {
+      "Return a copy of the data."
+      if (copy && data.table::is.data.table(self$data)) {
+        data.table::copy(self$data)
       } else {
-        df[, marketshare := NA_real_]
+        self$data
       }
-
-      data.table::setnames(df, me, "entity")
-      structure(as.data.frame(df), class = c("survey_entities", "data.frame"))
     },
 
-    # set/get individual private fields ----------------------------------------
     set_label = function(..., lst = NULL) {
       "Set labels."
       new <- merge_vectors(..., lst, private$.labels, default = self$names())
@@ -303,7 +268,7 @@ Survey <- R6::R6Class("Survey",
         res <- res[match_all(which, res)]
         if (!length(res)) res <- NULL
       }
-      # Invert names/values when returning
+      # Invert names/values when returning associations.
       if (invert) {
         res <- setNames(names(res), unname(res))
       }
@@ -384,8 +349,53 @@ Survey <- R6::R6Class("Survey",
       res
     },
 
-    print = function(...) {
-      print(self$data)
+    # Model and entities -------------------------------------------------------
+    model = function() {
+      "Return the measurement model"
+      mm <- list(
+        latent = private$.associations,
+        manifest = self$names(),
+        question = private$.labels,
+        type = vapply(self$data, function(x) class(x)[1], character(1)),
+        levels = vapply(self$data, function(x) {
+          l <- levels(x); if (is.null(l)) NA_character_ else stri_c(l, collapse = "\n")
+        }, character(1))
+      )
+
+      na <- rep(NA, ncol(self$data))
+      mm <- lapply(mm, function(x) { if (is.null(x)) na else x })
+      mm <- as.data.frame(mm, stringsAsFactors = FALSE)
+      structure(mm, class = c("survey_model", "data.frame"))
+    },
+
+    entities = function() {
+      "Return information on entities."
+      me <- self$get_association("mainentity")
+      if (!length(me) || is.null(me))
+        stop("'mainentity' is not specified. See help(set_association).")
+
+      dt <- data.table::as.data.table(self$get_data())
+      if ("percent_missing" %in% self$names()) {
+        cutoff <- self$get_config("cutoff")
+        cutoff <- if (is.null(cutoff)) NA else as.numeric(cutoff)
+        dt <- dt[, list("n" = .N, "valid" = sum(percent_missing <= cutoff)), keyby = me]
+      } else {
+        dt <- dt[, list("n" = .N, "valid" = NA_integer_), keyby = me]
+      }
+
+      ms <- self$get_marketshare()
+      if (!is.null(ms)) {
+        ms <- setNames(list(names(ms), unname(ms)), c(me, "marketshare"))
+        ms <- data.table::as.data.table(ms)
+        # Join on mainentity, convert ms to numeric and drop entities with
+        # NA observations. I.e., not part of the original result
+        dt <- dt[ms[, marketshare := as.numeric(marketshare)]][!is.na(n), ]
+      } else {
+        dt[, marketshare := NA_real_]
+      }
+
+      data.table::setnames(dt, me, "entity")
+      structure(as.data.frame(dt), class = c("survey_entities", "data.frame"))
     }
   )
 )
