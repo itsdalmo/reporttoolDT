@@ -7,7 +7,11 @@
 write_survey(x, file)
 }
 \arguments{
-\item{srv}{A \code{Survey}.}
+\item{x}{A \code{Survey}.}
+
+\item{file}{Output file or directory.}
+
+\item{...}{Arguments passed to \code{\link[officeR]{write_data}}.}
 }
 \description{
 The preferred way to store a \code{Survey} is by using \code{write_survey},

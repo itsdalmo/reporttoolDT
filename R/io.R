@@ -38,7 +38,9 @@
 #'  \item \code{.Rdata}: Everything is stored.
 #' }
 #'
-#' @param srv A \code{Survey}.
+#' @param x A \code{Survey}.
+#' @param file Output file or directory.
+#' @param ... Arguments passed to \code{\link[officeR]{write_data}}.
 #' @author Kristian D. Olsen
 #' @export
 #' @examples
