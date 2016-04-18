@@ -253,7 +253,11 @@ Survey <- R6::R6Class("Survey",
       lst <- c(list(...), lst)
       lst <- lapply(names(lst), function(nm) {
         x <- lst[[nm]]
-        setNames(rep(stri_trans_tolower(nm), length(x)), x)
+        # 'none' is used to set NA's.
+        nm <- stri_trans_tolower(nm)
+        if (nm == "none") nm <- NA
+        # Now we have 'vars' = 'value'.
+        setNames(rep(nm, length(x)), x)
         })
 
       new <- merge_vectors(lst, private$.associations, default = self$names())
