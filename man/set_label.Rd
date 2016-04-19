@@ -8,15 +8,15 @@
 \alias{set_translation}
 \title{Set a private field for a Survey object.}
 \usage{
-set_label(x, ..., lst = NULL)
+set_label(x, ..., list = NULL)
 
-set_association(x, ..., lst = NULL)
+set_association(x, ..., list = NULL, common = FALSE)
 
-set_marketshare(x, ..., lst = NULL)
+set_marketshare(x, ..., list = NULL)
 
-set_config(x, ..., lst = NULL)
+set_config(x, ..., list = NULL)
 
-set_translation(x, ..., lst = NULL)
+set_translation(x, ..., list = NULL)
 }
 \arguments{
 \item{x}{A \code{Survey} object.}
@@ -24,8 +24,11 @@ set_translation(x, ..., lst = NULL)
 \item{...}{Named arguments of the format \code{name = value}, with the exception
 of \code{set_association} which uses \code{value = name}.}
 
-\item{lst}{Optional: A \code{list} (or named character vector) the same format as
+\item{list}{Optional: A \code{list} (or named character vector) the same format as
 \code{...}.}
+
+\item{common}{Optional: Set to \code{TRUE} if you want associations to be set
+for common variable names. E.g., q1 is set as mainentity, and q4a-z is associated with image.}
 }
 \description{
 Like the \code{get_} functions with the same name, these functions provide a

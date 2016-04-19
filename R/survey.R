@@ -230,9 +230,9 @@ Survey <- R6::R6Class("Survey",
       }
     },
 
-    set_label = function(..., lst = NULL) {
+    set_label = function(..., list = NULL) {
       "Set labels."
-      new <- merge_vectors(..., lst, private$.labels, default = self$names())
+      new <- merge_vectors(..., list, private$.labels, default = self$names())
       private$.labels <- new
       invisible(self)
     },
@@ -247,21 +247,26 @@ Survey <- R6::R6Class("Survey",
       res
     },
 
-    set_association = function(..., lst = NULL) {
+    set_association = function(..., list = NULL, common = FALSE) {
       "Set associations."
-      # Associations are specified as value = c(vars), i.e. we have to reverse name and value.
-      lst <- c(list(...), lst)
-      lst <- lapply(names(lst), function(nm) {
-        x <- lst[[nm]]
-        # 'none' is used to set NA's.
-        nm <- stri_trans_tolower(nm)
-        if (nm == "none") nm <- NA
-        # Now we have 'vars' = 'value'.
-        setNames(rep(nm, length(x)), x)
-        })
+      new <- c(list(...), list)
+      old <- private$.associations
+      def <- self$names()
 
-      new <- merge_vectors(lst, private$.associations, default = self$names())
-      private$.associations <- new
+      # Associations are specified as value = c(vars) and have to be reversed.
+      # (Associations should also be lower-case, and none == no association.)
+      new <- names_as_values(new)
+      new <- setNames(stri_trans_tolower(new), names(new))
+      new[new == "none"] <- NA
+
+      # Optionally: Set common latents in defaults.
+      if (common) {
+        com <- setNames(common_latents(def), def)
+      } else {
+        com <- NULL
+      }
+
+      private$.associations <- merge_vectors(new, old, com, default = def)
       invisible(self)
     },
 
@@ -279,7 +284,7 @@ Survey <- R6::R6Class("Survey",
       res
     },
 
-    set_marketshare = function(..., lst = NULL) {
+    set_marketshare = function(..., list = NULL) {
       "Set marketshares."
       ent <- self$get_association("mainentity")
       if (is.null(ent)) {
@@ -291,7 +296,7 @@ Survey <- R6::R6Class("Survey",
         ent <- if (is.factor(ent)) levels(ent) else unique(ent)
       }
 
-      new <- merge_vectors(..., lst, private$.marketshares, default = ent)
+      new <- merge_vectors(..., list, private$.marketshares, default = ent)
       private$.marketshares <- new
       invisible(self)
     },
@@ -306,11 +311,11 @@ Survey <- R6::R6Class("Survey",
       res
     },
 
-    set_config = function(..., lst = NULL) {
+    set_config = function(..., list = NULL) {
       "Set config."
       def <- get_default("config")
       def <- setNames(def$value, def$required)
-      new <- merge_vectors(..., lst, private$.config, default = def)
+      new <- merge_vectors(..., list, private$.config, default = def)
       private$.config <- new
       invisible(self)
     },
@@ -325,7 +330,7 @@ Survey <- R6::R6Class("Survey",
       res
     },
 
-    set_translation = function(..., lst = NULL, language = NULL) {
+    set_translation = function(..., list = NULL, language = NULL) {
       "Set translation."
       def <- get_default("translation")
 
@@ -338,7 +343,7 @@ Survey <- R6::R6Class("Survey",
         def <- def$required
       }
 
-      new <- merge_vectors(..., lst, private$.translations, default = def)
+      new <- merge_vectors(..., list, private$.translations, default = def)
       private$.translations <- new
       invisible(self)
     },
