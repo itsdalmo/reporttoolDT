@@ -4,12 +4,14 @@
 \alias{write_survey}
 \title{Write a Survey}
 \usage{
-write_survey(x, file)
+write_survey(x, file, write_input = FALSE)
 }
 \arguments{
 \item{x}{A \code{Survey}.}
 
 \item{file}{Output file or directory.}
+
+\item{write_input}{Set to \code{TRUE} to create input-files for the PLS-wizard.}
 
 \item{...}{Arguments passed to \code{\link[officeR]{write_data}}.}
 }
