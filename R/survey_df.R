@@ -30,10 +30,10 @@ Survey_df <- R6::R6Class("Survey_df",
       }
     },
     as_dt = function(...) {
-      Survey_dt$new(self$get_data(), fields = private$all_fields())
+      Survey_dt$new(self$get_data(), fields = self$get_field())
     },
     as_tbl = function(...) {
-      Survey_tbl$new(self$get_data(), fields = private$all_fields())
+      Survey_tbl$new(self$get_data(), fields = self$get_field())
     }
   )
 )

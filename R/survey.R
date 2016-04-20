@@ -94,17 +94,6 @@ Survey <- R6::R6Class("Survey",
     .translations = NULL,
     .marketshares = NULL,
 
-
-    all_fields = function() {
-      list(
-        labels = private$.labels,
-        config = private$.config,
-        associations = private$.associations,
-        translations = private$.translations,
-        marketshares = private$.marketshares
-      )
-    },
-
     # TODO: Check consistency with data?
     set_fields = function(fields) {
         private$.labels = fields$labels
@@ -230,6 +219,18 @@ Survey <- R6::R6Class("Survey",
       }
     },
 
+    get_field = function() {
+      "Get all hidden fields."
+      fields <- list(
+        labels = private$.labels,
+        config = private$.config,
+        associations = private$.associations,
+        translations = private$.translations,
+        marketshares = private$.marketshares
+      )
+      fields
+    },
+
     set_label = function(..., list = NULL) {
       "Set labels."
       new <- merge_vectors(..., list, private$.labels, default = self$names())
@@ -266,7 +267,7 @@ Survey <- R6::R6Class("Survey",
         com <- NULL
       }
 
-      private$.associations <- merge_vectors(new, old, com, default = def)
+      private$.associations <- merge_vectors(new, com, old, default = def)
       invisible(self)
     },
 

@@ -36,10 +36,10 @@ Survey_tbl <- R6::R6Class("Survey_tbl",
       super$initialize(x, fields)
     },
     as_df = function(...) {
-      Survey_df$new(self$get_data(), fields = private$all_fields())
+      Survey_df$new(self$get_data(), fields = self$get_field())
     },
     as_dt = function(...) {
-      Survey_dt$new(self$get_data(), fields = private$all_fields())
+      Survey_dt$new(self$get_data(), fields = self$get_field())
     },
     as_tbl = function(clone = FALSE) {
       if (clone) {

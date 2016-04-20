@@ -36,7 +36,7 @@ Survey_dt <- R6::R6Class("Survey_dt",
       super$initialize(x, fields)
     },
     as_df = function(...) {
-      Survey_df$new(self$get_data(), fields = private$all_fields())
+      Survey_df$new(self$get_data(), fields = self$get_field())
     },
     as_dt = function(clone = FALSE) {
       if (clone) {
@@ -46,7 +46,7 @@ Survey_dt <- R6::R6Class("Survey_dt",
       }
     },
     as_tbl = function(...) {
-      Survey_tbl$new(self$get_data(), fields = private$all_fields())
+      Survey_tbl$new(self$get_data(), fields = self$get_field())
     },
     names = function() {
       data.table::copy(names(self$data))
