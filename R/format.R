@@ -33,7 +33,7 @@ print.survey_entities <- function(x, ...) {
 
   x$entity <- as.character(x$entity)
   res <- Map("c", x, c("Total", colSums(x[-1], na.rm = FALSE)))
-  res$marketshare <- ifelse(is.na(res$marketshare), NA, stri_c(as.numeric(res$marketshare) * 100L, "%", sep = " "))
+  res$marketshare <- ifelse(is.na(res$marketshare), NA, sprintf("%.2f %%", as.numeric(res$marketshare) * 100L))
 
   # Add titles and format before print
   res <- Map("c", c("Entity", "Obs", "Valid", "Marketshare/Weight"), res)
