@@ -1,25 +1,77 @@
-# read_survey <- function(file) {
-#   if (!tools::file_ext(file) == "") {
-#     stop("The specified path is not a directory:\n", file, call. = FALSE)
-#   } else {
-#     file <- officeR::clean_path(file)
-#     if (!file.exists(file))
-#       stop("The specified directory does not exist:\n", file, call. = FALSE)
-#   }
-#
-#   # Make sure the required directories are present.
-#   dir <- list.files(file)
-#   missing <- setdiff(c("data", "input"), stri_trans_tolower(dir))
-#   if (length(missing))
-#     stop("The required folders were not found in the directory:\n", str_list(missing))
-#
-#   # Read in the required data
-#   dir <- file.path(file, dir[stri_trans_tolower(dir) %in% c("data", "input")])
-#   dir <- setNames(dir, c("data", "input"))
-#
-#
-#
-# }
+#' Read a Survey
+#'
+#' The preferred way to store a \code{Survey} is by using \code{write_survey},
+#' which persists all the information in the \code{Survey}. Information that
+#' cannot be stored in SPSS for instance, will be stored in an associated .Rdata
+#' file instead. This also means that you have to use \code{\link{read_survey}}
+#' to get everything back.
+#'
+#' You can also use \code{\link[officeR]{write_data}} to write the \code{Survey}.
+#' In this case the information which is persisted depends on the format used:
+#'
+#' \itemize{
+#'  \item \code{.sav}: Data including labels, and levels for factor variables.
+#'  \item \code{.xlsx}: Data, measurement model (labels and levels) and entities.
+#'  \item \code{.Rdata}: Everything is stored.
+#' }
+#'
+#' @param x A \code{Survey}.
+#' @param file Output file or directory.
+#' @param write_input Set to \code{TRUE} to create input-files for the PLS-wizard.
+#' @param ... Arguments passed to \code{\link[officeR]{write_data}}.
+#' @author Kristian D. Olsen
+#' @export
+#' @examples
+#' \dontrun{
+#' df <- survey_df(data.frame("A" = "test", "B" = 2))
+#'
+#' # Store data and labels
+#' officeR::write_data(df, "test.sav")
+#'
+#' # Store everything
+#' write_survey(df, "test.Rdata")
+#' }
+
+read_survey <- function(file, mainentity = "q1", ...) {
+
+}
+
+read_model_output <- function(file, mainentity = "q1") {
+  file <- clean_path(file)
+  if (!file.exists(file))
+    stop("File does not exist:\n", file)
+
+  folders <- c("Data", "Input", "Output")
+  folders <- required_folders(file, folders, create = FALSE)
+
+  # 1 - Read the .sav file -----------------------------------------------------
+  fname <- list.files(folders$data)
+  fname <- fname[stri_detect(fname, regex = ".*em\\.sav$", case_insensitive = TRUE)]
+  if (length(fname) != 1L) {
+    msg <- if (length(fname) > 1L) "Found more than one" else "Could not find any"
+    stop(stri_c(msg, "'...EM.sav' files.", sep = " "))
+  }
+
+  data <- read_data(fname)
+
+  # 1.1 - Include fields if they exist
+  fname <- stri_c(tools::file_path_sans_ext(fname), " (survey).Rdata")
+  if (file.exists(fname)) {
+    fields <- read_data(fname)
+  } else {
+    fields <- NULL
+  }
+
+  # 1.2 - Convert to Survey
+  srv <- Survey$new(data, fields = fields)
+
+  # 2 - Read input -------------------------------------------------------------
+
+
+  file <- list.files(dir)
+  file <- file[stri_detect(stri_trans_tolower(file), regex = ".*em\\.sav$")]
+
+}
 
 #' Write a Survey
 #'
@@ -57,26 +109,12 @@
 
 write_survey <- function(x, file, write_input = FALSE) {
   stopifnot(is.survey(x))
-
   file <- clean_path(file)
+
   ext <- stri_trans_tolower(tools::file_ext(file))
-
   if (ext == "") {
-    folders <- setNames("Data", "data")
-    # Also create "input" folder if writing input.
-    if (write_input) folders <- c(folders, setNames("Input", "input"))
-    current <- list.files(file)
-
-    # Reuse folders if they exist
-    if (length(current)) {
-      existing <- names(folders) %in% stri_trans_tolower(current)
-      if (any(existing)) {
-        folders[existing] <- current[match_all(tolower(folders), tolower(current))]
-        folders[existing] <- file.path(file, folders[existing])
-      }
-    } else {
-      existing <- rep(FALSE, length(folders))
-    }
+    required <- if (write_input) c("Data", "Input") else "Data"
+    folders <- required_folders(file, required, create = TRUE)
 
     # Make sure the necessary configs have been set.
     cfg <- x$get_config(c("name", "segment", "year"))
@@ -85,32 +123,26 @@ write_survey <- function(x, file, write_input = FALSE) {
 
     # Construct a file name from config.
     data <- stri_c(stri_c(cfg[!is.na(cfg)], collapse = " "), ".sav")
-    folders[["data"]] <- file.path(folders[["data"]], data)
+    folders$data <- file.path(folders$data, data)
 
-    # Create missing folders that are required
-    if (any(!existing)) {
-      folders[!existing] <- file.path(file, folders[!existing])
-      lapply(folders[!existing], dir.create, showWarnings = FALSE)
-      warning("Created the following (required) folders:\n", str_list(folders[!existing]))
-    }
+  } else if (write_input) {
+    stop("Cannot write input when 'file' is not a directory.")
+  } else if (ext != "sav") {
+    stop("Use write_data to write Surveys to formats other than .sav.")
   } else {
-    if (write_input)
-      stop("Cannot write input when 'file' is not a directory.")
-    if (ext != "sav")
-      stop("Use write_data to write Surveys to formats other than .sav.")
-    folders <- setNames(file, "data")
+    folders <- list(data = file)
   }
 
   # Write input
   if (write_input)
-    write_model_input(x$clone(deep = TRUE), folders[["input"]])
+    write_model_input(x$clone(deep = TRUE), folders$input)
 
   # Write hidden fields.
-  field_data <- stri_c(basename_sans_ext(folders[["data"]]), " (survey).Rdata")
-  write_data(x$get_field(), file = file.path(dirname(file), field_data))
+  rdata_file <- stri_c(tools::file_path_sans_ext(folders$data), " (survey).Rdata")
+  write_data(x$get_field(), file = rdata_file)
 
   # Write data
-  write_data(x, file = folders[["data"]])
+  write_data(x, file = folders$data)
 
   # Make sure nothing is printed
   invisible()
@@ -219,5 +251,29 @@ write_model_input <- function(x, dir) {
 
   # Make sure nothing is printed
   invisible()
+
+}
+
+required_folders <- function(path, folders, create = FALSE) {
+  if (missing(folders) || !is.character(folders))
+    stop("Argument 'folders' should be a character vector.")
+
+  # Check/create required folders (error if create = FALSE)
+  existing <- list.files(path)
+  missing <- folders[!tolower(folders) %in% tolower(existing)]
+  if (length(missing)) {
+    if (!create) stop("Required folders do not exist:\n", str_list(missing))
+    for (folder in missing) {
+      dir.create(file.path(path, folder), showWarnings = FALSE)
+    }
+    warning("Created missing folders:\n", str_list(missing), call. = FALSE)
+  }
+
+  # Reuse existing (case insensitive)
+  paths <- c(missing, existing[tolower(existing) %in% tolower(folders)])
+  paths <- setNames(file.path(path, paths), tolower(paths))
+
+  # Return as list (avoid brackets)
+  as.list(paths)
 
 }
