@@ -4,23 +4,20 @@
 \alias{write_survey}
 \title{Write a Survey}
 \usage{
-write_survey(x, file, write_input = FALSE)
+write_survey(x, file)
 }
 \arguments{
 \item{x}{A \code{Survey}.}
 
-\item{file}{Output file or directory.}
-
-\item{write_input}{Set to \code{TRUE} to create input-files for the PLS-wizard.}
-
-\item{...}{Arguments passed to \code{\link[officeR]{write_data}}.}
+\item{file}{Output file or directory. (If a directory is specified, PLS-input
+will be created. The resulting EM.sav file-name is based on the Survey's config.)}
 }
 \description{
-The preferred way to store a \code{Survey} is by using \code{write_survey},
-which persists all the information in the \code{Survey}. Information that
-cannot be stored in SPSS for instance, will be stored in an associated .Rdata
-file instead. This also means that you have to use \code{\link{read_survey}}
-to get everything back.
+In contrast to \code{\link[officeR]{write_data}}, \code{write_survey} will store
+hidden fields (such as config, translations etc.) which can be retrieved by using
+\code{\link{read_survey}}. This means that you don't have to repeatedly set
+these options when reading/writing a survey you are working on. Information that
+cannot be stored in SPSS will be stored in an associated .Rdata file instead.
 }
 \details{
 You can also use \code{\link[officeR]{write_data}} to write the \code{Survey}.
