@@ -41,16 +41,14 @@ See Pandoc's [instructions](http://pandoc.org/installing.html) for installing La
 
 After installing, you might also want to change Rstudio's global options (Sweave) to "typeset LaTex into PDF using:" XeLatex. This allows you to generate PDF's with custom fonts.
 
-#### 3. Install dependencies ahead of CRAN.
-
-- [Haven](https://github.com/hadley/haven) 0.2.0.9000: Fixes crashes when writing strings longer than 256 characters.
+#### 3. Install officeR
 
 ```R
-if (!require(devtools)) {
-	install.packages("devtools")
-}
-devtools::install_github("hadley/haven")
+devtools::install_github("hadley/haven")     # Ahead of CRAN. See officeR documentation.
+devtools::install_github("itsdalmo/officeR") # Not on CRAN yet.
 ```
+
+If you want Powerpoint support (for `officeR::to_ppt` and `generate_ppt`), you can follow the instructions [here](https://github.com/itsdalmo/officeR).
 
 #### 4. Install reporttolDT.
 
@@ -62,17 +60,6 @@ devtools::install_github("itsdalmo/reporttoolDT", build_vignettes = TRUE)
 CRAN:
 ```R
 # Not on CRAN yet.
-```
-
-#### 5. Optional install
-
-Powerpoint (`generate_ppt`):
-
-- The latest JRE from [Java](http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html).
-- [ReporteRs](https://github.com/davidgohel/ReporteRs) from CRAN: 
-
-```R
-install.packages("ReporteRs")
 ```
 
 ## Whats next
