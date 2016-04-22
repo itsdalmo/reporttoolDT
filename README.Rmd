@@ -50,7 +50,7 @@ devtools::install_github("itsdalmo/officeR") # Not on CRAN yet.
 
 If you want Powerpoint support (for `officeR::to_ppt` and `generate_ppt`), you can follow the instructions [here](https://github.com/itsdalmo/officeR).
 
-#### 4. Install reporttolDT.
+#### 4. Install reporttolDT
 
 Development version:
 ```R
