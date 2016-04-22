@@ -12,7 +12,7 @@ Installation
 #### 1. Install R
 
 1.  Install the latest version of R (&gt;= 3.2.5) from [CRAN](https://cran.r-project.org/).
-2.  Next, install Rtools (required for .xlsx files). You can find it on [CRAN](https://cran.r-project.org/bin/windows/Rtools/).
+2.  Next, install Rtools (required for .xlsx files). You can find it on [CRAN](https://cran.r-project.org/bin/windows/Rtools/). Make sure you check "edit path" when installing.
 3.  Optional: Get the Rstudio (desktop) IDE from their [webpage](https://www.rstudio.com/products/rstudio/download/).
 
 #### 2. Install LaTeX
@@ -29,16 +29,14 @@ After installing, you might also want to change Rstudio's global options (Sweave
 
 #### 3. Install dependencies ahead of CRAN.
 
+-   [Haven](https://github.com/hadley/haven) 0.2.0.9000: Fixes crashes when writing strings longer than 256 characters.
+
 ``` r
 if (!require(devtools)) {
     install.packages("devtools")
 }
 devtools::install_github("hadley/haven")
 ```
-
-Dev. dependencies:
-
--   [Haven](https://github.com/hadley/haven) 0.2.0.9000: Fixes crashes when writing strings longer than 256 characters.
 
 #### 4. Install reporttolDT.
 
