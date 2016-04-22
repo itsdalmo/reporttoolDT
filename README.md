@@ -17,9 +17,9 @@ Installation
 
 #### 2. Install LaTeX
 
-LaTeX is required to create PDF files from rmarkdown and pandoc. The installation of Pandoc itself will happen in R, but you'll need to install LaTeX manually. Pandoc has [instructions](http://pandoc.org/installing.html) for installing LaTeX.
+LaTeX is required to create PDF files from rmarkdown and pandoc.
 
-There are multiple distributions for each operating system (all of which are large downloads/take a while to install):
+See Pandoc's [instructions](http://pandoc.org/installing.html) for installing LaTeX. Bulletpoints below:
 
 -   Windows: [MikTex](http://miktex.org/). Use the "MikTex {version} Net Installer 64-bit" under "Other Downloads" on this [page](http://miktex.org/download). Do a full install.
 -   OS X: Use [MacTex](https://tug.org/mactex/) (large download, but you'll have everything you need after.)
@@ -27,13 +27,7 @@ There are multiple distributions for each operating system (all of which are lar
 
 After installing, you might also want to change Rstudio's global options (Sweave) to "typeset LaTex into PDF using:" XeLatex. This allows you to generate PDF's with custom fonts.
 
-#### 3. Dependencies ahead of CRAN.
-
-Some imports require development versions of the packages. List and reason why we are using the development version below:
-
--   [Haven](https://github.com/hadley/haven) 0.2.0.9000 (CRAN is on 0.2.0): CRAN version crashes when writing strings longer than 256 characters. Dev. version does not.
-
-Install the above using the following code:
+#### 3. Install dependencies ahead of CRAN.
 
 ``` r
 if (!require(devtools)) {
@@ -42,19 +36,27 @@ if (!require(devtools)) {
 devtools::install_github("hadley/haven")
 ```
 
-If you have completed the steps above, you are ready to install `reporttoolDT` itself.
+Dev. dependencies:
 
-#### 4. Install the package.
+-   [Haven](https://github.com/hadley/haven) 0.2.0.9000: Fixes crashes when writing strings longer than 256 characters.
 
-Currently this package is not on CRAN, so run the code below to install the development version and all imports:
+#### 4. Install reporttolDT.
+
+Development version:
 
 ``` r
-devtools::install_github("itsdalmo/reporttoolDT")
+devtools::install_github("itsdalmo/reporttoolDT", build_vignettes = TRUE)
+```
+
+CRAN:
+
+``` r
+# Not on CRAN yet.
 ```
 
 #### 5. Optional install
 
-For Powerpoint output install the following:
+Powerpoint (`generate_ppt`):
 
 -   The latest JRE from [Java](http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html).
 -   [ReporteRs](https://github.com/davidgohel/ReporteRs) from CRAN:
@@ -66,4 +68,4 @@ install.packages("ReporteRs")
 Whats next
 ----------
 
-Head over to the [vignettes](https://github.com/itsdalmo/reporttoolDT/tree/master/vignettes) for a introduction, or run `vignettes(reporttoolDT)` in R.
+Head over to the [vignettes](https://github.com/itsdalmo/reporttoolDT/tree/master/vignettes) for the introduction, or run `vignette("introduction", package = "reporttoolDT")` in R.
