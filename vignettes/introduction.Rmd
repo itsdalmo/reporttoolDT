@@ -58,8 +58,11 @@ dt <- survey_dt(sav) # Option 2: Use the Survey_dt constructor.
 
 That's it. We have 3 subclasses for `Survey`, these are `Survey_df`, `Survey_dt`
 and `Survey_tbl`. We can either call the generic constructor `survey()`,or a specific 
-one which coerces the input data, these are: `survey_df()`, `survey_dt()` and
-`survey_tbl()` (requires dplyr).
+one which coerces the input data, these are: 
+
+- `survey_df()` 
+- `survey_dt()` 
+- `survey_tbl()`, requires [dplyr](https://github.com/hadley/dplyr).
 
 ## Working with surveys
 
@@ -94,6 +97,117 @@ identical(df$test, df[["test"]]) # FALSE
 ```
 
 Because the `Survey` class is implemented in R6, they are mutable and allows the 
-`Survey_dt` subclass to have hidden fields behave similar to the `data.table` itself,
-which will be shown in the next section.
+`Survey_dt` subclass to have hidden fields behave similar to the `data.table` itself.
 
+## Hidden fields
+
+As mentioned previously, the `Survey` lets us keep track of extra information to
+automate certain processes - these are kept in the following hidden fields:
+
+- **labels**: The question text for each variable.
+- **associations**: Associations, such as latent association in the case of PLS-PM.
+- **marketshares**: The marketshare for each entity in the study.
+- **config**: Name of study, segment, missing % cutoff etc.
+- **translations**: A dictionary of common words and their replacement. Used in tables and plots.
+
+To retriee one or more labels, you can use `get_label()`:
+```{r}
+# Get the label for Q1 using the R6 method
+q1_label <- dt$get_label("q1")
+
+# S3 Method (recommended). Creates a copy and must be assigned.
+q1_label <- get_label(dt, "q1")
+
+# To get all labels, just drop the second argument
+all_labels <- get_label(dt)
+```
+
+The object `dt` already contains labels in this case, because `survey()` has found them
+after reading in the SPSS-file in `officeR`. You can also set one or more labels manually
+using `set_label()`:
+
+```{r}
+# Get the label for Q1 using the R6 method
+dt$set_label(q16 = "Ideal")
+
+# S3 Method (recommended). Creates a copy and must be assigned.
+dt <- set_label(dt, q6 = "Vs expectations")
+
+# To set several labels, use the list argument.
+dt <- set_label(dt, list = list(q1 = "This is the mainentity", q3 = "Overall"))
+```
+
+This is more or less the pattern used to *get* or *set* all hidden fields in 
+a `Survey`.
+
+Get hidden fields:
+
+- `get_label()`
+- `get_association()`
+- `get_marketshare()`
+- `get_config()`
+- `get_translation()`
+
+Set hidden fields:
+
+- `set_label()`
+- `set_association()`
+- `set_marketshare()`
+- `set_config()`
+- `set_translation()`
+
+Having set the labels above, the Survey will keep track of them as the data changes:
+
+```{r}
+dt_subset <- dt[, .(q3, q6, q16)]
+names(dt_subset) <- paste0("example", 1:3L)
+get_label(dt_subset) # No second argument, all labels are returned.
+```
+
+## Model and entities
+
+You can also use the function `model()` to return a list of variables in the data,
+their names, type and label:
+
+```{r}
+# R6 method
+model_example <- dt_subset$model()
+
+# S3 (recommended)
+model(dt_subset)
+```
+
+If we set associations, these are also marked next to the variable type in the output from `model()`:
+```{r}
+dt_subset <- set_association(dt_subset, epsi = "example1")
+model(dt_subset)
+```
+
+You can also use `common = TRUE` to guess associations based on variable names:
+
+```{r}
+dt <- set_association(dt, common = TRUE)
+# Call model(dt) to see which variables have been identified.
+get_association(dt, "mainentity")
+```
+
+After identifying common associations and having Q1 identified as our mainentity
+variable, we can use `entities()` to get a summary: 
+
+```{r}
+dt$entities()
+```
+
+If we set a marketshare, rename to "percent_missing" and set cutoff in config:
+
+```{r}
+names(dt)[names(dt) == "Andel_Missing"] <- "percent_missing"
+dt <- set_marketshare(dt, reporttool = 1L)
+dt <- set_config(dt, cutoff = .1) # 10%
+dt$entities()
+```
+
+## Summary
+
+The fields and the values we set are then reused when working with the survey to
+create tables, plots, and various output. This is covered in the next vignettes.
