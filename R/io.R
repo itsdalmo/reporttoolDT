@@ -77,7 +77,7 @@ write_model_input <- function(x, file) {
   }
 
   # Check whether required variables can be found. (order by variable names)
-  mm <- x$get_association(which = get_default("latents"))
+  mm <- x$get_association(which = default_latents())
   mm <- mm[match_all(names(x), mm)]
 
   cr <- names(x)[stri_trans_tolower(names(x)) %in% "coderesp"]
@@ -94,7 +94,7 @@ write_model_input <- function(x, file) {
 
   # 5 - Write measurement model ------------------------------------------------
   model <- split(unname(mm), names(mm))
-  model <- lapply(model[get_default("latents")], function(vars) as.integer(mm %in% vars) * -1L)
+  model <- lapply(model[default_latents()], function(vars) as.integer(mm %in% vars) * -1L)
   model <- as.data.frame(c(list(manifest = unname(mm), model)), stringsAsFactors = FALSE)
 
   fname <- file.path(folders$input, "measurement model.txt")
