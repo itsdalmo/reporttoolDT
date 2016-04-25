@@ -17,11 +17,11 @@ clean_scale <- function(var) {
   if (!is.character(var))
     stop("'var' should be a factor or character vector.")
 
-  # Set values greater than 10L to NA
+  # Extract first occurrence of a 1-2 digit number and convert to integer.
   var <- stringi::stri_extract_first(var, regex = "[0-9]{1,2}")
   var <- suppressWarnings(as.integer(var))
 
-  # 10 point scale and return.
+  # Set all values other than 1 - 10 as NA. Return
   var[var > 10L | var < 1L] <- NA
   var
 
@@ -40,8 +40,16 @@ clean_scale <- function(var) {
 #' identical(x, c(0, 100))
 
 rescale_100 <- function(var) {
-  if (!is.integer(var)) stop("'var' should be an integer.", call. = FALSE)
-  suppressWarnings(ifelse(var %in% 1:10, (var-1)*(100/9), NA))
+  if (!is.integer(var))
+    stop("'var' should be an integer.")
+
+  # Rescale from 10 point to 100 point scale
+  var <- (var-1L)*(100L/9L)
+
+  # Set values other than 0 - 100 as NA. Return
+  var[var > 100L | var < 0L] <- NA
+  var
+
 }
 
 #' Conjunct strings
@@ -56,7 +64,6 @@ rescale_100 <- function(var) {
 #' x <- str_list(c("A", "B", "C"), conjunction = "or")
 #' identical(x, c("A, B or C"))
 
-# TODO: Needs a better name.
 str_list <- function(x, conjunction = "and") {
   stopifnot(is.character(x))
   if (length(x) == 1L) return(x)
@@ -84,7 +91,6 @@ str_list <- function(x, conjunction = "and") {
 #' identical(a, "abcde...")
 #' identical(b, "abcdefghij ")
 
-# TODO: Needs a better name.
 str_just <- function(x, n = 50, trail = "...", pad = NULL, side = "right") {
   stopifnot(is.character(x))
   smax <- n - stri_length(trail)
