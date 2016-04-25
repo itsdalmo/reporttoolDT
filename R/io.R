@@ -1,3 +1,53 @@
+# S3 methods for officeR -------------------------------------------------------
+
+#' @importFrom officeR write_data
+#' @export
+write_data.Survey <- function(x, file, ...) {
+  ext <- stri_trans_tolower(tools::file_ext(file))
+  # Convert Survey to a format that can be written using officeR.
+  if (ext == "xlsx") {
+    x <- list(data = x$get_data(), model = model(x), entities = entities(x))
+  } else if (ext == "sav") {
+    # S3 method for Survey below.
+    x <- officeR::to_labelled(x)
+  } else if (ext %in% c("rda", "rdata")) {
+    x <- setNames(list(x), deparse(substitute(x)))
+  } else {
+    stop("Unrecognized output format (for Survey). See help(write_survey).")
+  }
+
+  officeR::write_data(x, file, ...)
+
+}
+
+#' @importFrom officeR to_labelled
+#' @export
+to_labelled.Survey <- function(x) {
+  out <- x$get_data(copy = TRUE)
+  if (data.table::is.data.table(out)) {
+    data.table::setattr(out, "labels", x$get_label())
+  } else {
+    attr(out, "labels") <- x$get_label()
+  }
+
+  officeR::to_labelled(out)
+
+}
+
+#' @importFrom officeR to_excel
+#' @export
+to_excel.Survey <- function(x, ...) {
+  # TODO: Automatic labels etc.
+  officeR::to_excel(x$data, ...)
+}
+
+#' @importFrom officeR to_ppt
+#' @export
+to_ppt.Survey <- function(x, ...) {
+  # TODO: Automatic labels etc.
+  officeR::to_ppt(x$data, ...)
+}
+
 #' Write a Survey
 #'
 #' In contrast to \code{\link[officeR]{write_data}}, \code{write_survey} will store
@@ -141,40 +191,6 @@ write_model_input <- function(x, file) {
 
   # Make sure nothing is printed
   invisible()
-
-}
-
-#' @importFrom officeR write_data
-#' @export
-write_data.Survey <- function(x, file, ...) {
-  ext <- stri_trans_tolower(tools::file_ext(file))
-  # Convert Survey to a format that can be written using officeR.
-  if (ext == "xlsx") {
-    x <- list(data = x$get_data(), model = model(x), entities = entities(x))
-  } else if (ext == "sav") {
-    # S3 method for Survey below.
-    x <- officeR::to_labelled(x)
-  } else if (ext %in% c("rda", "rdata")) {
-    x <- setNames(list(x), deparse(substitute(x)))
-  } else {
-    stop("Unrecognized output format (for Survey). See help(write_survey).")
-  }
-
-  officeR::write_data(x, file, ...)
-
-}
-
-#' @importFrom officeR to_labelled
-#' @export
-to_labelled.Survey <- function(x) {
-  out <- x$get_data(copy = TRUE)
-  if (data.table::is.data.table(out)) {
-    data.table::setattr(out, "labels", x$get_label())
-  } else {
-    attr(out, "labels") <- x$get_label()
-  }
-
-  officeR::to_labelled(out)
 
 }
 
