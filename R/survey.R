@@ -156,7 +156,7 @@ Survey <- R6::R6Class("Survey",
     update = function(renamed = NULL) {
       "Update the survey. (Associations, labels, etc.)"
       if (!is.null(renamed)) {
-        self$set_names(renamed)
+        self$update_field_names(renamed)
       }
       self$set_association()
       self$set_label()
@@ -196,14 +196,17 @@ Survey <- R6::R6Class("Survey",
 
     set_names = function(new_names) {
       "Set colnames/named vectors with new names."
-      if (!length(new_names) == length(self$data))
-        stop("set_names: New names must be of same length as the data.", call. = FALSE)
       if (data.table::is.data.table(self$data)) {
         data.table::setnames(self$data, new_names)
       } else {
         names(self$data) <- new_names
       }
+      self$update_field_names(new_names)
+      invisible(self)
+    },
 
+    update_field_names = function(new_names) {
+      "Update fields with new names."
       private$.labels <- setNames(private$.labels, new_names)
       private$.associations <- setNames(private$.associations, new_names)
       invisible(self)
