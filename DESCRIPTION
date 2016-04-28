@@ -11,6 +11,7 @@ Depends:
     R (>= 3.2)
 Imports:
     data.table,
+    evaluate,
     ggplot2 (>= 2.1),
     lazyeval,
     officeR,
@@ -22,6 +23,7 @@ Suggests:
     dplyr,
     ggrepel,
     knitr,
+    readr,
     rmarkdown,
     testthat,
     tidyr
