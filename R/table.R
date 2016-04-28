@@ -75,7 +75,7 @@ qtable_impl <- function(df, vars, groups = NULL, margin = TRUE, wide = TRUE, wei
     df[, proportion := prop.table(n), by = c(groups, "variable")]
     if (wide) {
       df[, n := sum(n), by = c(groups, "variable")]
-      fm <- stri_c(c(groups, "n"), collapse = "+")
+      fm <- stri_c(c(groups, if (length(unique(df$variable)) > 1L) "variable", "n"), collapse = "+")
       fm <- stri_c(fm, "~ value", collapse = " ")
       df <- data.table::dcast(df, formula = fm, value.var = "proportion")
     }
