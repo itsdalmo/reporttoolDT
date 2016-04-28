@@ -26,41 +26,43 @@
 #' all.equal(x, y)
 
 get_label <- function(x, which = NULL) {
-  if (!is.survey(x))
-    return()
+  stopifnot(is.survey(x))
   x$get_label(which)
 }
 
 #' @rdname get_label
 #' @export
 get_association <- function(x, which = NULL, invert = TRUE) {
-  if (!is.survey(x))
-    return()
+  stopifnot(is.survey(x))
   x$get_association(which, invert = invert)
 }
 
 #' @rdname get_label
 #' @export
 get_marketshare <- function(x, which = NULL) {
-  if (!is.survey(x))
-    return()
+  stopifnot(is.survey(x))
   x$get_marketshare(which)
 }
 
 #' @rdname get_label
 #' @export
 get_config <- function(x, which = NULL) {
-  if (!is.survey(x))
-    return()
+  stopifnot(is.survey(x))
   x$get_config(which)
 }
 
 #' @rdname get_label
 #' @export
 get_translation <- function(x, which = NULL) {
-  if (!is.survey(x))
-    return()
+  stopifnot(is.survey(x))
   x$get_translation(which)
+}
+
+#' @rdname get_label
+#' @export
+get_data <- function(x) {
+  stopifnot(is.survey(x))
+  x$get_data()
 }
 
 #' Set a private field for a Survey object.
