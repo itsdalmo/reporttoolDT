@@ -3,6 +3,7 @@
 \name{get_label}
 \alias{get_association}
 \alias{get_config}
+\alias{get_data}
 \alias{get_label}
 \alias{get_marketshare}
 \alias{get_translation}
@@ -17,6 +18,8 @@ get_marketshare(x, which = NULL)
 get_config(x, which = NULL)
 
 get_translation(x, which = NULL)
+
+get_data(x)
 }
 \arguments{
 \item{x}{A \code{Survey} object.}
