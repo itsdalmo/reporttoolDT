@@ -40,12 +40,36 @@ Survey_df <- R6::R6Class("Survey_df",
 
 # S3 methods -------------------------------------------------------------------
 
+#' Survey: rbind
+#'
+#' \code{\link[base]{rbind}} method for \code{Survey} objects. Labels and associations
+#' are also merged if you are binding other surveys.
+#'
+#' @param x A \code{Survey}.
+#' @param ... Additional parameters passed to \code{rbind}.
+#' @inheritParams base::rbind
+#' @author Kristian D. Olsen
 #' @export
+#' @examples
+#' NULL
+
 rbind.Survey <- function(x, ...) {
   x$do_merge("rbind", list(...))
 }
 
+#' Survey: cbind
+#'
+#' \code{\link[base]{cbind}} method for \code{Survey} objects. Labels and associations
+#' are also merged if you are binding other surveys.
+#'
+#' @param x A \code{Survey}.
+#' @param ... Additional parameters passed to \code{cbind}.
+#' @inheritParams base::rbind
+#' @author Kristian D. Olsen
 #' @export
+#' @examples
+#' NULL
+
 cbind.Survey <- function(x, ...) {
   x$do_merge("cbind", list(...))
 }
