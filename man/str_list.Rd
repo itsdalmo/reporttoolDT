@@ -4,7 +4,7 @@
 \alias{str_list}
 \title{Conjunct strings}
 \usage{
-str_list(x, conjunction = "and")
+str_list(x, conjunction = "and", quote = TRUE)
 }
 \arguments{
 \item{x}{A character vector.}
@@ -16,7 +16,7 @@ See examples.
 }
 \examples{
 x <- str_list(c("A", "B", "C"), conjunction = "or")
-identical(x, c("A, B or C"))
+identical(x, c("'A', 'B' or 'C'"))
 }
 \author{
 Kristian D. Olsen

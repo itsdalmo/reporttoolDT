@@ -133,13 +133,13 @@ recode_impl <- function(x, subsets) {
 
   is_null <- vapply(subsets, is.null, logical(1))
   if (any(is_null)) {
-    null <- stri_c("'", names(subsets)[is_null], "'")
+    null <- names(subsets)[is_null]
     stop("Arguments evaluated to NULL:\n", str_list(null))
   }
 
   is_logical <- vapply(subsets, is.logical, logical(1))
   if (any(!is_logical)) {
-    logical <- stri_c("'", names(subsets)[!is_logical], "'")
+    logical <- names(subsets)[!is_logical]
     stop("Arguments did not evaluate to a logical:\n", str_list(logical))
   }
 

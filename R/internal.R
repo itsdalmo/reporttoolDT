@@ -62,11 +62,12 @@ rescale_100 <- function(var) {
 #' @export
 #' @examples
 #' x <- str_list(c("A", "B", "C"), conjunction = "or")
-#' identical(x, c("A, B or C"))
+#' identical(x, c("'A', 'B' or 'C'"))
 
-str_list <- function(x, conjunction = "and") {
+str_list <- function(x, conjunction = "and", quote = TRUE) {
   stopifnot(is.character(x))
   if (length(x) == 1L) return(x)
+  if (quote) x <- stri_c("'", x, "'")
   stri_c(stri_c(x[1:(length(x)-1)], collapse = ", "), conjunction, x[length(x)], sep = " ")
 }
 

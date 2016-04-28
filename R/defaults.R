@@ -26,7 +26,7 @@ get_default <- function(string, exact = TRUE) {
   id <- stri_detect(names(internal_defaults), fixed = string, ignore_case = TRUE)
   id <- names(internal_defaults)[id]
   if (length(id) > 1L && exact) {
-    stop("The string matched more than one element:\n", str_list(stri_c("'", id, "'")))
+    stop("The string matched more than one element:\n", str_list(id))
   }
 
   res <- internal_defaults[id]
