@@ -1,0 +1,263 @@
+---
+title: "Introduction to reporttool"
+author: "Kristian D. Olsen"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## What is a Survey?
+
+As we saw in the introduction, the `Survey` is essentially a `data.frame` which
+stores some extra information about the variables and the survey as a whole. To do this,
+the `Survey` class is built on top of [R6](https://github.com/wch/R6). 
+
+Note: Because `Survey` is an R6 class, I have opted to use a capital **S** for
+the class name, and use a lowercase letters for the constructor functions.
+
+Let's start by reading in the sample data, creating a `Survey` again and looking at it's class:
+
+```{r}
+require(reporttoolDT)
+sav <- officeR::read_data(system.file("extdata", "sample.sav", package = "reporttoolDT"))
+srv <- survey(sav)
+class(srv)
+```
+
+As we can see from the class of our `srv` object, it inherits from "R6" in addition to
+"Survey". When I say the `Survey` is essentially a `data.frame`, this is because
+the data rests inside the survey itself, and can be accessed using `$`:
+
+```{r}
+# Show data/class
+head(srv$data[, 1:5L], n = 3L)
+class(srv$data)
+```
+
+If we look at the class again, we see that `srv$data` is just the same data that
+was read in and stored in the `sav` object. The difference is that `survey()` 
+converts from labelled variables to factors, and stores the labels in the `Survey`
+instead of in the data. We can recreate this as follows:
+
+```{r}
+sav_cleaned <- officeR::from_labelled(sav)
+attr(sav_cleaned, "labels") <- NULL
+
+all.equal(srv$data, sav_cleaned)
+```
+
+The last line shows that `sav_cleaned` is equal to the data stored in the survey.
+
+#### Using `$` with a survey
+
+Because a `Survey` is implemented in R6, the `$` operator is reserved for accessing
+the contents (seen above) and methods (explained below) of the `Survey`, and not columns 
+in the data directly:
+
+```{r}
+# Fail
+srv$q1
+
+# Success
+head(srv$data$q1, n = 1L)
+```
+
+#### Object oriented
+
+`R6` is a packages which helps us do object orientation in R. In practice this means
+that many functions are defined inside the `Survey` itself, and can be called using 
+`$`. For instance, all **get** and **set** functions are defined inside the `Survey`
+and have S3 wrappers:
+
+```{r}
+# S3 method for setting a label
+srv <- set_label(srv, StartDate = "Date when respondent opened the Survey.")
+
+# R6 method
+srv$set_label(StartDate = "Timestamp when respondent opened the Survey.")
+```
+
+Both of these functions do the same thing, because the S3 method is just a function
+that calls the R6 method. However, the S3 method returns a copy of the Survey you passed
+to the function, while the R6 method modifies the existing survey (in place). 
+
+#### Mutable
+
+R6 objects are mutable, and since the `Survey` is built on R6, it is also mutable.
+This means that we can make changes to the `Survey` without having to assign (`<-`) the
+result, like you saw an example of above (R6 method for setting label). Because it is
+mutable, this allows the `Survey` to have hidden fields that behave like the `data.table` itself.
+
+
+However, mutable objects are rather atypical for R objects, and so I have made the following
+decision in order to make methods more predictable: 
+
+- All S3 methods (e.g. set_label()) return a copy of the Survey, and must be assigned (`<-`).
+- All R6 methods (accessed with `$`) modify the Survey in place.
+
+## Detailed usage
+
+As we can see, simply calling `survey()` on the data will create a `Survey_tbl`,
+this is because `haven` returns a `tbl_df` by default. If we instead wanted a 
+`Survey_dt` (i.e., use `data.table`), we have two options:
+
+```{r}
+dtm <- survey(data.table::as.data.table(sav)) # Option 1: Manual.
+dt <- survey_dt(sav) # Option 2: Use the Survey_dt constructor.
+"Survey_dt" %in% class(dt) && "Survey_dt" %in% class(dtm)
+```
+
+That's it. We have 3 subclasses for `Survey`, these are `Survey_df`, `Survey_dt`
+and `Survey_tbl`. We can either call the generic constructor `survey()`,or a specific 
+one which coerces the input data, these are: 
+
+- `survey_df()` 
+- `survey_dt()` 
+- `survey_tbl()`, requires [dplyr](https://github.com/hadley/dplyr).
+
+#### `[` and `[[`
+
+When working with surveys, we can use `[` and `[[` just like on a regular `data.frame`:
+```{r}
+df <- survey_df(sav)
+df[["test"]] <- "test"
+df[1L, "test"]
+```
+
+Or `data.table`: 
+```{r}
+dt <- survey_dt(sav)
+head(dt[, test := "test"][1L, test])
+```
+
+When subsetting a `Survey`, the new object will also be a `Survey`:
+```{r}
+dt_slice <- dt[1:5L, .(test)]
+class(dt_slice)
+```
+
+But only if the operation returns an object that inherits from `data.frame`:
+```{r}
+class(dt_slice[, test])
+```
+
+Overall, a `Survey` should behave like the underlying data. The only exception to
+this, is that `$` is reserved for accessing public fields in R6 objects:
+```{r}
+identical(df$test, df[["test"]]) # FALSE
+```
+
+Because the `Survey` class is implemented in R6, they are mutable and allows the 
+`Survey_dt` subclass to have hidden fields behave similar to the `data.table` itself.
+
+#### Hidden fields
+
+As mentioned previously, the `Survey` lets us keep track of extra information to
+automate certain processes - these are kept in the following hidden fields:
+
+- **labels**: The question text for each variable.
+- **associations**: Associations, such as latent association in the case of PLS-PM.
+- **marketshares**: The marketshare for each entity in the study.
+- **config**: Name of study, segment, missing % cutoff etc.
+- **translations**: A dictionary of common words and their replacement. Used in tables and plots.
+
+To retriee one or more labels, you can use `get_label()`:
+```{r}
+# Get the label for Q1 using the R6 method
+q1_label <- dt$get_label("q1")
+
+# S3 Method (recommended). Creates a copy and must be assigned.
+q1_label <- get_label(dt, "q1")
+
+# To get all labels, just drop the second argument
+all_labels <- get_label(dt)
+```
+
+The object `dt` already contains labels in this case, because `survey()` has found them
+after reading in the SPSS-file in `officeR`. You can also set one or more labels manually
+using `set_label()`:
+
+```{r}
+# Get the label for Q1 using the R6 method
+dt$set_label(q16 = "Ideal")
+
+# S3 Method (recommended). Creates a copy and must be assigned.
+dt <- set_label(dt, q6 = "Vs expectations")
+
+# To set several labels, use the list argument.
+dt <- set_label(dt, list = list(q1 = "This is the mainentity", q3 = "Overall"))
+```
+
+This is more or less the pattern used to *get* or *set* all hidden fields in 
+a `Survey`.
+
+Get hidden fields:
+
+- `get_label()`
+- `get_association()`
+- `get_marketshare()`
+- `get_config()`
+- `get_translation()`
+
+Set hidden fields:
+
+- `set_label()`
+- `set_association()`
+- `set_marketshare()`
+- `set_config()`
+- `set_translation()`
+
+Having set the labels above, the Survey will keep track of them as the data changes:
+
+```{r}
+dt_subset <- dt[, .(q3, q6, q16)]
+names(dt_subset) <- paste0("example", 1:3L)
+get_label(dt_subset) # No second argument, all labels are returned.
+```
+
+#### Model and entities
+
+You can also use the function `model()` to return a list of variables in the data,
+their names, type and label:
+
+```{r}
+# R6 method
+model_example <- dt_subset$model()
+
+# S3 (recommended)
+model(dt_subset)
+```
+
+If we set associations, these are also marked next to the variable type in the output from `model()`:
+```{r}
+dt_subset <- set_association(dt_subset, epsi = "example1")
+model(dt_subset)
+```
+
+You can also use `common = TRUE` to guess associations based on variable names:
+
+```{r}
+dt <- set_association(dt, common = TRUE)
+# Call model(dt) to see which variables have been identified.
+get_association(dt, "mainentity")
+```
+
+After identifying common associations and having Q1 identified as our mainentity
+variable, we can use `entities()` to get a summary: 
+
+```{r}
+dt$entities()
+```
+
+If we set a marketshare, rename to "percent_missing" and set cutoff in config:
+
+```{r}
+names(dt)[names(dt) == "Andel_Missing"] <- "percent_missing"
+dt <- set_marketshare(dt, reporttool = 1L)
+dt <- set_config(dt, cutoff = .1) # 10%
+dt$entities()
+```
+
