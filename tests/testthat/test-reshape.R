@@ -122,6 +122,6 @@ test_that("dcast works with Survey_dt", {
 
   expect_s3_class(dt, "Survey_dt")
   expect_identical(names(dt), c("Q1", "Score1", "Score2"))
-  expect_equivalent(dt$data, org)
+  expect_equivalent(dt$data, data.table::as.data.table(org))
 
 })
