@@ -10,6 +10,8 @@ str_list(x, conjunction = "and", quote = TRUE)
 \item{x}{A character vector.}
 
 \item{conjunction}{The conjunction to use.}
+
+\item{quote}{Put quotes ('') around list items. Default is \code{TRUE}.}
 }
 \description{
 See examples.

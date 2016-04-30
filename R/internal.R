@@ -58,6 +58,7 @@ rescale_100 <- function(var) {
 #'
 #' @param x A character vector.
 #' @param conjunction The conjunction to use.
+#' @param quote Put quotes ('') around list items. Default is \code{TRUE}.
 #' @author Kristian D. Olsen
 #' @export
 #' @examples
