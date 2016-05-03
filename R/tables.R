@@ -53,7 +53,7 @@ qtable.Survey <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE,
 #' @export
 latent_table <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wide = TRUE) {
   # Get variables by name of latents
-  vars <- names(x)[stri_trans_tolower(names(x)) %in% default_latents()]
+  vars <- names(df)[stri_trans_tolower(names(df)) %in% default_latents()]
   if (!length(vars)) stop("Latent variables were not found in the data.")
 
   # Get weights in the same way
@@ -64,7 +64,8 @@ latent_table <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, 
   out <- tabulR::qtable(df, vars, groups = groups, weight = weight, margin = TRUE, wide = wide)
   title <- stri_c("Latent scores", if (!is.null(weight)) " (Weighted)" else " (Unweighted)")
 
-  # Return with title
+  # Remove counts. Return with title
+  out[, n := NULL]
   attr(out, "title") <- title
   out
 }
@@ -74,7 +75,8 @@ latent_table <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, 
 manifest_table <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wide = TRUE) {
   # Get variables from associations
   vars <- get_association(df, default_latents())
-  vars <- names(df)[tolower(names(df)) %in% stri_c(vars, "em")]
+  if (!length(vars)) stop("Latent associations have not been set yet.")
+  vars <- names(df)[tolower(names(df)) %in% stri_c(tolower(vars), "em")]
   if (!length(vars)) stop("No 'em' variables found in the data.")
 
   # Get weights in the same way
@@ -85,7 +87,8 @@ manifest_table <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE
   out <- tabulR::qtable(df, vars, groups = groups, weight = weight, margin = TRUE, wide = wide)
   title <- stri_c("Manifest scores", if (!is.null(weight)) " (Weighted)" else " (Unweighted)")
 
-  # Return with title
+  # Remove counts. Return with title
+  out[, n := NULL]
   attr(out, "title") <- title
   out
 }
