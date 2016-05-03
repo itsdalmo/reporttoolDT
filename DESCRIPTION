@@ -29,7 +29,7 @@ Suggests:
     testthat,
     tidyr
 Remotes:
-    itsdalmo/officeR
+    itsdalmo/officeR,
     itsdalmo/tabulR
 RoxygenNote: 5.0.1
 VignetteBuilder: knitr
