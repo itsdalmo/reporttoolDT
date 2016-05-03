@@ -57,7 +57,7 @@ latent_table <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, 
   if (!length(vars)) stop("Latent variables were not found in the data.")
 
   # Get weights in the same way
-  weight <- get_association(x, "weight")
+  weight <- get_association(df, "weight")
   if (is.null(weight)) warning("'weight' is not specified in associations. Margin is unweighted.")
 
   # Make the table and rename vars
@@ -78,7 +78,7 @@ manifest_table <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE
   if (!length(vars)) stop("No 'em' variables found in the data.")
 
   # Get weights in the same way
-  weight <- get_association(x, "weight")
+  weight <- get_association(df, "weight")
   if (is.null(weight)) warning("'weight' is not specified in associations. Margin is unweighted.")
 
   # Make the table and rename vars
