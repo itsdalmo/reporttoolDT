@@ -17,6 +17,7 @@ Imports:
     officeR,
     R6,
     stringi,
+    tabulR,
     tools,
     utils
 Suggests:
@@ -29,5 +30,6 @@ Suggests:
     tidyr
 Remotes:
     itsdalmo/officeR
+    itsdalmo/tabulR
 RoxygenNote: 5.0.1
 VignetteBuilder: knitr

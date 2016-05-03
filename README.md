@@ -2,7 +2,7 @@
 reporttool
 ----------
 
-[![Build Status](https://travis-ci.org/itsdalmo/reporttoolDT.svg?branch=master)](https://travis-ci.org/itsdalmo/reporttoolDT) [![codecov.io](http://codecov.io/github/itsdalmo/reporttoolDT/coverage.svg?branch=master)](http://codecov.io/github/itsdalmo/reporttoolDT?branch=master)
+[![Linux/OSX](https://travis-ci.org/itsdalmo/reporttoolDT.svg?branch=master)](https://travis-ci.org/itsdalmo/reporttoolDT) [![Windows](https://ci.appveyor.com/api/projects/status/github/itsdalmo/reporttoolDT?branch=master&svg=true)](https://ci.appveyor.com/project/itsdalmo/reporttoolDT) [![Coverage](http://codecov.io/github/itsdalmo/reporttoolDT/coverage.svg?branch=master)](http://codecov.io/github/itsdalmo/reporttoolDT?branch=master)
 
 A tool (work in progress) for generating reports from Survey data.
 
