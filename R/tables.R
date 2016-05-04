@@ -62,8 +62,14 @@ latent_table <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, 
   out <- tabulR::qtable(df, vars, groups = groups, weight = weight, margin = TRUE, wide = wide)
   title <- stri_c("Latent scores", if (!is.null(weight)) " (Weighted)" else " (Unweighted)")
 
-  # Remove counts. Return with title
-  out[, n := NULL]
+  # Remove counts.
+  if (data.table::is.data.table(out)) {
+    out[, n := NULL]
+  } else {
+    out$n <- NULL
+  }
+
+  # Return with title
   attr(out, "title") <- title
   out
 }
@@ -74,7 +80,7 @@ manifest_table <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE
   # Get variables from associations
   vars <- get_association(df, default_latents())
   if (!length(vars)) stop("Latent associations have not been set yet.")
-  vars <- names(df)[tolower(names(df)) %in% stri_c(tolower(vars), "em")]
+  vars <- names(df)[match_all(stri_c(tolower(vars), "em"), tolower(names(df)))]
   if (!length(vars)) stop("No 'em' variables found in the data.")
 
   # Get weights in the same way
@@ -83,10 +89,17 @@ manifest_table <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE
 
   # Make the table and rename vars
   out <- tabulR::qtable(df, vars, groups = groups, weight = weight, margin = TRUE, wide = wide)
+  names(out) <- stri_replace(names(out), "", regex = "em$")
   title <- stri_c("Manifest scores", if (!is.null(weight)) " (Weighted)" else " (Unweighted)")
 
-  # Remove counts. Return with title
-  out[, n := NULL]
+  # Remove counts.
+  if (data.table::is.data.table(out)) {
+    out[, n := NULL]
+  } else {
+    out$n <- NULL
+  }
+
+  # Return with title
   attr(out, "title") <- title
   out
 }
