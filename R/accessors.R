@@ -189,9 +189,7 @@ common_latents <- function(var) {
 
   # Suggest q1 as mainentity if it exists
   is_me <- stri_detect(var, regex = "^q1$", case_insensitive = TRUE)
-  if (any(is_me)) {
-    out[is_me] <- "mainentity"
-  }
+  if (any(is_me)) out[is_me] <- "mainentity"
 
   # Set remaining values to NA and return
   out[out == ""] <- NA

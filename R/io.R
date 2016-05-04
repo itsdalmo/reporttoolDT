@@ -234,12 +234,20 @@ read_survey <- function(file, mainentity = "q1") {
     fields <- NULL
   }
 
-  out <- Survey_tbl$new(out, fields = fields) # Always return tbl?
+  # Convert to survey and (always) set common latents.
+  out <- Survey_tbl$new(out, fields = fields)
 
-  # Rename "andel_missing" to "percent_missing".
-  if (!"percent_missing" %in% stri_trans_tolower(names(out))) {
-    names(out)[stri_trans_tolower(names(out)) == "andel_missing"] <-  "percent_missing"
-  }
+  # Add mainentity association if it exists in the data.
+  is_me <- stri_detect(names(out), regex = stri_c("^", mainentity, "$"), case_insensitive = TRUE)
+  if (any(is_me)) out$set_association(mainentity = names(out)[is_me][1L])
+
+  # percent_/andel_missing as missing
+  is_pm <- stri_detect(names(out), regex = "(percent|andel)_missing$", case_insensitive = TRUE)
+  if (any(is_pm)) out$set_association(percent_missing = names(out)[is_pm][1L])
+
+  # "w" as weight
+  is_wt <- stri_detect(names(out), regex = "^w$", case_insensitive = TRUE)
+  if (any(is_wt)) out$set_association(weight = names(out)[is_wt][1L])
 
   # Return
   out
@@ -275,11 +283,8 @@ read_model_output <- function(file, mainentity) {
   mm <- officeR::read_data(fname, encoding = "latin1", col_types = list("Manifest" = readr::col_character()))
   mm <- lapply(mm[-1], function(x, vars) {vars[x == -1]}, mm[[1]])
 
-  # Case insensitive matching for mainentity.
-  mainentity <- names(out)[tolower(names(out)) %in% tolower(mainentity)]
-
-  # Set associations specified in measurement model (and mainentity).
-  out$set_association(list = mm, mainentity = mainentity)
+  # Set associations specified in measurement model (mainentity is set in read_survey.).
+  out$set_association(list = mm)
 
   # 3 - Read config ------------------------------------------------------------
   fname <- files[stri_detect(files, regex = "config.*\\.txt", case_insensitive = TRUE)]
