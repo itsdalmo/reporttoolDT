@@ -5,8 +5,6 @@
 #' will use labels as columnames if possible. It also replaces variable names with their
 #' label in long tables (in the column "variable").
 #'
-#' \code{}
-#'
 #' @inheritParams tabulR::qtable
 #' @author Kristian D. Olsen
 #' @name tables

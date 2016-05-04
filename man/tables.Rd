@@ -37,9 +37,6 @@ addition to it's usual functionality, \code{qtable} used with a \code{Survey}
 will use labels as columnames if possible. It also replaces variable names with their
 label in long tables (in the column "variable").
 }
-\details{
-\code{}
-}
 \examples{
 NULL
 }
