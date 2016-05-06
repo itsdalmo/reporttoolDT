@@ -13,7 +13,8 @@
 
 #' @rdname tables
 #' @export
-qtable.Survey <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wide = TRUE) {
+stable <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wide = TRUE) {
+  stopifnot(is.survey(df))
   out <- tabulR::qtable(df$data, vars, groups, weight, margin, wide)
 
   # If only one variable was specified, and there is no "variable" column and/or
@@ -30,8 +31,8 @@ qtable.Survey <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE,
   if ("variable" %in% names(out)) {
     new <- get_label(df, out$variable)
     if (!is.null(new)) {
-      new <- new[!is.na(new)]
-      out$variable[out$variable %in% names(new)] <- new
+      new <- new[!is.na(new)]; new <- new[!duplicated(names(new))]; new <- setNames(names(new), new)
+      out$variable <- recode_(out$variable, dots = as.list(new), add = TRUE)
     }
   }
 
@@ -59,7 +60,7 @@ latent_table <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, 
   if (is.null(weight)) warning("'weight' is not specified in associations. Margin is unweighted.")
 
   # Make the table and rename vars
-  out <- tabulR::qtable(df, vars, groups = groups, weight = weight, margin = TRUE, wide = wide)
+  out <- stable(df, vars, groups = groups, weight = weight, margin = TRUE, wide = wide)
   title <- stri_c("Latent scores", if (!is.null(weight)) " (Weighted)" else " (Unweighted)")
 
   # Remove counts.
@@ -88,7 +89,7 @@ manifest_table <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE
   if (is.null(weight)) warning("'weight' is not specified in associations. Margin is unweighted.")
 
   # Make the table and rename vars
-  out <- tabulR::qtable(df, vars, groups = groups, weight = weight, margin = TRUE, wide = wide)
+  out <- stable(df, vars, groups = groups, weight = weight, margin = TRUE, wide = wide)
   names(out) <- stri_replace(names(out), "", regex = "em$")
   title <- stri_c("Manifest scores", if (!is.null(weight)) " (Weighted)" else " (Unweighted)")
 

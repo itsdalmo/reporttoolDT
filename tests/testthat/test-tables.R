@@ -6,7 +6,7 @@ srv <- survey_tbl(sav)$set_association(common = TRUE)
 # Merge attributes -------------------------------------------------------------
 test_that("qtable method for survey", {
 
-  out <- tabulR::qtable(srv, vars = "q17", groups = "q1", wide = TRUE)
+  out <- stable(srv, vars = "q17", groups = "q1", wide = TRUE)
   expect_identical(names(out)[1L], "q1: Supplier")
   expect_identical(out$n, c(10L, 5L, 5L, 20L))
   expect_identical(out$Nei, c(.9, .8, .8, .85))

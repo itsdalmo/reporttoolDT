@@ -3,11 +3,11 @@
 \name{tables}
 \alias{latent_table}
 \alias{manifest_table}
-\alias{qtable.Survey}
+\alias{stable}
 \alias{tables}
 \title{Tables from surveys.}
 \usage{
-qtable.Survey(df, vars, groups = NULL, weight = NULL, margin = TRUE,
+stable(df, vars, groups = NULL, weight = NULL, margin = TRUE,
   wide = TRUE)
 
 latent_table(df, vars, groups = NULL, weight = NULL, margin = TRUE,
