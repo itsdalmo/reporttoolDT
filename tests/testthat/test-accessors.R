@@ -76,14 +76,15 @@ test_that("setting/getting marketshare works for Survey_tbl", {
 
 # Config -----------------------------------------------------------------------
 test_that("setting/getting config works", {
-
-  # TODO
-
+  df <- set_config(survey_df(org), cutoff = .3)
+  expect_identical(get_config(df, "cutoff"), setNames("0.3", "cutoff"))
+  expect_identical(get_config(df, "name"), setNames("Example", "name"))
 })
 
 # Translation ------------------------------------------------------------------
 test_that("setting/getting translation works", {
-
-  # TODO
-
+  df <- set_translation(survey_df(org))
+  expect_identical(unname(get_translation(df)), rep(NA, length(get_default("translation")$required)))
+  df <- set_translation(survey_df(org), language = "norwegian")
+  expect_identical(get_translation(df, "epsi"), setNames("Kundetilfredshet", "epsi"))
 })
