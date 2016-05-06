@@ -88,3 +88,9 @@ test_that("setting/getting translation works", {
   df <- set_translation(survey_df(org), language = "norwegian")
   expect_identical(get_translation(df, "epsi"), setNames("Kundetilfredshet", "epsi"))
 })
+
+# Common associations ----------------------------------------------------------
+test_that("setting common associations work", {
+  df <- set_association(survey_df(org), common = TRUE)
+  expect_identical(get_association(df, "mainentity"), setNames("Q1", "mainentity"))
+})
