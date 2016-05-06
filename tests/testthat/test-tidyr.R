@@ -11,7 +11,7 @@ dummy_survey <- function(x) {
 }
 
 # Complete ---------------------------------------------------------------------
-test_that("complete works with Survey_dt", {
+test_that("complete works with Survey_df", {
   skip_if_not_installed("dplyr")
   skip_if_not_installed("tidyr")
 
@@ -59,4 +59,35 @@ test_that("complete works with Survey_tbl", {
   expect_s3_class(tbl, "Survey_tbl")
   expect_identical(as.character(tbl$data$Q1), lvl)
 
+})
+
+test_that("expand works with Survey_tbl", {
+  skip_if_not_installed("dplyr")
+  skip_if_not_installed("tidyr")
+
+  df <- data.frame(
+    Q1 = rep("Example", 7L),
+    year   = c(2010, 2010, 2010, 2010, 2012, 2012, 2012),
+    qtr    = c(   1,    2,    3,    4,    1,    2,    3),
+    return = rnorm(7)
+  )
+
+  tbl <- dummy_survey(survey_tbl(df))
+  tbl <- tidyr::expand(tbl, Q1, year, qtr)
+
+  expect_s3_class(tbl, "Survey_tbl")
+  expect_identical(get_association(tbl, "mainentity"), setNames("Q1", "mainentity"))
+
+})
+
+test_that("fill works with Survey_tbl", {
+  skip_if_not_installed("dplyr")
+  skip_if_not_installed("tidyr")
+
+  df <- data.frame(Q1 = rep("Example", 12L), Month = 1:12, Year = c(2000, rep(NA, 11)))
+  tbl <- dummy_survey(survey_tbl(df))
+  tbl <- tidyr::fill(tbl, Year)
+
+  expect_s3_class(tbl, "Survey_tbl")
+  expect_identical(get_association(tbl, "mainentity"), setNames("Q1", "mainentity"))
 })
