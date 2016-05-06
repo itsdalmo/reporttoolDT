@@ -342,12 +342,12 @@ Survey <- R6::R6Class("Survey",
       if (!is.null(language)) {
         found <- stri_detect(names(def), fixed = language, ignore_case = TRUE)
         if (!any(found)) stop("The specified language was not found.")
-        def <- setNames(def[[which(found)]], def$required)
+        lang <- setNames(def[[which(found)]], def$required)
       } else {
-        def <- def$required
+        lang <- NULL
       }
 
-      new <- merge_vectors(..., list, private$.translations, default = def)
+      new <- merge_vectors(..., list, lang, private$.translations, default = def$required)
       private$.translations <- new
       invisible(self)
     },
