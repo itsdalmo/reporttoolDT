@@ -111,9 +111,17 @@ write_survey <- function(x, file) {
 write_model_input <- function(x, file) {
   x <- survey_dt(x)
 
-  # 1 - Use config to creat a filename -----------------------------------------
-  cfg <- x$get_config(c("name", "segment", "year"))
+  # 1 - Check config and use it to create a filename ---------------------------
+  cfg <- x$get_config(c("name", "segment", "timestamp"))
   if (is.null(cfg)) stop("Config must be set before writing input.")
+  cfg[["timestamp"]] <- format(as.Date(cfg[["timestamp"]], "%Y-%m-%d"), "%Y")
+
+  co <- as.numeric(x$get_config("cutoff"))
+  if (is.na(co) || !length(co)) {
+    warning("Cutoff had not been set. Defaulting to 30%.", call. = FALSE)
+    co <- .3; x$set_config(cutoff = .3)
+  }
+
   fname <- stri_c(stri_c(cfg[!is.na(cfg)], collapse = " "), ".sav")
 
   # 2 - Check data -------------------------------------------------------------
@@ -152,11 +160,6 @@ write_model_input <- function(x, file) {
 
   # 5 - Write PLS data ---------------------------------------------------------
   mm <- unname(mm) # Drop latent association.
-  co <- as.numeric(x$get_config("cutoff"))
-  if (is.na(co) || !length(co)) {
-    warning("Cutoff had not been set. Defaulting to 30%.", call. = FALSE)
-    co <- .3; x$set_config(cutoff = .3)
-  }
 
   data <- x$get_data()
   data <- data[percent_missing <= co, vars, with = FALSE]
