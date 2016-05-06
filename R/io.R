@@ -161,8 +161,10 @@ write_model_input <- function(x, file) {
   # 5 - Write PLS data ---------------------------------------------------------
   mm <- unname(mm) # Drop latent association.
 
+  pm <- x$get_association("percent_missing")
+  if (is.null(pm)) stop("'percent_missing' association must be set before writing.")
   data <- x$get_data()
-  data <- data[percent_missing <= co, vars, with = FALSE]
+  data <- data[pm <= co, vars, with = FALSE]
 
   # Convert mainentity to integer, clean scales, recode NA and order by mainentity.
   data[, (me) := lapply(.SD, as.integer), .SDcols = unname(me)]
