@@ -75,6 +75,7 @@ get_data <- function(x) {
 #' of \code{set_association} which uses \code{value = name}.
 #' @param list Optional: A \code{list} (or named character vector) the same format as
 #' \code{...}.
+#' @param language Optional: Language defaults to use for translations.
 #' @param common Optional: Set to \code{TRUE} if you want associations to be set
 #' for common variable names. E.g., q1 is set as mainentity, and q4a-z is associated with image.
 #' @note These functions return a copy (\code{deep_clone}) of the \code{Survey}.
@@ -131,10 +132,10 @@ set_config <- function(x, ..., list = NULL) {
 
 #' @rdname set_label
 #' @export
-set_translation <- function(x, ..., list = NULL) {
+set_translation <- function(x, ..., list = NULL, language = NULL) {
   if (!is.survey(x))
     stop("set_translation: argument 'x' must be of class 'Survey'.", call. = FALSE)
-  res <- x$clone(deep = TRUE)$set_translation(..., list = list)
+  res <- x$clone(deep = TRUE)$set_translation(..., list = list, language = language)
   res
 }
 

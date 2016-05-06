@@ -16,7 +16,7 @@ set_marketshare(x, ..., list = NULL)
 
 set_config(x, ..., list = NULL)
 
-set_translation(x, ..., list = NULL)
+set_translation(x, ..., list = NULL, language = NULL)
 }
 \arguments{
 \item{x}{A \code{Survey} object.}
@@ -29,6 +29,8 @@ of \code{set_association} which uses \code{value = name}.}
 
 \item{common}{Optional: Set to \code{TRUE} if you want associations to be set
 for common variable names. E.g., q1 is set as mainentity, and q4a-z is associated with image.}
+
+\item{language}{Optional: Language defaults to use for translations.}
 }
 \description{
 Like the \code{get_} functions with the same name, these functions provide a
