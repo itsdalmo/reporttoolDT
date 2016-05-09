@@ -5,15 +5,17 @@ capture_dots <- function(...) {
 
 # Get renamed columns from lazy_dots in dplyr::select and dplyr::rename.
 # Return is equivalent to: setNames(old_name, new_name) ------------------------
-renamed_vars <- function(dots) {
-  expr <- dots[!is.na(names(dots)) & names(dots) != ""]
-  if (length(expr)) {
-    nms <- lapply(names(expr), function(nm) { x <- expr[[nm]]$expr; if (x != nm) x })
-    nms <- setNames(as.character(unlist(nms)), names(expr))
-  } else {
-    nms <- NULL
-  }
-  nms
+renamed_vars <- function(vars, dots) {
+  renamed <- dplyr::select_vars_(vars, dots)
+  renamed <- renamed[names(renamed) != renamed]
+
+  # Return NULL early if nothing has been renamed.
+  if (!length(renamed)) return()
+
+  # If renamed. Return a renamed vars vector.
+  vars[match(vars, renamed)] <- names(renamed)
+  vars
+
 }
 
 # Check whether data is a tbl --------------------------------------------------

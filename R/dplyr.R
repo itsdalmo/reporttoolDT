@@ -21,9 +21,7 @@ select_.Survey <- function(x, ...) {
   # dplyr::select also allows renaming variables when called.
   # e.g., select(x, new_name = old_var)
   dots <- lazyeval::all_dots(...)
-  vars <- renamed_vars(dots)
-  if (length(vars))
-    vars <- recode_(names(x), vars)
+  vars <- renamed_vars(names(x), dots)
 
   f <- get("select_", asNamespace("dplyr"))
   x$do(f, dots, renamed = vars)
@@ -33,9 +31,7 @@ select_.Survey <- function(x, ...) {
 #' @export
 rename_.Survey <- function(x, ...) {
   dots <- lazyeval::all_dots(...)
-  vars <- renamed_vars(dots)
-  if (length(vars))
-    vars <- recode_(x$names(), vars)
+  vars <- renamed_vars(names(x), dots)
 
   f <- get("rename_", asNamespace("dplyr"))
   x$do(f, dots, renamed = vars)
