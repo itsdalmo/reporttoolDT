@@ -11,11 +11,10 @@
 #' @examples
 #' NULL
 
-#' @rdname tables
+#' @importFrom tabulR qtable qtable_
 #' @export
-stable <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wide = TRUE) {
-  stopifnot(is.survey(df))
-  out <- tabulR::qtable(df$data, vars, groups, weight, margin, wide)
+qtable_.Survey <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wide = TRUE) {
+  out <- tabulR::qtable_(df$data, vars = vars, groups = groups, weight = weight, margin = margin, wide = wide)
 
   # If only one variable was specified, and there is no "variable" column and/or
   # the variable name is not in colnames - assume it has been spread. Use it's
@@ -31,7 +30,9 @@ stable <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wide =
   if ("variable" %in% names(out)) {
     new <- get_label(df, out$variable)
     if (!is.null(new)) {
-      new <- new[!is.na(new)]; new <- new[!duplicated(names(new))]; new <- setNames(names(new), new)
+      new <- new[!is.na(new)]
+      new <- new[!duplicated(names(new))]
+      new <- setNames(names(new), new)
       out$variable <- suppressWarnings(recode_(out$variable, dots = as.list(new), add = TRUE))
     }
   }
@@ -65,7 +66,7 @@ latent_table <- function(df, groups = NULL, weight = NULL, margin = TRUE, wide =
   }
 
   # Make the table and rename vars
-  out <- stable(df, vars, groups = groups, weight = weight, margin = margin, wide = wide)
+  out <- tabulR::qtable_(df, vars, groups = groups, weight = weight, margin = margin, wide = wide)
   title <- stri_c("Latent scores", if (!is.null(weight)) " (Weighted)" else " (Unweighted)")
 
   # Remove counts.
@@ -99,7 +100,7 @@ manifest_table <- function(df, groups = NULL, weight = NULL, margin = TRUE, wide
   }
 
   # Make the table and rename vars
-  out <- stable(df, vars, groups = groups, weight = weight, margin = margin, wide = wide)
+  out <- tabulR::qtable_(df, vars, groups = groups, weight = weight, margin = margin, wide = wide)
   names(out) <- stri_replace(names(out), "", regex = "em$")
   title <- stri_c("Manifest scores", if (!is.null(weight)) " (Weighted)" else " (Unweighted)")
 

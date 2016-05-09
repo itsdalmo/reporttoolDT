@@ -3,12 +3,12 @@
 \name{tables}
 \alias{latent_table}
 \alias{manifest_table}
-\alias{stable}
+\alias{qtable_.Survey}
 \alias{tables}
 \title{Tables from surveys.}
 \usage{
-stable(df, vars, groups = NULL, weight = NULL, margin = TRUE,
-  wide = TRUE)
+\method{qtable_}{Survey}(df, vars, groups = NULL, weight = NULL,
+  margin = TRUE, wide = TRUE)
 
 latent_table(df, groups = NULL, weight = NULL, margin = TRUE,
   wide = TRUE)
@@ -18,8 +18,6 @@ manifest_table(df, groups = NULL, weight = NULL, margin = TRUE,
 }
 \arguments{
 \item{df}{A \code{data.frame} or \code{data.table}.}
-
-\item{vars}{The variables to aggregate, as a character vector.}
 
 \item{groups}{Variables to group by during aggregation.}
 

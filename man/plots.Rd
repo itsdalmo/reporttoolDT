@@ -20,8 +20,6 @@ manifest_plot(df, groups = NULL, weight = NULL, margin = TRUE)
 \arguments{
 \item{df}{A \code{data.frame} or \code{data.table}.}
 
-\item{vars}{The variables to aggregate, as a character vector.}
-
 \item{groups}{Variables to group by during aggregation.}
 
 \item{weight}{Name of a variable to weight by. Only used when \code{margin = TRUE}.}
