@@ -50,7 +50,8 @@ default_latents <- function() get_default("latents", exact = TRUE)
 internal_defaults <- list(
 
   # Default palette
-  palette = c("#F8766D", "#00BFC4", "#808080", "#00BF7D", "#9590FF", "#A3A500", "#EA8331"),
+  palette = c("#2FABB7", "#F04E36", "#747678", "#4C72B0", "#55A868", "#C44E52",
+              "#8172B2", "#CCB974", "#FFC000", "#004A52", "#0091A1", "#BFBFBF"),
 
   # CSI latent names
   latents =   c("image", "expect", "prodq", "servq", "value", "epsi", "loyal"),
