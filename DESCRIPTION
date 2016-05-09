@@ -16,6 +16,7 @@ Imports:
     lazyeval,
     officeR,
     R6,
+    scales,
     stringi,
     tabulR,
     tools,
@@ -23,8 +24,10 @@ Imports:
 Suggests:
     dplyr,
     ggrepel,
+    gridExtra,
     knitr,
     readr,
+    reshape2,
     rmarkdown,
     testthat,
     tidyr

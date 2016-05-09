@@ -1,32 +1,12 @@
-# splot <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE) {
-#   stopifnot(is.survey(df))
-#   if (length(groups) > 1L) stop("splot does not support multiple groups.")
-#   out <- stable(df, vars, groups, weight, margin, wide = FALSE)
-#   if ("proportion" %in% names(out)) {
-#     splot_factor(out, vars, groups)
-#   } else {
-#     splot_numeric(out)
-#   }
-# }
-#
-# splot_factor <- function(x, vars, groups) {
-#   out <- ggplot2::ggplot( data = x, ggplot2::aes_string(x = "value", y = "proportion", group = "variable"))
-#   out <- out + ggplot2::geom_bar( stat = "identity", width = .5, position = ggplot2::position_dodge(width = .6))
-#   out <- out + ggplot2::scale_y_continuous(labels = scales::percent)
-#   # out <- out + ggplot2::geom_text()
-#   out <- out + theme_epsi()
-#   if (length(vars) > 1L) {
-#     out <- out +  ggplot2::facet_wrap(~ variable, ncol=2L, scales="free_x")
-#   }
-#   out
-# }
-
-#' EPSI ggplot2 theme
+#' Bar and line charts
 #'
-#' A baseline theme for plots.
+#' These functions provide an easy way to visualize numeric or categorical data.
+#' Uses \code{\link[tabulR]{qtable}} to aggregate the data, but only supports one
+#' grouping variable.
 #'
-#' @param base_size Fontsize.
-#' @param base_family Font family.
+#' @inheritParams tabulR::qtable
+#' @param wrap Optional: Call \code{\link[ggplot2]{facet_wrap}} on variables in \code{bar_chart}.
+#' @param ... Additional parameters. Not used.
 #' @author Kristian D. Olsen
 #' @importFrom ggplot2 theme_gray theme element_rect element_text element_blank element_line
 #' @name plots
@@ -34,60 +14,103 @@
 #' @examples
 #' NULL
 
-theme_epsi <- function(base_size = 12, base_family = "sans") {
-  out <- theme_gray(base_size = base_size, base_family = base_family)
-  out + theme(
-    # Use a transparent canvas/background for the plots.
-    panel.background  = element_rect(fill = "transparent", colour = NA),
-    plot.background   = element_rect(fill = "transparent", colour = NA),
-    legend.background = element_rect(fill = "transparent", colour = NA),
-    legend.key        = element_rect(fill = "transparent", colour = NA),
+bar_chart <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wrap = FALSE) {
+  # Aggregate data to a long table using qtable (always wide = FALSE)
+  out <- tabulR::qtable(df$data, vars, groups, weight, margin, wide = FALSE)
+  pct <- "proportion" %in% names(out)
 
-    # Margins should also be transparent
-    panel.border = element_rect(fill = "transparent", colour=NA),
-
-    # Remove axis ticks.
-    axis.ticks = element_blank(),
-
-    # Format axis text size and color. Titles should be blank.
-    axis.text.x  = element_text(size=9, colour="#23373b"),
-    axis.text.y  = element_text(size=9, colour="#23373b"),
-    axis.title.y = element_blank(),
-    axis.title.x = element_blank(),
-
-    # Format the grid (only horizontal lines)
-    panel.grid.major.x = element_blank(),
-    panel.grid.major.y = element_line(colour="#D0D0D0", size=.5),
-
-    # Facet-title formatting
-    strip.text       = element_text(colour="white", vjust = 1L),
-    strip.background = element_rect(fill="#23373b"),
-
-    # Change plot margins
-    panel.margin = grid::unit(2, "lines"), # facet margins
-    plot.margin  = grid::unit(c(1, 0, 1, 0), "cm"),
-
-    # Legend position and format
-    legend.position = "bottom",
-    legend.title    = element_blank()
+  # Create the plot
+  out <- ggplot2::ggplot(
+    data = out,
+    ggplot2::aes_string(
+      x     = if (pct) "value" else "variable",
+      y     = if (pct) "proportion" else "value",
+      ymin  = if (pct) 0 else min(out$value, na.rm = TRUE) * 0.8,
+      ymax  = if (pct) 1.05 else max(out$value, na.rm = TRUE) * 1.2,
+      group = groups,
+      fill  = groups)
   )
+
+  # Add geom
+  out <- out + ggplot2::geom_bar(
+    stat = "identity",
+    width = .5,
+    position = ggplot2::position_dodge(width = .6)
+  )
+
+  # Set y axis to percentages
+  if (pct)
+    out <- out + ggplot2::scale_y_continuous(labels = scales::percent)
+
+  # Add labels to each bar
+  out <- out + ggplot2::geom_text(
+    ggplot2::aes(
+      label    = if (pct) sprintf("%.0f %%", proportion * 100L) else sprintf("%.1f", value)),
+      position = ggplot2::position_dodge(width = 0.6),
+      vjust    = -1.1,
+      hjust    = .35,
+      size     = 3,
+      colour   = "#23373b"
+  )
+
+  # Wrap if multiple variables.
+  if (wrap && length(vars) > 1L)
+    out <- out + ggplot2::facet_wrap(~ variable, ncol = 2L, scales="free_x")
+
+  out + theme_epsi() + scale_fill_epsi()
+
 }
 
 #' @rdname plots
 #' @export
-plot_shared_legend <- function(...) {
+line_chart <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, ...) {
+  # Aggregate data to a long table using qtable (always wide = FALSE)
+  out <- tabulR::qtable(df$data, vars, groups, weight, margin, wide = FALSE)
+  if ("proportion" %in% names(df)) stop("Use bar_chart() to plot proportions.")
 
-  plots <- list(...)
+  # Create the plot
+  out <- ggplot2::ggplot(
+    data = out,
+    ggplot2::aes_string(
+      x     = "variable",
+      y     = "value",
+      ymin  = min(out$value) * 0.8,
+      ymax  = max(out$value) * 1.1,
+      group = groups,
+      colour  = groups)
+  )
 
-  grobs <- ggplotGrob(plots[[1]] + theme(legend.position = "bottom"))$grobs
-  legends <- grobs[[which(lapply(grobs, function(x) x$name) == "guide-box")]]
-  heights <- sum(legends$height)
+  # Add geom line and point (dots)
+  out <- out + ggplot2::geom_line(size = 1L) + ggplot2::geom_point(size = 3L)
 
-  gridExtra::grid.arrange(
-    do.call(gridExtra::arrangeGrob, lapply(plots, function(x) {
-      x + theme(legend.position="none")})),
-    legends,
-    ncol = 1,
-    heights = grid::unit.c(grid::unit(1, "npc") - heights, heights))
+  # Add labels to each line
+  out <- out + ggplot2::geom_text(
+    ggplot2::aes(
+      label    = sprintf("%.1f", value)),
+      size     = 3,
+      colour   = "#23373b"
+  )
+
+  out + theme_epsi() + scale_colour_epsi()
 
 }
+
+#' @rdname plots
+#' @export
+latent_plot <- function(df, groups = NULL, weight = NULL, margin = TRUE) {
+  vars <- names(df)[stri_trans_tolower(names(df)) %in% default_latents()]
+  if (!length(vars)) stop("Latent variables were not found in the data.")
+  if (is.null(groups)) {
+    bar_chart(df, vars = vars, groups = groups, weight = weight, margin = margin)
+  } else {
+    line_chart(df, vars = vars, groups = groups, weight = weight, margin = margin)
+  }
+
+}
+
+#' @rdname plots
+#' @export
+manifest_plot <- function(df, groups = NULL, weight = NULL, margin = TRUE) {
+  # TODO
+}
+
