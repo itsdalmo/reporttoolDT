@@ -10,10 +10,10 @@
 stable(df, vars, groups = NULL, weight = NULL, margin = TRUE,
   wide = TRUE)
 
-latent_table(df, vars, groups = NULL, weight = NULL, margin = TRUE,
+latent_table(df, groups = NULL, weight = NULL, margin = TRUE,
   wide = TRUE)
 
-manifest_table(df, vars, groups = NULL, weight = NULL, margin = TRUE,
+manifest_table(df, groups = NULL, weight = NULL, margin = TRUE,
   wide = TRUE)
 }
 \arguments{

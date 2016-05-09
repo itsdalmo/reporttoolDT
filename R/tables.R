@@ -32,7 +32,7 @@ stable <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wide =
     new <- get_label(df, out$variable)
     if (!is.null(new)) {
       new <- new[!is.na(new)]; new <- new[!duplicated(names(new))]; new <- setNames(names(new), new)
-      out$variable <- recode_(out$variable, dots = as.list(new), add = TRUE)
+      out$variable <- suppressWarnings(recode_(out$variable, dots = as.list(new), add = TRUE))
     }
   }
 
@@ -50,17 +50,22 @@ stable <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wide =
 
 #' @rdname tables
 #' @export
-latent_table <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wide = TRUE) {
+latent_table <- function(df, groups = NULL, weight = NULL, margin = TRUE, wide = TRUE) {
   # Get variables by name of latents
   vars <- names(df)[stri_trans_tolower(names(df)) %in% default_latents()]
   if (!length(vars)) stop("Latent variables were not found in the data.")
 
   # Get weights in the same way
-  weight <- get_association(df, "weight")
-  if (is.null(weight)) warning("'weight' is not specified in associations. Margin is unweighted.")
+  if (margin) {
+    weight <- get_association(df, "weight")
+    if (is.null(weight))
+      warning("'weight' is not specified in associations. Margin is unweighted.")
+  } else {
+    weight <- NULL
+  }
 
   # Make the table and rename vars
-  out <- stable(df, vars, groups = groups, weight = weight, margin = TRUE, wide = wide)
+  out <- stable(df, vars, groups = groups, weight = weight, margin = margin, wide = wide)
   title <- stri_c("Latent scores", if (!is.null(weight)) " (Weighted)" else " (Unweighted)")
 
   # Remove counts.
@@ -77,7 +82,7 @@ latent_table <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, 
 
 #' @rdname tables
 #' @export
-manifest_table <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wide = TRUE) {
+manifest_table <- function(df, groups = NULL, weight = NULL, margin = TRUE, wide = TRUE) {
   # Get variables from associations
   vars <- get_association(df, default_latents())
   if (!length(vars)) stop("Latent associations have not been set yet.")
@@ -85,11 +90,16 @@ manifest_table <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE
   if (!length(vars)) stop("No 'em' variables found in the data.")
 
   # Get weights in the same way
-  weight <- get_association(df, "weight")
-  if (is.null(weight)) warning("'weight' is not specified in associations. Margin is unweighted.")
+  if (margin) {
+    weight <- get_association(df, "weight")
+    if (is.null(weight))
+      warning("'weight' is not specified in associations. Margin is unweighted.")
+  } else {
+    weight <- NULL
+  }
 
   # Make the table and rename vars
-  out <- stable(df, vars, groups = groups, weight = weight, margin = TRUE, wide = wide)
+  out <- stable(df, vars, groups = groups, weight = weight, margin = margin, wide = wide)
   names(out) <- stri_replace(names(out), "", regex = "em$")
   title <- stri_c("Manifest scores", if (!is.null(weight)) " (Weighted)" else " (Unweighted)")
 
