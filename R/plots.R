@@ -1,32 +1,66 @@
-#' Bar and line charts
+#' Bar chart
 #'
-#' These functions provide an easy way to visualize numeric or categorical data.
-#' Uses \code{\link[tabulR]{qtable}} to aggregate the data, but only supports one
+#' Create a bar chart to easily visualize numeric and/or categorical data. This function
+#' is meant to be used with \code{\link[tabulR]{qtable}}, but only supports one
 #' grouping variable.
 #'
-#' @inheritParams tabulR::qtable
+#' @inheritParams tabulR::qtable_
 #' @param wrap Optional: Call \code{\link[ggplot2]{facet_wrap}} on variables in \code{bar_chart}.
-#' @param ... Additional parameters. Not used.
+#' @param ... Unquoted variable names passed to \code{\link[dplyr]{select}}.
 #' @author Kristian D. Olsen
 #' @importFrom ggplot2 theme_gray theme element_rect element_text element_blank element_line
-#' @name plots
+#' @seealso line_chart
 #' @export
 #' @examples
 #' NULL
 
-bar_chart <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wrap = FALSE) {
-  # Aggregate data to a long table using qtable (always wide = FALSE)
-  out <- tabulR::qtable(df$data, vars, groups, weight, margin, wide = FALSE)
-  pct <- "proportion" %in% names(out)
+bar_chart <- function(df, ..., groups = NULL, weight = NULL, margin = TRUE, wrap = FALSE) {
+  if (!requireNamespace("dplyr", quietly = TRUE))
+    stop("The NSE version of bar_chart requires dplyr.")
+
+  # Use dplyr to select vars. Also, look for dplyr groups if not specified.
+  vars <- dplyr::select_vars_(names(df), lazyeval::lazy_dots(...))
+  groups <- groups %||% as.character(dplyr::groups(df))
+
+  # Rename vars before creating table
+  if (any(names(vars) != vars)) {
+    if (data.table::is.data.table(df)) {
+      data.table::setnames(df, unname(vars), names(vars))
+    } else {
+      names(df)[match(vars, names(df))] <- names(vars)
+    }
+  }
+
+  bar_chart_(df, vars = names(vars), groups = groups, weight = weight, margin = margin, wrap = wrap)
+
+}
+
+#' @rdname bar_chart
+#' @export
+bar_chart_ <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wrap = FALSE) {
+  UseMethod("bar_chart_")
+}
+
+bar_chart_.default <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wrap = FALSE) {
+  out <- tabulR::qtable_(df, vars = vars, groups = groups, weight = weight, margin = margin, wide = FALSE)
+  bar_chart_impl(out, vars, groups, weight, margin, wrap)
+}
+
+bar_chart_.qtable <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wrap = FALSE) {
+  bar_chart_impl(df, vars, groups, weight, margin, wrap)
+}
+
+bar_chart_impl <- function(df, vars, groups, weight, margin, wrap) {
+  pct <- "proportion" %in% names(df)
 
   # Create the plot
   out <- ggplot2::ggplot(
-    data = out,
+    data = df,
     ggplot2::aes_string(
       x     = if (pct) "value" else "variable",
       y     = if (pct) "proportion" else "value",
-      ymin  = if (pct) 0 else min(out$value, na.rm = TRUE) * 0.8,
-      ymax  = if (pct) 1.05 else max(out$value, na.rm = TRUE) * 1.2,
+      ymin  = if (pct) 0 else min(df$value, na.rm = TRUE) * 0.8,
+      ymax  = if (pct) 1.05 else max(df$value, na.rm = TRUE) * 1.2,
       group = groups,
       fill  = groups)
   )
@@ -61,21 +95,68 @@ bar_chart <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wra
 
 }
 
-#' @rdname plots
+#' Line chart
+#'
+#' Create a line chart to easily visualize numeric data. This function
+#' is meant to be used with \code{\link[tabulR]{qtable}}, but only supports one
+#' grouping variable.
+#'
+#' @inheritParams bar_chart
+#' @param wrap Ignored.
+#' @author Kristian D. Olsen
+#' @importFrom ggplot2 theme_gray theme element_rect element_text element_blank element_line
+#' @seealso bar_chart
 #' @export
-line_chart <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, ...) {
-  # Aggregate data to a long table using qtable (always wide = FALSE)
-  out <- tabulR::qtable(df$data, vars, groups, weight, margin, wide = FALSE)
+#' @examples
+#' NULL
+
+line_chart <- function(df, ..., groups = NULL, weight = NULL, margin = TRUE, wrap = FALSE) {
+  if (!requireNamespace("dplyr", quietly = TRUE))
+    stop("The NSE version of bar_chart requires dplyr.")
+
+  # Use dplyr to select vars. Also, look for dplyr groups if not specified.
+  vars <- dplyr::select_vars_(names(df), lazyeval::lazy_dots(...))
+  groups <- groups %||% as.character(dplyr::groups(df))
+
+  # Rename vars before creating table
+  if (any(names(vars) != vars)) {
+    if (data.table::is.data.table(df)) {
+      data.table::setnames(df, unname(vars), names(vars))
+    } else {
+      names(df)[match(vars, names(df))] <- names(vars)
+    }
+  }
+
+  line_chart_(df, vars = names(vars), groups = groups, weight = weight, margin = margin, wrap = wrap)
+
+}
+
+#' @rdname line_chart
+#' @export
+line_chart_ <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wrap = FALSE) {
+  UseMethod("line_chart_")
+}
+
+line_chart_.default <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wrap = FALSE) {
+  out <- tabulR::qtable_(df, vars = vars, groups = groups, weight = weight, margin = margin, wide = FALSE)
+  line_chart_impl(out, vars, groups, weight, margin, wrap)
+}
+
+line_chart_.qtable <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wrap = FALSE) {
+  line_chart_impl(df, vars, groups, weight, margin, wrap)
+}
+
+line_chart_impl <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wrap) {
   if ("proportion" %in% names(df)) stop("Use bar_chart() to plot proportions.")
 
   # Create the plot
   out <- ggplot2::ggplot(
-    data = out,
+    data = df,
     ggplot2::aes_string(
       x     = "variable",
       y     = "value",
-      ymin  = min(out$value) * 0.8,
-      ymax  = max(out$value) * 1.1,
+      ymin  = min(df$value) * 0.8,
+      ymax  = max(df$value) * 1.1,
       group = groups,
       colour  = groups)
   )
@@ -95,20 +176,20 @@ line_chart <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, ..
 
 }
 
-#' @rdname plots
+#' @rdname latent_table
 #' @export
 latent_plot <- function(df, groups = NULL, weight = NULL, margin = TRUE) {
   vars <- names(df)[stri_trans_tolower(names(df)) %in% default_latents()]
   if (!length(vars)) stop("Latent variables were not found in the data.")
   if (is.null(groups)) {
-    bar_chart(df, vars = vars, groups = groups, weight = weight, margin = margin)
+    bar_chart_(df, vars = vars, groups = groups, weight = weight, margin = margin)
   } else {
-    line_chart(df, vars = vars, groups = groups, weight = weight, margin = margin)
+    line_chart_(df, vars = vars, groups = groups, weight = weight, margin = margin)
   }
 
 }
 
-#' @rdname plots
+#' @rdname manifest_table
 #' @export
 manifest_plot <- function(df, groups = NULL, weight = NULL, margin = TRUE) {
   # TODO
