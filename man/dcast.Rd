@@ -2,37 +2,14 @@
 % Please edit documentation in R/survey_dt.R
 \name{dcast}
 \alias{dcast}
-\alias{dcast.Survey}
-\alias{dcast.default}
 \title{data.table: dcast}
 \usage{
 dcast(data, ...)
-
-dcast.default(data, formula, fun.aggregate = NULL, ..., margins = NULL,
-  subset = NULL, fill = NULL, value.var = guess(data))
-
-\method{dcast}{Survey}(data, ...)
 }
 \arguments{
 \item{data}{A \code{Survey} or \code{data.frame}.}
 
-\item{...}{Additional parameters passed to \code{dcast}.}
-
-\item{formula}{A formula of the form LHS ~ RHS to cast, see details.}
-
-\item{fun.aggregate}{Should the data be aggregated before casting? If the formula doesn't identify single observation for each cell, then aggregation defaults to \code{length} with a message.
-
-  \bold{NEW}: it is possible to provide a list of functions to \code{fun.aggregate} argument. See \code{examples}.}
-
-\item{margins}{Not implemented yet. Should take variable names to compute margins on. A value of \code{TRUE} would compute all margins.}
-
-\item{subset}{Specified if casting should be done on subset of the data. Ex: subset = .(col1 <= 5) or subset = .(variable != "January").}
-
-\item{fill}{Value to fill missing cells with. If \code{fun.aggregate} is present, takes the value by applying the function on 0-length vector.}
-
-\item{value.var}{Name of the column whose values will be filled to cast. Function `guess()` tries to, well, guess this column automatically, if none is provided.
-
-  \bold{NEW}: it is possible to cast multiple \code{value.var} columns simultaneously now. See \code{examples}.}
+\item{...}{Additional parameters passed to \code{\link[data.table]{dcast}}.}
 }
 \description{
 Same as the \code{data.table} function \code{dcast}. This is a new generic,

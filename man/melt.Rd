@@ -2,24 +2,14 @@
 % Please edit documentation in R/survey_dt.R
 \name{melt}
 \alias{melt}
-\alias{melt.Survey}
-\alias{melt.default}
 \title{data.table: melt}
 \usage{
 melt(data, ...)
-
-melt.default(data, ..., na.rm = FALSE, value.name = "value")
-
-\method{melt}{Survey}(data, ...)
 }
 \arguments{
 \item{data}{A \code{Survey} or \code{data.frame}.}
 
-\item{...}{Additional parameters passed to \code{melt}.}
-
-\item{na.rm}{If \code{TRUE}, \code{NA} values will be removed from the molten data.}
-
-\item{value.name}{name for the molten data values column. The default name is 'value'.}
+\item{...}{Additional parameters passed to \code{\link[data.table]{melt}}.}
 }
 \description{
 Same as the \code{data.table} function \code{melt}. This is a new generic,
