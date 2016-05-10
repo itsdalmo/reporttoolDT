@@ -106,20 +106,16 @@ manifest_table <- function(df, groups = NULL, weight = NULL, margin = TRUE, wide
 #' @examples
 #' NULL
 
-qtable_.Survey <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wide = TRUE) {
-  # If margin is wanted and there is a translation for "average",
-  # we manually add the margin to give it the correct name.
-  avg <- get_translation(df, "average")
-  if (margin && length(groups) && !is.null(avg)) {
-    out <- df$as_dt()$get_data(copy = TRUE)
-    out <- out[, groups[1] := lapply(.SD, as.factor), .SDcols = groups[1], with = FALSE]
-    out <- rbind(out, data.table::copy(out)[, groups[1] := avg, with = FALSE])
-    margin <- FALSE
-  } else {
-    out <- df$data
+qtable_.Survey <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, margin_name = NULL, wide = TRUE) {
+  if (margin) {
+    margin_name <- margin_name %||% unname(get_translation(df, "average"))
+    if (isTRUE(weight))
+      weight <- unname(get_association(df, "weight"))
   }
 
-  out <- tabulR::qtable_(out, vars = vars, groups = groups, weight = weight, margin = margin, wide = wide)
+  out <- tabulR::qtable_(df$get_data(copy = TRUE), vars = vars, groups = groups,
+                         weight = weight, margin = margin, margin_name = margin_name,
+                         wide = wide)
 
   # If only one variable was specified, and there is no "variable" column and/or
   # the variable name is not in colnames - assume it has been spread. Use it's
