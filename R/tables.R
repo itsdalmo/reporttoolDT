@@ -1,56 +1,15 @@
-#' Tables from surveys.
+#' Latent scores
 #'
-#' \code{Survey}'s work best with the \code{\link[tabulR]{qtable}} function. In
-#' addition to it's usual functionality, \code{qtable} used with a \code{Survey}
-#' will use labels as columnames if possible. It also replaces variable names with their
-#' label in long tables (in the column "variable").
+#' \code{manifest_table} is a convenience function similar to \code{\link{manifest_table}},
+#' and uses \code{\link[tabulR]{qtable}} to generate a table of means (by groups) for
+#' any PLS latents.
 #'
-#' @inheritParams tabulR::qtable
+#' @inheritParams tabulR::qtable_
 #' @author Kristian D. Olsen
-#' @name tables
+#' @export
 #' @examples
 #' NULL
 
-#' @importFrom tabulR qtable qtable_
-#' @export
-qtable_.Survey <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wide = TRUE) {
-  out <- tabulR::qtable_(df$data, vars = vars, groups = groups, weight = weight, margin = margin, wide = wide)
-
-  # If only one variable was specified, and there is no "variable" column and/or
-  # the variable name is not in colnames - assume it has been spread. Use it's
-  # label as title.
-  if (length(vars) == 1L && !vars %in% names(out)) {
-    title <- stri_c(stri_c(vars, ": "), get_label(df, vars))
-    title <- stri_c(title, if (!is.null(weight)) " (Weighted)" else " (Unweighted)")
-  } else {
-    title <- " "
-  }
-
-  # Use labels in "variable" column
-  if ("variable" %in% names(out)) {
-    new <- get_label(df, out$variable)
-    if (!is.null(new)) {
-      new <- new[!is.na(new)]
-      new <- new[!duplicated(names(new))]
-      new <- setNames(names(new), new)
-      out$variable <- suppressWarnings(recode_(out$variable, dots = as.list(new), add = TRUE))
-    }
-  }
-
-  # Also use labels as names for columns
-  new <- get_label(df, names(out))
-  if (!is.null(new)) {
-    new <- new[!is.na(new)]
-    names(out)[names(out) %in% names(new)] <-  stri_c(names(new), stri_c(": ", unname(new)))
-  }
-
-  # Return with title
-  attr(out, "title") <- title
-  out
-}
-
-#' @rdname tables
-#' @export
 latent_table <- function(df, groups = NULL, weight = NULL, margin = TRUE, wide = TRUE) {
   # Get variables by name of latents
   vars <- names(df)[stri_trans_tolower(names(df)) %in% default_latents()]
@@ -81,8 +40,20 @@ latent_table <- function(df, groups = NULL, weight = NULL, margin = TRUE, wide =
   out
 }
 
-#' @rdname tables
+#' Manifest scores
+#'
+#' \code{manifest_table} is a convenience function similar to \code{\link{latent_table}},
+#' and uses \code{\link[tabulR]{qtable}} to generate a table of means (by groups) for
+#' variables associated with PLS latents. It uses EM variables to calculate the means,
+#' but removes the EM suffix from variable names in the results. Variables in the results are
+#' ordered by their latent association.
+#'
+#' @inheritParams tabulR::qtable_
+#' @author Kristian D. Olsen
 #' @export
+#' @examples
+#' NULL
+
 manifest_table <- function(df, groups = NULL, weight = NULL, margin = TRUE, wide = TRUE) {
   # Get variables from associations
   vars <- get_association(df, default_latents())
@@ -101,7 +72,7 @@ manifest_table <- function(df, groups = NULL, weight = NULL, margin = TRUE, wide
 
   # Make the table and rename vars
   out <- tabulR::qtable_(df, vars, groups = groups, weight = weight, margin = margin, wide = wide)
-  names(out) <- stri_replace(names(out), "", regex = "em$")
+  names(out) <- stri_replace(names(out), "", regex = "em$", case_insensitive = TRUE)
   title <- stri_c("Manifest scores", if (!is.null(weight)) " (Weighted)" else " (Unweighted)")
 
   # Remove counts.
@@ -114,4 +85,70 @@ manifest_table <- function(df, groups = NULL, weight = NULL, margin = TRUE, wide
   # Return with title
   attr(out, "title") <- title
   out
+}
+
+#' Using qtable_ with a Survey
+#'
+#' This is a S3 method for \code{\link[tabulR]{qtable}}. In addition to the standard
+#' functionality in \code{qtable}, it also replaces variable names with their label
+#' ("var: label") if a label exists. This is done for column names, and for the
+#' \code{variable} column in a long table (\code{wide = FALSE}). When \code{margin = TRUE},
+#' the table will use the "average" from \code{\link{set_translation}} for the margin.
+#'
+#' If you only want the regular \code{qtable} functionality, the recommended way
+#' is to just call \code{qtable} on the survey data itself (\code{qtable(x$data)}
+#' instead of \code{qtable(x)}).
+#'
+#' @inheritParams tabulR::qtable_
+#' @author Kristian D. Olsen
+#' @importFrom tabulR qtable qtable_
+#' @export
+#' @examples
+#' NULL
+
+qtable_.Survey <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wide = TRUE) {
+  # If margin is wanted and there is a translation for "average",
+  # we manually add the margin to give it the correct name.
+  avg <- get_translation(df, "average")
+  if (margin && length(groups) && !is.null(avg)) {
+    out <- df$as_dt()$get_data(copy = TRUE)
+    out <- out[, groups[1] := lapply(.SD, as.factor), .SDcols = groups[1], with = FALSE]
+    out <- rbind(out, data.table::copy(out)[, groups[1] := avg, with = FALSE])
+    margin <- FALSE
+  } else {
+    out <- df$data
+  }
+
+  out <- tabulR::qtable_(out, vars = vars, groups = groups, weight = weight, margin = margin, wide = wide)
+
+  # If only one variable was specified, and there is no "variable" column and/or
+  # the variable name is not in colnames - assume it has been spread. Use it's
+  # label as title.
+  if (length(vars) == 1L && !vars %in% names(out)) {
+    title <- stri_c(stri_c(vars, ": "), get_label(df, vars))
+    title <- stri_c(title, if (!is.null(weight)) " (Weighted)" else " (Unweighted)")
+  } else {
+    title <- NULL
+  }
+
+  # Use labels in "variable" column and colnames
+  if ("variable" %in% names(out)) {
+    new <- get_label(df, unique(out$variable))
+    if (!is.null(new)) {
+      new <- new[!is.na(new)]
+      new <- setNames(names(new), new)
+      out$variable <- suppressWarnings(recode_(out$variable, dots = as.list(new), add = TRUE))
+    }
+  }
+
+  # new <- get_label(df, names(out))
+  # if (!is.null(new)) {
+  #   new <- new[!is.na(new)]
+  #   names(out)[names(out) %in% names(new)] <-  stri_c(names(new), stri_c(": ", unname(new)))
+  # }
+
+  # Return with title
+  attr(out, "title") <- title
+  out
+
 }

@@ -7,7 +7,8 @@ srv <- survey_tbl(sav)$set_association(common = TRUE)
 test_that("qtable_ method for survey", {
 
   out <- tabulR::qtable_(srv, vars = "q17", groups = "q1", wide = TRUE)
-  expect_identical(names(out)[1L], "q1: Supplier")
+  # expect_identical(names(out)[1L], "q1: Supplier")
+  expect_identical(names(out)[1L], "q1")
   expect_identical(out$n, c(10L, 5L, 5L, 20L))
   expect_identical(out$Nei, c(.9, .8, .8, .85))
 })
@@ -25,7 +26,7 @@ test_that("manifest table for survey", {
   out <- srv
   out[["q3EM"]] <- rescale_100(clean_scale(out[["q3"]]))
   expect_warning(out <- manifest_table(out), "Margin is unweighted.")
-  expect_identical(round(out$q3EM, digits = 1L), 75.6)
+  expect_identical(round(out$q3, digits = 1L), 75.6)
 
 })
 
