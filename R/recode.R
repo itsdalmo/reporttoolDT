@@ -45,7 +45,6 @@ recode_ <- function(x, dots, by = x, ...) {
   UseMethod("recode_")
 }
 
-#' @rdname recode
 #' @export
 recode_.character <- function(x, dots, by = x, factor = FALSE, ...) {
   sets <- vapply(dots, function(x) {is.character(x) || is.numeric(x)}, logical(1))
@@ -56,11 +55,9 @@ recode_.character <- function(x, dots, by = x, factor = FALSE, ...) {
   res
 }
 
-#' @rdname recode
 #' @export
 recode_.numeric <- recode_.character
 
-#' @rdname recode
 #' @export
 recode_.factor <- function(x, dots, by = x, drop = TRUE, add = FALSE, arrange = FALSE, ...) {
   if (!all(names(dots) %in% levels(x)) && !add)

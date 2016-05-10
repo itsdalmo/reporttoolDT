@@ -3,9 +3,6 @@
 \name{recode}
 \alias{recode}
 \alias{recode_}
-\alias{recode_.character}
-\alias{recode_.factor}
-\alias{recode_.numeric}
 \alias{spread_10}
 \alias{spread_100}
 \alias{spread_age}
@@ -15,13 +12,6 @@ recode(x, ..., by = x, drop = TRUE, add = FALSE, factor = FALSE,
   arrange = FALSE)
 
 recode_(x, dots, by = x, ...)
-
-\method{recode_}{character}(x, dots, by = x, factor = FALSE, ...)
-
-\method{recode_}{numeric}(x, dots, by = x, factor = FALSE, ...)
-
-\method{recode_}{factor}(x, dots, by = x, drop = TRUE, add = FALSE,
-  arrange = FALSE, ...)
 
 spread_10(x)
 
