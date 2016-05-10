@@ -141,11 +141,14 @@ qtable_.Survey <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE
     }
   }
 
-  # new <- get_label(df, names(out))
-  # if (!is.null(new)) {
-  #   new <- new[!is.na(new)]
-  #   names(out)[names(out) %in% names(new)] <-  stri_c(names(new), stri_c(": ", unname(new)))
-  # }
+  # Only replace colnames when spreading.
+  if (wide) {
+    new <- get_label(df, names(out))
+    if (!is.null(new)) {
+      new <- new[!is.na(new)]
+      names(out)[names(out) %in% names(new)] <- unname(new)
+    }
+  }
 
   # Return with title
   attr(out, "title") <- title
