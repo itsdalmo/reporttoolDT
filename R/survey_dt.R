@@ -62,8 +62,7 @@ Survey_dt <- R6::R6Class("Survey_dt",
 #' is a \code{data.table}.
 #'
 #' @param data A \code{Survey} or \code{data.frame}.
-#' @param ... Additional parameters passed to \code{melt}.
-#' @inheritParams data.table::melt
+#' @param ... Additional parameters passed to \code{\link[data.table]{melt}}.
 #' @author Kristian D. Olsen
 #' @export
 #' @examples
@@ -74,11 +73,11 @@ Survey_dt <- R6::R6Class("Survey_dt",
 
 melt <- function(data, ...) UseMethod("melt")
 
-#' @rdname melt
 #' @export
-melt.default <- data.table::melt
+melt.data.frame <- function(data, ...) {
+  data.table::melt(data, ...)
+}
 
-#' @rdname melt
 #' @export
 melt.Survey <- function(data, ...) {
   f <- get("melt", asNamespace("data.table"))
@@ -92,8 +91,7 @@ melt.Survey <- function(data, ...) {
 #' is a \code{data.table}.
 #'
 #' @param data A \code{Survey} or \code{data.frame}.
-#' @param ... Additional parameters passed to \code{dcast}.
-#' @inheritParams data.table::dcast
+#' @param ... Additional parameters passed to \code{\link[data.table]{dcast}}.
 #' @author Kristian D. Olsen
 #' @export
 #' @examples
@@ -104,11 +102,11 @@ melt.Survey <- function(data, ...) {
 
 dcast <- function(data, ...) UseMethod("dcast")
 
-#' @rdname dcast
 #' @export
-dcast.default <- data.table::dcast
+dcast.data.frame <- function(data, ...) {
+  data.table::dcast(data, ...)
+}
 
-#' @rdname dcast
 #' @export
 dcast.Survey <- function(data, ...) {
   f <- get("dcast", asNamespace("data.table"))
