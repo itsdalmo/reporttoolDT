@@ -21,6 +21,7 @@ bar_chart <- function(df, ..., groups = NULL, weight = NULL, margin = TRUE, wrap
   # Use dplyr to select vars. Also, look for dplyr groups if not specified.
   vars <- dplyr::select_vars_(names(df), lazyeval::lazy_dots(...))
   groups <- groups %||% as.character(dplyr::groups(df))
+  if (!length(groups)) groups <- NULL
 
   # Rename vars before creating table
   if (any(names(vars) != vars)) {
@@ -38,6 +39,8 @@ bar_chart <- function(df, ..., groups = NULL, weight = NULL, margin = TRUE, wrap
 #' @rdname bar_chart
 #' @export
 bar_chart_ <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wrap = FALSE) {
+  if (length(groups) > 1L)
+    stop("bar_chart can only handle 1 grouping variable.")
   UseMethod("bar_chart_")
 }
 
@@ -117,6 +120,7 @@ line_chart <- function(df, ..., groups = NULL, weight = NULL, margin = TRUE, wra
   # Use dplyr to select vars. Also, look for dplyr groups if not specified.
   vars <- dplyr::select_vars_(names(df), lazyeval::lazy_dots(...))
   groups <- groups %||% as.character(dplyr::groups(df))
+  if (!length(groups)) groups <- NULL
 
   # Rename vars before creating table
   if (any(names(vars) != vars)) {
@@ -134,6 +138,8 @@ line_chart <- function(df, ..., groups = NULL, weight = NULL, margin = TRUE, wra
 #' @rdname line_chart
 #' @export
 line_chart_ <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wrap = FALSE) {
+  if (length(groups) > 1L)
+    stop("line_chart can only handle 1 grouping variable.")
   UseMethod("line_chart_")
 }
 
