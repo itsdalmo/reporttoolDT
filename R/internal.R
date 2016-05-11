@@ -72,6 +72,45 @@ str_list <- function(x, conjunction = "and", quote = TRUE) {
   stri_c(stri_c(x[1:(length(x)-1)], collapse = ", "), conjunction, x[length(x)], sep = " ")
 }
 
+#' Extract numbers from strings
+#'
+#' \code{str_to_numeric} lets you extract numbers from strings and convert them
+#' to a numeric vector. If a single element in the character vector contains multiple
+#' numbers, you can specify an aggregate function. See examples.
+#'
+#' @param x A character vector.
+#' @param FUN If a string contains several numbers, you can specify an aggregate
+#' function. By default this function returns the mean of all numbers, but you can use
+#' \code{min}, \code{max}, \code{median}, \code{head} or \code{tail} also.
+#' @param ... Arguments passed to \code{FUN}.
+#' @author Kristian D. Olsen
+#' @export
+#' @examples
+#' x <- c("10", "between 0 and 10", "about 8,5")
+#' y <- str_to_numeric(x, FUN = mean)
+#' identical(y, c(10, 5, 8.5))
+#' y <- str_to_numeric(x, FUN = head, n = 1L)
+#' identical(y, c(10, 0, 8.5))
+
+str_to_numeric <- function(x, FUN = mean, ...) {
+  if (is.factor(x)) {
+    x <- as.character(x)
+  } else if (!is.character(x)) (
+    stop("'x' should be a string or character vector.")
+  )
+
+  out <- stringi::stri_extract_all(x, regex = "[0-9,.]+")
+  out <- vapply(out, function(v) {
+    v <- as.numeric(stringi::stri_replace_all(v, ".", fixed = ","))
+    if (length(v) > 1L) v <- do.call(FUN, list(v, ...))
+    v
+  }, numeric(1))
+
+  # Return
+  unlist(out)
+
+}
+
 #' Trim strings
 #'
 #' This function pads/trims strings to the desired length. When trimming, it

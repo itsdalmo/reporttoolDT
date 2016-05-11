@@ -6,6 +6,7 @@
 \alias{spread_10}
 \alias{spread_100}
 \alias{spread_age}
+\alias{spread_employees}
 \title{Recode}
 \usage{
 recode(x, ..., by = x, drop = TRUE, add = FALSE, factor = FALSE,
@@ -18,6 +19,8 @@ spread_10(x)
 spread_100(x)
 
 spread_age(x, small = FALSE)
+
+spread_employees(x)
 }
 \arguments{
 \item{x}{The vector to be recoded.}

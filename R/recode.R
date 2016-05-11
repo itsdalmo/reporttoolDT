@@ -105,6 +105,11 @@ spread_100 <- function(x) {
 #' @rdname recode
 #' @export
 spread_age <- function(x, small = FALSE) {
+  if (is.character(x)) {
+    # x <- stringi::stri_extract_first(x, regex = "[0-9]+")
+    # x <- suppressWarnings(as.integer(x))
+    # x <- str_to_numeric(x, FUN = mean, na.rm = TRUE)
+  }
   if (!is.numeric(x)) {
     stop("Expecting a numeric vector.")
   } else if (!is.integer(x)) {
@@ -125,6 +130,27 @@ spread_age <- function(x, small = FALSE) {
   recode_(x, rec, factor = TRUE)
 }
 
+#' @rdname recode
+#' @export
+spread_employees <- function(x) {
+  if (is.character(x)) {
+    # x <- stringi::stri_extract_first(x, regex = "[0-9]+")
+    # x <- suppressWarnings(as.integer(x))
+    # x <- str_to_numeric(x, FUN = mean, na.rm = TRUE)
+  }
+  if (!is.numeric(x)) {
+    stop("Expecting a numeric vector.")
+  } else if (!is.integer(x)) {
+    if (any_fractions(x))
+      stop("This function should not be used with fractions, only wholenumbers.")
+    x <- as.integer(x)
+  }
+
+  rec <- list("1-19" = 1:19L, "20-99" = 20:99L, "100+" = x >= 100L)
+
+  recode_(x, rec, factor = TRUE)
+
+}
 
 recode_impl <- function(x, subsets) {
 
