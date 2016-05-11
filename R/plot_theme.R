@@ -46,6 +46,7 @@ theme_epsi <- function(base_size = 12, base_family = "sans") {
     plot.margin  = grid::unit(c(.5, .5, .5, .5), "cm"),
 
     # Legend position and format
+    legend.key.size = grid::unit(10L, "points"),
     legend.position = "bottom",
     legend.title    = element_blank()
   )
