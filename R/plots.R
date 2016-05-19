@@ -54,45 +54,98 @@ bar_chart_.qtable <- function(df, vars, groups = NULL, weight = NULL, margin = T
 }
 
 bar_chart_impl <- function(df, vars, groups, weight, margin, wrap) {
-  pct <- "proportion" %in% names(df)
+  is_grouped <- !is.null(groups)
+  is_proportion <- "proportion" %in% names(df)
+  multiple_vars <- length(vars) > 1L
 
-  # Create the plot
+  # Cannot visualize multiple proportions with groups, without
+  # wrapping. Override with a warning.
+  if (is_proportion && multiple_vars && is_grouped && !wrap) {
+    warning("Multiple proportions with groups have to be wrapped. Ignoring wrap = FALSE.", call. = FALSE)
+    wrap <- TRUE
+  } else if (!multiple_vars && wrap) {
+    warning("Ignoring wrap = TRUE when plotting a single variable.", call. = FALSE)
+    wrap <- FALSE
+  }
+
+  # Use groups as the x-axis if it contains more unique values than the
+  # proportions being plotted, or the number of variables being plotted for numeric plots.
+  if (is_grouped) {
+    group_length <- length(levels(df[[groups]]) %||% unique(df[[groups]]))
+    xvar <- if (is_proportion) "value" else "variable"
+    xvar_length <- length(levels(df[[xvar]]) %||% unique(df[[xvar]]))
+  }
+
+  # Figure out the best aesthetics for visualizing the plot.
+  # (Depends on: proportion/numeric, grouped or not, single/mult. vars, wrap etc.)
+  if (is_proportion) {
+    xvar  <- "value"
+    yvar  <- "proportion"
+    ymin  <- 0L
+    ymax  <- 1.05
+    group <- "value"
+    fill  <- if (is_grouped) groups else NULL
+
+    # Swap xvar and fill if necessary.
+    if (is_grouped && group_length > xvar_length) {
+      xvar <- groups
+      fill <- "value"
+    }
+  } else {
+    xvar  <- "variable"
+    yvar  <- "value"
+    ymin  <- min(df$value, na.rm = TRUE) * 0.8
+    ymax  <- max(df$value, na.rm = TRUE) * 1.2
+    group <- groups
+    fill  <- if (is_grouped) groups else NULL
+
+    # Swap xvar and fill if necessary.
+    if (is_grouped && group_length > xvar_length) {
+      xvar <- groups
+      group <- "variable"
+      fill <- if (multiple_vars && !wrap) "variable" else NULL
+    }
+  }
+
+  # Create the bar plot using predefined aes
   out <- ggplot2::ggplot(
-    data = df,
-    ggplot2::aes_string(
-      x     = if (pct) "value" else "variable",
-      y     = if (pct) "proportion" else "value",
-      ymin  = if (pct) 0 else min(df$value, na.rm = TRUE) * 0.8,
-      ymax  = if (pct) 1.05 else max(df$value, na.rm = TRUE) * 1.2,
-      group = groups,
-      fill  = groups)
-  )
+    data = df, ggplot2::aes_string(
+      x = xvar,
+      y = yvar,
+      ymin = ymin,
+      ymax = ymax,
+      group = group,
+      fill  = fill)) +
 
-  # Add geom
-  out <- out + ggplot2::geom_bar(
-    stat = "identity",
-    width = .5,
-    position = ggplot2::position_dodge(width = .6)
-  )
+    ggplot2::geom_bar(
+      stat = "identity",
+      width = .5,
+      position = ggplot2::position_dodge(width = .6))
 
-  # Set y axis to percentages
-  if (pct)
-    out <- out + ggplot2::scale_y_continuous(labels = scales::percent)
-
-  # Add labels to each bar
+  # Add labels to each bar.
+  # Round percentages to a whole number, keep 1 decimal for numeric.
   out <- out + ggplot2::geom_text(
     ggplot2::aes(
-      label    = if (pct) sprintf("%.0f %%", proportion * 100L) else sprintf("%.1f", value)),
-      position = ggplot2::position_dodge(width = 0.6),
-      vjust    = -1.1,
-      hjust    = .35,
-      size     = 3,
-      colour   = "#23373b"
+    label = if (is_proportion) sprintf("%.0f %%", proportion * 100L) else sprintf("%.1f", value)),
+    position = ggplot2::position_dodge(width = 0.6),
+    vjust = -1.1,
+    hjust = .35,
+    size = 3,
+    colour = "#23373b"
   )
 
-  # Wrap if multiple variables.
-  if (wrap && length(vars) > 1L)
+  # For proportions, we want yaxis ticks to be percentages as well.
+  # In case of numeric, we only want to show a subset of the plot area.
+  if (is_proportion) {
+    out <- out + ggplot2::scale_y_continuous(labels = scales::percent)
+  } else {
+    out <- out + ggplot2::coord_cartesian(ylim=c(ymin, ymax))
+  }
+
+  # Optionally wrap the results by variable.
+  if (wrap) {
     out <- out + ggplot2::facet_wrap(~ variable, ncol = 2L, scales="free_x")
+  }
 
   out + theme_epsi() + scale_fill_epsi()
 
@@ -186,6 +239,9 @@ line_chart_impl <- function(df, vars, groups = NULL, weight = NULL, margin = TRU
 #' @export
 latent_plot <- function(df, groups = NULL, weight = NULL, margin = TRUE) {
   vars <- names(df)[stri_trans_tolower(names(df)) %in% default_latents()]
+  if (is.null(groups) && requireNamespace("dplyr", quietly = TRUE)) {
+    groups <- as.character(dplyr::groups(df))
+  }
   if (!length(vars)) stop("Latent variables were not found in the data.")
   if (is.null(groups)) {
     bar_chart_(df, vars = vars, groups = groups, weight = weight, margin = margin)
@@ -198,6 +254,14 @@ latent_plot <- function(df, groups = NULL, weight = NULL, margin = TRUE) {
 #' @rdname manifest_table
 #' @export
 manifest_plot <- function(df, groups = NULL, weight = NULL, margin = TRUE) {
-  # TODO
+  vars <- get_association(df, default_latents())
+  vars <- names(df)[match_all(stri_trans_tolower(stri_c(vars, "em")), stri_trans_tolower(names(df)))]
+  if (is.null(groups) && requireNamespace("dplyr", quietly = TRUE)) {
+    groups <- as.character(dplyr::groups(df))
+    if (!length(groups)) groups <- NULL
+  }
+  out <- manifest_table(df, groups = groups, weight = weight, margin = margin, wide = FALSE)
+  out <- bar_chart_(out, vars = vars, groups = groups, weight = weight, margin = margin)
+  out
 }
 
