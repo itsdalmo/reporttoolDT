@@ -72,7 +72,14 @@ manifest_table <- function(df, groups = NULL, weight = NULL, margin = TRUE, wide
 
   # Make the table and rename vars
   out <- tabulR::qtable_(df, vars, groups = groups, weight = weight, margin = margin, wide = wide)
-  names(out) <- stri_replace(names(out), "", regex = "em$", case_insensitive = TRUE)
+  if (wide) {
+    names(out) <- stri_replace(names(out), "", regex = "em$", case_insensitive = TRUE)
+  } else {
+    new <- levels(out$variable) %||% unique(out$variable)
+    new <- setNames(new, stri_replace(new, "$1", regex = "^([^-]*)em", case_insensitive = TRUE))
+    out$variable <- suppressWarnings(recode_(out$variable, dots = as.list(new), add = TRUE))
+  }
+
   title <- stri_c("Manifest scores", if (!is.null(weight)) " (Weighted)" else " (Unweighted)")
 
   # Remove counts.
@@ -113,8 +120,12 @@ qtable_.Survey <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE
       weight <- unname(get_association(df, "weight"))
   }
 
-  out <- tabulR::qtable_(df$get_data(copy = TRUE), vars = vars, groups = groups,
-                         weight = weight, margin = margin, margin_name = margin_name,
+  out <- tabulR::qtable_(df$get_data(copy = TRUE),
+                         vars = vars,
+                         groups = groups,
+                         weight = weight,
+                         margin = margin,
+                         margin_name = margin_name,
                          wide = wide)
 
   # If only one variable was specified, and there is no "variable" column and/or
@@ -127,22 +138,32 @@ qtable_.Survey <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE
     title <- NULL
   }
 
-  # Use labels in "variable" column and colnames
+  # Include labels with variable names for wide/long tables.
+  # (The "variable" column exists when creating table with mult. vars, or long tables.)
   if ("variable" %in% names(out)) {
     new <- get_label(df, unique(out$variable))
-    if (!is.null(new)) {
+    if (!is.null(new) && !all(is.na(new))) {
+      # Keep original name if it is not a latent.
+      old <- levels(out$variable)
+      old <- ifelse(stri_trans_tolower(old) %in% default_latents(), "", stri_c(old, " - "))
       new <- new[!is.na(new)]
-      new <- setNames(names(new), new)
+      new <- setNames(names(new), stri_c(old, new))
       out$variable <- suppressWarnings(recode_(out$variable, dots = as.list(new), add = TRUE))
     }
   }
 
-  # Only replace colnames when spreading.
+  # Columnnames should only be replaced when wide = TRUE. Else
+  # we only replace variable (above).
   if (wide) {
     new <- get_label(df, names(out))
-    if (!is.null(new)) {
+    if (!is.null(new) && !all(is.na(new))) {
+      # Keep original name if it is not a latent.
+      old <- names(out)[names(out) %in% names(new)]
+      old <- ifelse(stri_trans_tolower(old) %in% default_latents(), "", stri_c(old, " - "))
       new <- new[!is.na(new)]
-      names(out)[names(out) %in% names(new)] <- unname(new)
+      if (length(new)) {
+        names(out)[names(out) %in% names(new)] <- stri_c(old, new)
+      }
     }
   }
 

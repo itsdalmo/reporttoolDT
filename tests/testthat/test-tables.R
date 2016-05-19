@@ -7,8 +7,7 @@ srv <- survey_tbl(sav)$set_association(common = TRUE)
 test_that("qtable_ method for survey", {
 
   out <- tabulR::qtable_(srv, vars = "q17", groups = "q1", wide = TRUE)
-  # expect_identical(names(out)[1L], "q1: Supplier")
-  expect_identical(names(out)[1L], "Supplier")
+  expect_identical(names(out)[1L], "q1 - Supplier")
   expect_identical(out$n, c(10L, 5L, 5L, 20L))
   expect_identical(out$Nei, c(.9, .8, .8, .85))
 })
