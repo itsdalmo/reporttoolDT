@@ -7,9 +7,13 @@
 latent_plot(df, groups = NULL, weight = NULL, margin = TRUE)
 }
 \arguments{
-\item{x}{A \code{Survey}.}
+\item{df}{A \code{Survey}.}
 
-\item{...}{Ignored.}
+\item{groups}{Variables to group by during aggregation.}
+
+\item{weight}{Name of a variable to weight by. Only used when \code{margin = TRUE}.}
+
+\item{margin}{If \code{TRUE} (the default), the first group will include a "Total".}
 }
 \description{
 Create a "latent profile" for one or more entities against the average.

@@ -2,8 +2,8 @@
 #'
 #' Create a "latent profile" for one or more entities against the average.
 #'
-#' @param x A \code{Survey}.
-#' @param ... Ignored.
+#' @param df A \code{Survey}.
+#' @inheritParams tabulR::bar_chart_
 #' @author Kristian D. Olsen
 #' @seealso latent_table
 #' @export
@@ -28,8 +28,8 @@ latent_plot <- function(df, groups = NULL, weight = NULL, margin = TRUE) {
 #'
 #' Create a "swot" with manifest results for one or more entities against the average.
 #'
-#' @param x A \code{Survey}.
-#' @param ... Ignored.
+#' @param df A \code{Survey}.
+#' @inheritParams tabulR::bar_chart_
 #' @author Kristian D. Olsen
 #' @seealso manifest_table
 #' @export
@@ -48,16 +48,38 @@ manifest_plot <- function(df, groups = NULL, weight = NULL, margin = TRUE) {
   out
 }
 
+#' Using bar_chart_ with a Survey
+#'
+#' This is a S3 method for \code{\link[tabulR]{bar_chart_}} which applies the
+#' EPSI theme to the plot. See \code{\link{qtable_.Survey}} for additional information
+#' on how they differ.
+#'
+#' @inheritParams tabulR::bar_chart_
+#' @author Kristian D. Olsen
 #' @importFrom tabulR bar_chart bar_chart_
 #' @export
-line_chart_.Survey <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wrap = FALSE) {
+#' @examples
+#' NULL
+
+bar_chart_.Survey <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wrap = FALSE) {
   out <- tabulR::qtable_(df, vars = vars, groups = groups, weight = weight, margin = margin, wide = FALSE)
   out <- tabulR::bar_chart_(out, vars = vars, groups = groups, weight = weight, margin = margin, wrap = wrap)
   out + theme_epsi() + scale_fill_epsi()
 }
 
-#' @importFrom tabulR bar_chart bar_chart_
+#' Using line_chart_ with a Survey
+#'
+#' This is a S3 method for \code{\link[tabulR]{line_chart_}} which applies the
+#' EPSI theme to the plot. See \code{\link{qtable_.Survey}} for additional information
+#' on how they differ.
+#'
+#' @inheritParams tabulR::line_chart_
+#' @author Kristian D. Olsen
+#' @importFrom tabulR line_chart line_chart_
 #' @export
+#' @examples
+#' NULL
+
 line_chart_.Survey <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wrap = FALSE) {
   out <- tabulR::qtable_(df, vars = vars, groups = groups, weight = weight, margin = margin, wide = FALSE)
   out <- tabulR::line_chart_(out, vars = vars, groups = groups, weight = weight, margin = margin, wrap = wrap)
