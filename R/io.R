@@ -130,7 +130,7 @@ write_model_input <- function(x, file) {
   if (is.null(me)) {
     stop("'mainentity' must be set before writing input.")
   } else if (!is.factor(lvl)) {
-    lvl <- lvl[stri_order(lvl)]
+    lvl <- lvl[stringi::stri_order(lvl)]
     x[, (me) := lapply(.SD, function(x) factor(x, levels = me_levels)), .SDcols = me]
   }
 
