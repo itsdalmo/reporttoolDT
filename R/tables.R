@@ -172,3 +172,21 @@ qtable_.Survey <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE
   out
 
 }
+
+#' Impact table
+#'
+#' summarise inner weights (impacts) for the EPSI model in a table.
+#'
+#' @param x A \code{Survey}.
+#' @param ... Ignored.
+#' @author Kristian D. Olsen
+#' @seealso flow_chart
+#' @export
+#' @examples
+#' NULL
+
+impact_table <- function(x, ...) {
+  stopifnot(is.survey(x))
+  # TODO
+  stop("impact_table has not been implemented yet.")
+}
