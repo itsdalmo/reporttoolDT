@@ -1,0 +1,161 @@
+---
+title: "Workflow (reporttool)"
+author: "Kristian D. Olsen"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## About
+
+This package is meant for a particular use, which is to work with data from surveys to generate batch reports. To do so, we need to keep track of the labels (questions) for each variable, in addition to latent associations for use in structural modelling (PLS-PM).
+
+To achieve this, `reporttool` provides a `Survey` class which is built using R6, and stuffs some extra information into private (hidden) `fields` inside it. For users, a `Survey` should look and behave pretty much like a normal `data.frame`, `data.table` or `tbl` (dplyr). Internally `Survey`'s helps us keep track of the hidden fields, toward the end goal of automating tables, plots and reports.
+
+*Note* that `reporttool` is meant to be used with `officeR` and `tabulR`.
+
+## Usage
+
+As an example, let's take some "raw data" from SPSS and complete a Survey for PLS-PM modelling.
+
+#### 1. Read the data (officeR)
+
+```{r}
+require(reporttoolDT)
+require(officeR)
+
+sav <- read_data(system.file("extdata", "raw_data.sav", package = "reporttoolDT"))
+class(sav)
+```
+
+#### 2. Convert to `Survey`.
+
+You can convert any `data.frame` to a `Survey` using `survey()`, or you can use one of the following functions which also coerces the input to a specific type of  `data.frame`:
+
+  - `survey_df()`: A regular R `data.frame`.
+- `survey_dt()`  A `data.table`. Read more [here](https://github.com/Rdatatable/data.table/wiki).
+- `survey_tbl()`, requires [dplyr](https://github.com/hadley/dplyr).
+
+For this example, we can use a regular `data.frame`:
+
+  ```{r}
+srv <- survey_df(sav)
+class(srv)
+```
+
+#### 3. Labels
+
+When the data is read from SPSS, the labels are collected from the file. We can check the labels in several ways, but `model()` works best to get an overview:
+
+  ```{r}
+model(srv)
+```
+
+The output from model shows us the column number, name, type in parantheses, and their labels. Let's say we wanted to change the labels to say "Loyalty" instead of  just "loyal". We can do the following:
+
+```{r}
+srv <- set_label(srv, q10 = "Loyalty 1", q15b = "Loyalty 2")
+# To see that the labels have changed:
+get_label(srv, c("q10", "q15b"))
+```
+
+If we wanted to change the label for several variables, we could also supply a list:
+
+```{r}
+new_labels <- list(q10 = "Loyal 1", q15b = "Loyal 2")
+srv <- set_label(srv, list = new_labels)
+# Same result as above.
+```
+
+#### 4. Association
+
+We also need to specify which variables are associated with which latent construct,  we can specify them as follows:
+
+```{r}
+srv <- set_association(srv, image = c("q4a", "q4b"))
+model(srv)
+```
+
+As you can see from the output, **q4a** and **q4b** have a star next to them which indicates that the variables have an association. `set_association()` can also look for common latent associations, based on the name of the variables:
+
+```{r}
+srv <- set_association(srv, common = TRUE)
+# Run model(srv) to see the result
+```
+
+Since all of our variables follow the naming convention, all associations have been identified.
+
+#### 5. Config
+
+We also need to set the config for the survey. Most importantly, we need to set the cutoff to use for valid observations:
+
+```{r}
+srv <- set_config(srv, name = "Example", segment = "B2C", cutoff = .3)
+```
+
+#### 6. Marketshares
+
+In order to be able to weight variables, we also need to specify the marketshare for each company in our study. After the **mainentity** association is set, we can do this using `set_marketshare()`:
+
+```{r}
+srv <- set_marketshare(srv, CompanyA = .3, CompanyB = .5, CompanyC = .2)
+entities(srv)
+```
+
+Above, I have used the `entities()` function which gives you an overview of the entities in the data, and their marketshare if it is set. For the column "Valid", the values are NA because we have not calculated the percentage of missing values on variables associated with latents.
+
+#### 7. Latents (mean)
+
+At this point we have two choices, calculate latent scores as a mean to do a "topline", or prepare it for PLS modelling using the PLS wizard, using the two functions `latents_pls()` and `latents_mean()`. The former does the following:
+
+- Adds `EM` variables to the data (based on associations).
+- Calculates the missing percentage (`percent_missing`).
+- It adds a `coderesp` variable to the data (1 to N).
+- Also, it calculates latents (mean) for each respondent.
+
+```{r}
+srv_mean <- latents_mean(srv)
+# model(srv_mean)
+```
+
+After running `latents_mean()` we see that the labels are empty. To fix this we can use the `auto` argument for `set_label()` (translations have to be set first):
+
+```{r}
+srv_mean <- set_translation(srv_mean, language = "english")
+srv_mean <- set_label(srv_mean, auto = TRUE)
+tail(model(srv_mean))
+```
+
+With missing percentage calculated, we can check `entities()` again to see the number of valid observations:
+
+```{r}
+entities(srv)
+```
+
+#### 8. PLS-wizard
+
+Let's instead run `latents_pls()` to generate input for the PLS-wizard:
+
+```{r}
+srv <- latents_pls(srv)
+tail(model(srv))
+```
+
+Here, the EM variables and latents are not included - only `percent_missing` and `coderesp`. This (in addition to the associations we have set) is enough to create the input files for the PLS-wizard. To create the files, simply run:
+
+```{r}
+# write_survey(srv, file = getwd())
+```
+
+The second argument `file` is the path to where you would like to store the `Survey`. `write_survey()` will always write a separate `...(Survey).Rdata` file which contains all the hidden information for the Survey, and which you can get back again by using `read_survey()`. If `file` is a directory, it will create a new directory **Data** and store the SPSS file, as well as **Input** which contains all the input files for the PLS-wizard.
+
+## Next
+
+After doing all of the necessary steps above, we can use the Survey to generate tables and plots. See the vignette for more information:
+
+```{r, eval = FALSE}
+vignette("output", package = "reporttoolDT")
+```
