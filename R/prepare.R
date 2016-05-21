@@ -69,6 +69,8 @@ latents_impl <- function(x, type) {
     x <- x$as_tbl()
   }
 
+  # Set associations, update labels and return.
+  x$set_association(percent_missing = "percent_missing")
   x
 
 }
