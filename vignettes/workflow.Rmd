@@ -50,7 +50,7 @@ class(srv)
 
 When the data is read from SPSS, the labels are collected from the file. We can check the labels in several ways, but `model()` works best to get an overview:
 
-  ```{r}
+```{r}
 model(srv)
 ```
 

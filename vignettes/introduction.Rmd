@@ -1,5 +1,5 @@
 ---
-title: "Workflow (reporttool)"
+title: "Introduction to reporttool"
 author: "Kristian D. Olsen"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -23,7 +23,7 @@ As an example, let's take some "raw data" from SPSS and complete a Survey to gen
 
 #### Read and prepare
 
-```{r}
+```{r, warning = FALSE, message = FALSE}
 require(dplyr)
 require(officeR)
 require(tabulR)
@@ -39,3 +39,86 @@ srv <- survey_tbl(sav) %>%
   set_label(auto = TRUE)
 ```
 
+For more information about the steps above, check out the [vignette](https://github.com/itsdalmo/reporttoolDT/blob/master/vignettes/workflow.Rmd) by running `vignette("workflow", package = "reporttoolDT")`. We are now ready to generate output from the `Survey`.
+
+#### Tables
+
+To generate tables, we can use the `qtable()` function from the tabulR package.
+
+```{r, warning = FALSE, message = FALSE}
+srv %>% group_by(q1) %>% qtable(q17)
+```
+
+We can also use `latent_table()` and `manifest_table()` to easily summarise the model variables:
+
+```{r, warning = FALSE, message = FALSE}
+srv %>% group_by(q1) %>% latent_table()
+```
+
+#### Recode
+
+Let's say we wanted to recode "had reason to complain" as "no", and create a table of satisfaction for complaining and non-complaining customers (by company), we can call:
+
+```{r, warning = FALSE, message = FALSE}
+srv %>% 
+  mutate(q17 = recode(q17, Nei = c("Nei", "Hadde grunn til å klage, men klaget ikke"))) %>%
+  group_by(q1, q17) %>%
+  qtable(epsi)
+```
+
+#### Charts
+
+Creating charts works more or less exactly like `qtable()`, except we have two choices - `bar_chart()` and `line_chart()`:
+
+```{r, warning = FALSE, message = FALSE}
+srv %>% group_by(q1) %>% bar_chart(epsi, margin = FALSE)
+```
+
+We can also use `manifest_plot()` and `latent_plot()` to visualize our model variables:
+
+```{r, warning = FALSE, message = FALSE}
+# srv %>% group_by(q1) %>% latent_plot()
+```
+
+The plots are meant as a baseline, and can be further adjusted using ggplot2 (which was also used to create them).
+
+#### Output
+
+To create PDF or Powerpoint output, we first create a workbook in R, and use `to_ppt` and `to_excel` to send tables and/or plots to the workbook. The workbook can then be saved with `write_data` after. Let's start with Excel:
+
+```{r, warning = FALSE, message = FALSE}
+wb <- excel_workbook()
+
+# Add the latent table
+srv %>% group_by(q1) %>% latent_table() %>% to_excel(wb)
+
+# Add manifest table
+# srv %>% group_by(q1) %>% manifest_table() %>% to_excel(wb)
+
+# Save
+# write_data(wb, "reporttool example.xlsx")
+```
+
+We cannot send plots to Excel, but we can with Powerpoint:
+
+```{r, warning = FALSE, message = FALSE}
+wb <- ppt_workbook()
+
+# Add the latent plot
+srv %>% group_by(q1) %>% latent_plot() %>% to_ppt(wb, title = "Latent plot")
+
+# And also satisfaction barchart
+srv %>% group_by(q1) %>% bar_chart(epsi, margin = FALSE) %>% to_ppt(wb, title = "Satisfaction")
+
+# Save
+# write_data(wb, "reporttool example.pptx")
+```
+
+#### Reports
+
+Coming soon.
+
+## More information
+
+- [Survey-class](https://github.com/itsdalmo/reporttoolDT/blob/master/vignettes/survey.Rmd): `vignette("survey", package = "reporttoolDT")`.
+- [Workflow](https://github.com/itsdalmo/reporttoolDT/blob/master/vignettes/workflow.Rmd): `vignette("workflow", package = "reporttoolDT")`.
