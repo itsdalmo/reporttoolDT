@@ -102,7 +102,8 @@ srv %>% group_by(q1) %>% latent_table() %>% to_excel(wb)
 We cannot send plots to Excel, but we can with Powerpoint:
 
 ```{r, warning = FALSE, message = FALSE}
-wb <- ppt_workbook()
+if (require(ReporteRs)) {
+ wb <- ppt_workbook()
 
 # Add the latent plot
 srv %>% group_by(q1) %>% latent_plot() %>% to_ppt(wb, title = "Latent plot")
@@ -111,7 +112,8 @@ srv %>% group_by(q1) %>% latent_plot() %>% to_ppt(wb, title = "Latent plot")
 srv %>% group_by(q1) %>% bar_chart(epsi, margin = FALSE) %>% to_ppt(wb, title = "Satisfaction")
 
 # Save
-# write_data(wb, "reporttool example.pptx")
+# write_data(wb, "reporttool example.pptx") 
+}
 ```
 
 #### Reports
