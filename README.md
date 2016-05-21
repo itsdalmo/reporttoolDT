@@ -6,16 +6,16 @@ reporttool
 
 A tool (work in progress) for generating reports from Survey data.
 
-Installation
-------------
+Prerequisites
+-------------
 
-#### 1. Install R
+#### 1. R
 
 1.  Install the latest version of R (&gt;= 3.2.5) from [CRAN](https://cran.r-project.org/).
 2.  Next, install Rtools (required for .xlsx files). You can find it on [CRAN](https://cran.r-project.org/bin/windows/Rtools/). Make sure you check "edit path" when installing.
 3.  Optional: Get the Rstudio (desktop) IDE from their [webpage](https://www.rstudio.com/products/rstudio/download/).
 
-#### 2. Install LaTeX
+#### 2. LaTeX
 
 LaTeX is required to create PDF files from rmarkdown and pandoc.
 
@@ -25,18 +25,12 @@ See Pandoc's [instructions](http://pandoc.org/installing.html) for installing La
 -   OS X: Use [MacTex](https://tug.org/mactex/) (large download, but you'll have everything you need after.)
 -   Linux: Install [Tex Live](http://www.tug.org/texlive/) using the package manager for the OS.
 
-After installing, you might also want to change Rstudio's global options (Sweave) to "typeset LaTex into PDF using:" XeLatex. This allows you to generate PDF's with custom fonts.
+#### 3. Optional: Powerpoint
 
-#### 3. Install officeR
+If you want Powerpoint support (for `officeR::to_ppt` and `generate_ppt`), you also need Java and ReporteRs. Follow the instructions [here](https://github.com/itsdalmo/officeR).
 
-``` r
-devtools::install_github("hadley/haven")     # Ahead of CRAN. See officeR documentation.
-devtools::install_github("itsdalmo/officeR") # Not on CRAN yet.
-```
-
-If you want Powerpoint support (for `officeR::to_ppt` and `generate_ppt`), you can follow the instructions [here](https://github.com/itsdalmo/officeR).
-
-#### 4. Install reporttolDT
+Installation
+------------
 
 Development version:
 
@@ -50,7 +44,11 @@ CRAN:
 # Not on CRAN yet.
 ```
 
-Whats next
-----------
+Usage
+-----
 
-Head over to the [vignettes](https://github.com/itsdalmo/reporttoolDT/tree/master/vignettes) for the introduction, or run `vignette("introduction", package = "reporttoolDT")` in R.
+See [vignettes](https://github.com/itsdalmo/reporttoolDT/tree/master/vignettes) here on github, or run the code below in R after installing:
+
+``` r
+vignette("introduction", package = "reporttoolDT")
+```
