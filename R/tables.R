@@ -15,6 +15,11 @@ latent_table <- function(df, groups = NULL, weight = NULL, margin = TRUE, wide =
   vars <- names(df)[stri_trans_tolower(names(df)) %in% default_latents()]
   if (!length(vars)) stop("Latent variables were not found in the data.")
 
+  # Check groups if dplyr is installed.
+  if (requireNamespace("dplyr", quietly = TRUE)) {
+    groups <- groups %||% as.character(dplyr::groups(df))
+  }
+
   # Get weights in the same way
   if (margin) {
     weight <- get_association(df, "weight")
@@ -61,6 +66,11 @@ manifest_table <- function(df, groups = NULL, weight = NULL, margin = TRUE, wide
   vars <- names(df)[match_all(stri_c(tolower(vars), "em"), tolower(names(df)))]
   if (!length(vars)) stop("No 'em' variables found in the data.")
 
+  # Check groups if dplyr is installed.
+  if (requireNamespace("dplyr", quietly = TRUE)) {
+    groups <- groups %||% as.character(dplyr::groups(df))
+  }
+
   # Get weights in the same way
   if (margin) {
     weight <- get_association(df, "weight")
@@ -73,7 +83,7 @@ manifest_table <- function(df, groups = NULL, weight = NULL, margin = TRUE, wide
   # Make the table and rename vars
   out <- tabulR::qtable_(df, vars, groups = groups, weight = weight, margin = margin, wide = wide)
   if (wide) {
-    names(out) <- stri_replace(names(out), "", regex = "em$", case_insensitive = TRUE)
+    names(out) <- stri_replace(names(out), "$1", regex = "^([^-]*)em", case_insensitive = TRUE)
   } else {
     new <- levels(out$variable) %||% unique(out$variable)
     new <- setNames(new, stri_replace(new, "$1", regex = "^([^-]*)em", case_insensitive = TRUE))
