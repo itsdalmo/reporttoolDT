@@ -8,7 +8,7 @@
 \alias{set_translation}
 \title{Set a private field for a Survey object.}
 \usage{
-set_label(x, ..., list = NULL)
+set_label(x, ..., list = NULL, auto = FALSE)
 
 set_association(x, ..., list = NULL, common = FALSE)
 
@@ -26,6 +26,9 @@ of \code{set_association} which uses \code{value = name}.}
 
 \item{list}{Optional: A \code{list} (or named character vector) the same format as
 \code{...}.}
+
+\item{auto}{Optional: Set to \code{TRUE} if you want to automatically set labels
+for EM variables and latents (if translations are set).}
 
 \item{common}{Optional: Set to \code{TRUE} if you want associations to be set
 for common variable names. E.g., q1 is set as mainentity, and q4a-z is associated with image.}

@@ -76,6 +76,8 @@ get_data <- function(x) {
 #' @param list Optional: A \code{list} (or named character vector) the same format as
 #' \code{...}.
 #' @param language Optional: Language defaults to use for translations.
+#' @param auto Optional: Set to \code{TRUE} if you want to automatically set labels
+#' for EM variables and latents (if translations are set).
 #' @param common Optional: Set to \code{TRUE} if you want associations to be set
 #' for common variable names. E.g., q1 is set as mainentity, and q4a-z is associated with image.
 #' @note These functions return a copy (\code{deep_clone}) of the \code{Survey}.
@@ -96,10 +98,10 @@ get_data <- function(x) {
 #' # Should be equivalent
 #' all.equal(x, y)
 
-set_label <- function(x, ..., list = NULL) {
+set_label <- function(x, ..., list = NULL, auto = FALSE) {
   if (!is.survey(x))
     stop("set_label: argument 'x' must be of class 'Survey'.", call. = FALSE)
-  res <- x$clone(deep = TRUE)$set_label(..., list = list)
+  res <- x$clone(deep = TRUE)$set_label(..., list = list, auto = auto)
   res
 }
 
@@ -161,6 +163,42 @@ merge_vectors <- function(..., default = NULL) {
   } else {
     res
   }
+
+}
+
+# Reuse variable labels for EM variables, and translations for latents.
+# (Only replaces NA's, not existing labels.)
+auto_label <- function(fields) {
+  labs <- fields$labels
+  asso  <- fields$associations
+
+  em <- NULL # EM variables
+  lv <- NULL # Latent variables
+
+  # Get a list of variables with EM prefix and a missing label
+  is_em <- stri_detect(names(labs), regex = "em$", case_insensitive = TRUE)
+  is_na <- is.na(labs)
+
+  # Reuse labels from non-EM variables
+  if (any(is_em) && any(is_na)) {
+    em <- names(labs)[is_em & is_na]
+    la <- stri_replace(em, "$1", regex = "(.*)em$", case_insensitive = TRUE)
+    la <- match_all(stri_trans_tolower(la), stri_trans_tolower(names(labs)))
+    em <- setNames(labs[la], em)
+  }
+
+  # Also set translation as label for latents if possible
+  trans <- fields$translations
+  is_lat <- stri_trans_tolower(names(labs)) %in% default_latents()
+
+  if (!is.null(trans) && any(is_lat)) {
+    lv <- names(labs)[is_lat & is_na]
+    lb <- trans[match_all(stri_trans_tolower(lv), names(trans))]
+    lv <- setNames(lb, lv)
+  }
+
+  # Return
+  c(em, lv)
 
 }
 

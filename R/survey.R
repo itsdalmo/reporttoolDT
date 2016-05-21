@@ -234,9 +234,10 @@ Survey <- R6::R6Class("Survey",
       fields
     },
 
-    set_label = function(..., list = NULL) {
+    set_label = function(..., list = NULL, auto = FALSE) {
       "Set labels."
-      new <- merge_vectors(..., list, private$.labels, default = self$names())
+      em <- if (auto) auto_label(self$get_field()) else NULL
+      new <- merge_vectors(..., list, em, private$.labels, default = self$names())
       private$.labels <- new
       invisible(self)
     },
