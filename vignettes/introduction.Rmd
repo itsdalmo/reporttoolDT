@@ -77,7 +77,7 @@ srv %>% group_by(q1) %>% bar_chart(epsi, margin = FALSE)
 We can also use `manifest_plot()` and `latent_plot()` to visualize our model variables:
 
 ```{r, warning = FALSE, message = FALSE}
-# srv %>% group_by(q1) %>% latent_plot()
+srv %>% group_by(q1) %>% latent_plot()
 ```
 
 The plots are meant as a baseline, and can be further adjusted using ggplot2 (which was also used to create them).
@@ -93,7 +93,7 @@ wb <- excel_workbook()
 srv %>% group_by(q1) %>% latent_table() %>% to_excel(wb)
 
 # Add manifest table
-# srv %>% group_by(q1) %>% manifest_table() %>% to_excel(wb)
+srv %>% group_by(q1) %>% manifest_table() %>% to_excel(wb)
 
 # Save
 # write_data(wb, "reporttool example.xlsx")
@@ -103,16 +103,16 @@ We cannot send plots to Excel, but we can with Powerpoint:
 
 ```{r, warning = FALSE, message = FALSE}
 if (require(ReporteRs)) {
- wb <- ppt_workbook()
+   wb <- ppt_workbook()
 
-# Add the latent plot
-srv %>% group_by(q1) %>% latent_plot() %>% to_ppt(wb, title = "Latent plot")
+  # Add the latent plot
+  srv %>% group_by(q1) %>% latent_plot() %>% to_ppt(wb, title = "Latent plot")
 
-# And also satisfaction barchart
-srv %>% group_by(q1) %>% bar_chart(epsi, margin = FALSE) %>% to_ppt(wb, title = "Satisfaction")
+  # And also satisfaction barchart
+  srv %>% group_by(q1) %>% bar_chart(epsi, margin = FALSE) %>% to_ppt(wb, title = "Satisfaction")
 
-# Save
-# write_data(wb, "reporttool example.pptx") 
+  # Save
+  # write_data(wb, "reporttool example.pptx") 
 }
 ```
 
