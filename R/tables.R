@@ -168,12 +168,10 @@ qtable_.Survey <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE
     new <- get_label(df, names(out))
     if (!is.null(new) && !all(is.na(new))) {
       # Keep original name if it is not a latent.
+      new <- new[!is.na(new)]
       old <- names(out)[names(out) %in% names(new)]
       old <- ifelse(stri_trans_tolower(old) %in% default_latents(), "", stri_c(old, " - "))
-      new <- new[!is.na(new)]
-      if (length(new)) {
-        names(out)[names(out) %in% names(new)] <- stri_c(old, new)
-      }
+      names(out)[names(out) %in% names(new)] <- stri_c(old, new)
     }
   }
 
