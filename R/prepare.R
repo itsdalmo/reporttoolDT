@@ -50,7 +50,7 @@ add_weight <- function(x) {
 
   # Convert back to correct class
   if (old_class == "Survey_tbl") {
-    x <- x$as_df$as_tbl() # to get a tbl_df back.
+    x <- x$as_df()$as_tbl() # to get a tbl_df back.
   } else if (old_class == "Survey_df") {
     x <- x$as_df()
   }
