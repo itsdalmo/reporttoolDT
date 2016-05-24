@@ -28,7 +28,7 @@ add_weight <- function(x) {
 
   # Calculate a weight for each entity based on valid observations and ms.
   ents <- data.table::as.data.table(ents)
-  ents[, tot := sum(valid)][, wt := (marketshare*tot)/n]
+  ents[, total := sum(valid)][, wt := (marketshare*total)/valid]
 
   # Replace existing weights with the newly calculated ones.
   pm <- x$get_association("percent_missing")
@@ -42,7 +42,8 @@ add_weight <- function(x) {
   is_valid <- x[[pm]] <= as.numeric(co)
   for (i in seq_along(ents$entity)) {
     current_entity <- x[[me]] == ents$entity[i]
-    data.table::set(x$data, which(is_valid & current_entity), wt, ents$wt[i])
+    rows <- which(is_valid & current_entity)
+    data.table::set(x$data, rows, wt, ents$wt[i])
   }
 
   # Set association
