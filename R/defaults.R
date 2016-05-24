@@ -138,10 +138,10 @@ internal_defaults <- list(
     ),
 
     swedish = stringi::stri_unescape_unicode(
-      c("Image/inntrykk",
+      c("Image",
         "F\\u00f6rv\\u00e4ntningar",
         "Produktkvalitet",
-        "Servicekvalitet",
+        "Service",
         "Prisv\\u00e4rdhet",
         "Kundn\\u00f6jdhet",
         "Lojalitet",
@@ -153,7 +153,7 @@ internal_defaults <- list(
         "Fr\\u00e5ga",
         "Snitt",
         "Webstudien",
-        "National",
+        "Nationell",
         "V\\u00e5r",
         "H\\u00f6st")
     ),
@@ -177,6 +177,27 @@ internal_defaults <- list(
         "National",
         "For\\u00e5r",
         "Efter\\u00e5r")
+    ),
+
+    finnish = stringi::stri_unescape_unicode(
+      c("Imago",
+        "Odotukset",
+        "Tuotelaatu",
+        "Palvelulaatu",
+        "Koettu Lisv\u00e4arvo",
+        "Asiakastyytyv\u00e4isyys",
+        "Uskollisuus",
+        "Valitukset",
+        "Pankki",
+        "Toimiala",
+        "Koodi",
+        "Ero",
+        "Kysymys",
+        "Keskiarvo",
+        "Web-tutkimus",
+        "Kansallinen",
+        "Kev\u00e4t",
+        "Syksy")
     )),
 
   # Default config values for the .config private field in Survey's.
