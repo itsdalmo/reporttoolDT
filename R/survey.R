@@ -398,7 +398,7 @@ Survey <- R6::R6Class("Survey",
       }
 
       ms <- self$get_marketshare()
-      if (!is.null(ms)) {
+      if (!is.null(ms) && all(names(ms) %in% dt[[me]])) {
         ms <- setNames(list(names(ms), unname(ms)), c(me, "marketshare"))
         ms <- data.table::as.data.table(ms)
         # Join on mainentity, convert ms to numeric and drop entities with
