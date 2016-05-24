@@ -1,3 +1,64 @@
+#' Add weight
+#'
+#' Create a weight variable to a survey, based on marketshares. Values will be
+#' replaced if 'weight' is set in associations. If not, a new variable 'w' is created.
+#' Weights are only set for valid observations, non-valid will be set to \code{NA}.
+#'
+#' @param x A Survey.
+#' @author Kristian D. Olsen
+#' @export
+#' @examples
+#' NULL
+
+add_weight <- function(x) {
+  stopifnot(is.survey(x))
+  old_class <- class(x)[1L]
+  ents <- x$entities() # Throws errors if necessary information is missing.
+
+  missing_valid <- any(is.na(ents$valid))
+  if (missing_valid) {
+    stop("Cannot calculate valid observations. Do set_config(cutoff = ...) and
+         set_association(percent_missing = ...) first.")
+  }
+
+  missing_ms <- any(is.na(ents$marketshare))
+  if (missing_ms) {
+    stop("Marketshares must be set for all entities. See help(set_marketshare).")
+  }
+
+  # Calculate a weight for each entity based on valid observations and ms.
+  ents <- data.table::as.data.table(ents)
+  ents[, tot := sum(valid)][, wt := (marketshare*tot)/n]
+
+  # Replace existing weights with the newly calculated ones.
+  pm <- x$get_association("percent_missing")
+  co <- x$get_config("cutoff")
+  me <- x$get_association("mainentity")
+
+  x <- x$as_dt() # Make sure we are dealing with a data.table.
+  wt <- x$get_association("weight") %||% "w"
+  x[, wt := NA, with = FALSE]  # Set 'w' or weight variable.
+
+  is_valid <- x[[pm]] <= as.numeric(co)
+  for (i in seq_along(ents$entity)) {
+    current_entity <- x[[me]] == ents$entity[i]
+    data.table::set(x$data, which(is_valid & current_entity), wt, ents$wt[i])
+  }
+
+  # Set association
+  x$set_association(weight = wt)
+
+  # Convert back to correct class
+  if (old_class == "Survey_tbl") {
+    x <- x$as_df$as_tbl() # to get a tbl_df back.
+  } else if (old_class == "Survey_df") {
+    x <- x$as_df()
+  }
+
+  x
+
+}
+
 #' Prepare data
 #'
 #' Prepare a \code{Survey} for PLS modelling, or get means for each latent.
