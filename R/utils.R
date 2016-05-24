@@ -13,7 +13,10 @@ renamed_vars <- function(vars, dots) {
   if (!length(renamed)) return()
 
   # If renamed. Return a renamed vars vector.
-  vars[match(vars, renamed)] <- names(renamed)
+  # (has to be done in a loop to support referencing newly created vars.)
+  for (i in seq_along(renamed)) {
+    vars[vars == renamed[i]] <- names(renamed)[i]
+  }
   vars
 
 }
