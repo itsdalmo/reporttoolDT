@@ -389,7 +389,10 @@ Survey <- R6::R6Class("Survey",
         stop("'mainentity' is not specified. See help(set_association).")
 
       dt <- data.table::as.data.table(self$get_data())
-      if ("percent_missing" %in% self$names()) {
+      pm <- unname(self$get_association("percent_missing"))
+      if (!is.null(pm) && pm != "percent_missing")
+        data.table::setnames(dt, pm, "percent_missing")
+      if ("percent_missing" %in% names(dt)) {
         cutoff <- self$get_config("cutoff")
         cutoff <- if (is.null(cutoff)) NA else as.numeric(cutoff)
         dt <- dt[, list("n" = .N, "valid" = sum(percent_missing <= cutoff)), keyby = me]
