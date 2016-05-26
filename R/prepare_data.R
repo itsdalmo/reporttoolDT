@@ -1,3 +1,34 @@
+#' Add latent spreads
+#'
+#' This function adds latent-spreads to a \code{Survey}.
+#'
+#' @param x A Survey.
+#' @author Kristian D. Olsen
+#' @export
+#' @examples
+#' NULL
+
+add_latent_spread <- function(x) {
+  stopifnot(is.survey(x))
+  s <- class(x)[1L]
+  x <- x$clone(deep = TRUE)$as_dt()
+
+  # Figure out which latents
+  lats <- names(x)[stri_trans_tolower(names(x)) %in% default_latents()]
+  lats_spread <- stri_c(lats, "spread", sep = "_")
+  x[, lats_spread := lapply(.SD, spread_100), .SDcols = lats, with = FALSE]
+
+  # Coerce back to input format.
+  if (s == "Survey_df") {
+    x <- x$as_df()
+  } else if (s == "Survey_tbl") {
+    x <- x$as_df()$as_tbl()
+  }
+
+  x
+
+}
+
 #' Add weight
 #'
 #' Create a weight variable to a survey, based on marketshares. Values will be
@@ -12,7 +43,8 @@
 
 add_weight <- function(x) {
   stopifnot(is.survey(x))
-  old_class <- class(x)[1L]
+  s <- class(x)[1L]
+  x <- x$clone(deep = TRUE)$as_dt()
   ents <- x$entities() # Throws errors if necessary information is missing.
 
   missing_valid <- any(is.na(ents$valid))
@@ -49,11 +81,11 @@ add_weight <- function(x) {
   # Set association
   x$set_association(weight = wt)
 
-  # Convert back to correct class
-  if (old_class == "Survey_tbl") {
-    x <- x$as_df()$as_tbl() # to get a tbl_df back.
-  } else if (old_class == "Survey_df") {
+  # Coerce back to input format.
+  if (s == "Survey_df") {
     x <- x$as_df()
+  } else if (s == "Survey_tbl") {
+    x <- x$as_df()$as_tbl()
   }
 
   x
@@ -128,7 +160,7 @@ latents_impl <- function(x, type) {
   if (s == "Survey_df") {
     x <- x$as_df()
   } else if (s == "Survey_tbl") {
-    x <- x$as_tbl()
+    x <- x$as_df()$as_tbl()
   }
 
   # Set associations, update labels and return.
