@@ -51,6 +51,11 @@ is_named <- function(x) {
   !is.null(nms) && !any(is.na(nms)) && !any(nms == "")
 }
 
+# Check whether data is a tbl --------------------------------------------------
+is_tbl <- function(x) {
+  inherits(x, c("tbl", "tbl_df", "tbl_dt"))
+}
+
 # See if a numeric vactor contains fractions/decimals (i.e., not an integer) ---
 any_fractions <- function(x) {
   num <- x%%1 != 0

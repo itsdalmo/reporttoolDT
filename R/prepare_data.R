@@ -10,22 +10,20 @@
 
 add_latent_spread <- function(x) {
   stopifnot(is.survey(x))
-  s <- class(x)[1L]
-  x <- x$clone(deep = TRUE)$as_dt()
+  out <- x$clone(deep = TRUE)$as_dt()
 
   # Figure out which latents
-  lats <- names(x)[stri_trans_tolower(names(x)) %in% default_latents()]
+  lats <- names(out)[stri_trans_tolower(names(out)) %in% default_latents()]
   lats_spread <- stri_c(lats, "spread", sep = "_")
-  x[, lats_spread := lapply(.SD, spread_100), .SDcols = lats, with = FALSE]
+  out[, lats_spread := lapply(.SD, spread_100), .SDcols = lats, with = FALSE]
 
   # Coerce back to input format.
-  if (s == "Survey_df") {
-    x <- x$as_df()
-  } else if (s == "Survey_tbl") {
-    x <- x$as_df()$as_tbl()
-  }
+  if (!data.table::is.data.table(x$data))
+    out$as_df()
+  if (inherits(x$data, "tbl"))
+    out$as_tbl()
 
-  x
+  out
 
 }
 
@@ -43,9 +41,8 @@ add_latent_spread <- function(x) {
 
 add_weight <- function(x) {
   stopifnot(is.survey(x))
-  s <- class(x)[1L]
-  x <- x$clone(deep = TRUE)$as_dt()
-  ents <- x$entities() # Throws errors if necessary information is missing.
+  out <- x$clone(deep = TRUE)$as_dt()
+  ents <- out$entities() # Throws errors if necessary information is missing.
 
   missing_valid <- any(is.na(ents$valid))
   if (missing_valid) {
@@ -63,32 +60,30 @@ add_weight <- function(x) {
   ents[, total := sum(valid)][, wt := (marketshare*total)/valid]
 
   # Replace existing weights with the newly calculated ones.
-  pm <- x$get_association("percent_missing")
-  co <- x$get_config("cutoff")
-  me <- x$get_association("mainentity")
+  pm <- out$get_association("percent_missing")
+  co <- out$get_config("cutoff")
+  me <- out$get_association("mainentity")
 
-  x <- x$as_dt() # Make sure we are dealing with a data.table.
-  wt <- x$get_association("weight") %||% "w"
-  x[, wt := NA, with = FALSE]  # Set 'w' or weight variable.
+  wt <- out$get_association("weight") %||% "w"
+  out[, wt := NA, with = FALSE]  # Set 'w' or weight variable.
 
-  is_valid <- x[[pm]] <= as.numeric(co)
+  is_valid <- out[[pm]] <= as.numeric(co)
   for (i in seq_along(ents$entity)) {
-    current_entity <- x[[me]] == ents$entity[i]
+    current_entity <- out[[me]] == ents$entity[i]
     rows <- which(is_valid & current_entity)
-    data.table::set(x$data, rows, wt, ents$wt[i])
+    data.table::set(out$data, rows, wt, ents$wt[i])
   }
 
   # Set association
-  x$set_association(weight = wt)
+  out$set_association(weight = wt)
 
   # Coerce back to input format.
-  if (s == "Survey_df") {
-    x <- x$as_df()
-  } else if (s == "Survey_tbl") {
-    x <- x$as_df()$as_tbl()
-  }
+  if (!data.table::is.data.table(x$data))
+    out$as_df()
+  if (inherits(x$data, "tbl"))
+    out$as_tbl()
 
-  x
+  out
 
 }
 
@@ -115,40 +110,39 @@ latents_mean <- function(x) {
 
 latents_impl <- function(x, type) {
   stopifnot(is.survey(x))
-  s <- class(x)[1L]
-  x <- x$clone(deep = TRUE)$as_dt()
+  out <- x$clone(deep = TRUE)$as_dt()
 
-  cutoff <- get_config(x, "cutoff")
+  cutoff <- out$get_config("cutoff")
   if (is.null(cutoff) || is.na(cutoff))
     stop("'cutoff' must be set first. See help(set_config).")
   cutoff <- as.numeric(cutoff)
 
-  vars <- x$get_association(which = default_latents())
-  vars <- vars[match(names(x), vars, nomatch = 0L)] # Get vars in same order as data.
+  vars <- out$get_association(which = default_latents())
+  vars <- vars[match(names(out), vars, nomatch = 0L)] # Get vars in same order as data.
   if (!length(vars))
     stop("Latent associations must be set. See help(set_association).")
 
   # Check whether EM variables already exist. If so, overwrite.
   em <- c(stri_c(vars, "EM"))
-  ex <- names(x)[stri_trans_tolower(names(x)) %in% stri_trans_tolower(em)]
+  ex <- names(out)[stri_trans_tolower(names(out)) %in% stri_trans_tolower(em)]
   if (length(ex) == length(em))
     stop("All 'em' variables already exist in the data. Did you really mean to prepare data?")
   em <- c(em, ex)
   em <- em[!duplicated(stri_trans_tolower(em), fromLast = TRUE)]
 
   # Add "EM" variables. Calculate missing and add coderesp.
-  x[, `:=`(em, lapply(.SD, clean_scale)), .SDcols = vars, with = FALSE]
-  x[, `:=`(em, lapply(.SD, rescale_100)), .SDcols = em, with = FALSE]
-  x[, percent_missing := rowMeans(is.na(.SD)), .SDcols = em]
-  x[, coderesp := 1:.N]
+  out[, `:=`(em, lapply(.SD, clean_scale)), .SDcols = vars, with = FALSE]
+  out[, `:=`(em, lapply(.SD, rescale_100)), .SDcols = em, with = FALSE]
+  out[, percent_missing := rowMeans(is.na(.SD)), .SDcols = em]
+  out[, coderesp := 1:.N]
 
   if (type == "pls") {
-    x[, em := NULL, with = FALSE]
+    out[, em := NULL, with = FALSE]
   } else if (type == "mean") {
     for (lat in default_latents()) {
       lat_var <- em[names(vars) == lat]
       if (length(lat_var)) {
-        x[percent_missing <= cutoff,
+        out[percent_missing <= cutoff,
           lat := rowMeans(.SD, na.rm = TRUE),
           .SDcols = lat_var, with = FALSE]
       }
@@ -157,14 +151,13 @@ latents_impl <- function(x, type) {
   }
 
   # Coerce back to input format.
-  if (s == "Survey_df") {
-    x <- x$as_df()
-  } else if (s == "Survey_tbl") {
-    x <- x$as_df()$as_tbl()
-  }
+  if (!data.table::is.data.table(x$data))
+    out$as_df()
+  if (inherits(x$data, "tbl"))
+    out$as_tbl()
 
   # Set associations, update labels and return.
-  x$set_association(percent_missing = "percent_missing")
-  x
+  out$set_association(percent_missing = "percent_missing")
+  out
 
 }
