@@ -8,7 +8,8 @@ Description: Work with surveys using regular R syntax, data.table or dplyr. And.
 License: MIT + file LICENSE
 LazyData: TRUE
 Depends:
-    R (>= 3.2)
+    R (>= 3.2),
+    R6Frame
 Imports:
     data.table,
     evaluate,
@@ -32,6 +33,7 @@ Suggests:
     tidyr
 Remotes:
     itsdalmo/officeR,
+    itsdalmo/R6Frame,
     itsdalmo/tabulR
 RoxygenNote: 5.0.1
 VignetteBuilder: knitr

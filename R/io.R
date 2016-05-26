@@ -241,7 +241,7 @@ read_survey <- function(file, mainentity = "q1") {
   }
 
   # Convert to survey and (always) set common latents.
-  out <- Survey_tbl$new(out, fields = fields)
+  out <- Survey$new(out, fields = fields)
 
   # Add mainentity association if it exists in the data.
   is_me <- stri_detect(names(out), regex = stri_c("^", mainentity, "$"), case_insensitive = TRUE)

@@ -64,6 +64,15 @@
 survey <- function(x) UseMethod("survey")
 
 #' @export
+survey.data.frame <- function(x) survey_df(x)
+
+#' @export
+survey.data.table <- function(x) survey_dt(x)
+
+#' @export
+survey.tbl <- function(x) survey_tbl(x)
+
+#' @export
 survey.Survey <- function(x) x
 
 #' @rdname survey
@@ -80,10 +89,47 @@ as.survey.default <- function(x) survey(x)
 #' @export
 is.survey <- function(x) inherits(x, "Survey")
 
+#' @rdname survey
+#' @export
+survey_dt <- function(x) {
+  if (!is.survey(x)) {
+    out <- Survey$new(x)
+  } else {
+    out <- x$clone(deep = TRUE)
+  }
+  out$as_dt()
+  out
+}
+
+#' @rdname survey
+#' @export
+survey_tbl <- function(x) {
+  if (!is.survey(x)) {
+    out <- Survey$new(x)
+  } else {
+    out <- x$clone(deep = TRUE)
+  }
+  out$as_tbldf()
+  out
+}
+
+#' @rdname survey
+#' @export
+survey_df <- function(x) {
+  if (!is.survey(x)) {
+    out <- Survey$new(x)
+  } else {
+    out <- x$clone(deep = TRUE)
+  }
+  out$as_df()
+  out
+}
 
 # Survey (R6 Class) ------------------------------------------------------------
 #' @importFrom R6 R6Class
+#' @importFrom R6Frame R6Frame
 Survey <- R6::R6Class("Survey",
+  inherit = R6Frame::R6Frame,
 
 
   # Private methods ------------------------------------------------------------
@@ -107,9 +153,7 @@ Survey <- R6::R6Class("Survey",
 
   # Public methods -------------------------------------------------------------
   public = list(
-
     data = NULL,
-
     initialize = function(x, fields = NULL) {
       if (missing(x) || !is.data.frame(x))
         stop("Expecting a data.frame or data.table.", call. = FALSE)
@@ -123,33 +167,8 @@ Survey <- R6::R6Class("Survey",
       if (!is.null(fields))
         private$set_fields(fields)
 
-      self$data <- x
-      self$update()
-    },
-
-    initialize_subset = function(x) {
-      "(Re)Initialize a sliced/subset survey."
-      if (requireNamespace("dplyr") && is_tbl(x)) {
-        slice <- self$as_tbl(clone = TRUE)
-      } else if (data.table::is.data.table(x)) {
-        slice <- self$as_dt(clone = TRUE)
-      } else {
-        slice <- self$as_df(clone = TRUE)
-      }
-      if (!identical(class(slice), class(self))) {
-        new <- class(slice); old <- class(self)
-        warning("Class has changed from ", setdiff(old, new), " to ", setdiff(new, old), call. = FALSE)
-      }
-      slice$data <- x
-      slice
-    },
-
-    names = function() {
-      names(self$data)
-    },
-
-    print = function(...) {
-      print(self$data)
+      # R6 Frame init
+      super$initialize(x)
     },
 
     # Operations ---------------------------------------------------------------
@@ -163,23 +182,7 @@ Survey <- R6::R6Class("Survey",
       self
     },
 
-    do = function(f, dots, renamed = NULL) {
-      "Perform operations directly on the Survey."
-      # Original call is 2 layers up at this point. parent.frame(n = 2L)
-      res <- do.call(f, c(list(self$data), dots), envir = parent.frame(n = 2L))
-
-      if (identical(data.table::address(res), data.table::address(self$data))) {
-        invisible(self$update(renamed))
-      } else {
-        if (is.data.frame(res)) {
-          self$initialize_subset(res)$update(renamed)
-        } else {
-          res
-        }
-      }
-    },
-
-    do_merge = function(f, dots) {
+    do_merge = function(f, dots, env) {
       "Do merging operations on a Survey."
       # Get labels and associations
       lbl <- lapply(dots, function(x) { if (is.survey(x)) x$get_label() })
@@ -189,19 +192,13 @@ Survey <- R6::R6Class("Survey",
       private$.labels <- merge_vectors(private$.labels, lbl)
       private$.associations <- merge_vectors(private$.associations, aso)
 
-      # Extract data and apply function
-      dots <- lapply(dots, function(x) { if (is.survey(x)) x$get_data() else x })
-      self$do(f, dots)
+      # Extract data and apply functions
+      super$do_merge(f, dots, env = env)
     },
 
     set_names = function(new_names) {
       "Set colnames/named vectors with new names."
-      if (data.table::is.data.table(self$data)) {
-        data.table::setnames(self$data, new_names)
-      } else {
-        names(self$data) <- new_names
-      }
-      self$update_field_names(new_names)
+      super$set_names(new_names)$update_field_names(new_names)
       invisible(self)
     },
 
@@ -213,15 +210,6 @@ Survey <- R6::R6Class("Survey",
     },
 
     # Accessors ----------------------------------------------------------------
-    get_data = function(copy = TRUE) {
-      "Return a copy of the data."
-      if (copy && data.table::is.data.table(self$data)) {
-        data.table::copy(self$data)
-      } else {
-        self$data
-      }
-    },
-
     get_field = function() {
       "Get all hidden fields."
       fields <- list(
@@ -417,63 +405,6 @@ Survey <- R6::R6Class("Survey",
   )
 )
 
-# S3 methods -------------------------------------------------------------------
 #' @export
-`[.Survey` <- function(x, ...) {
-  x$do("[", capture_dots(...))
-}
+.datatable.aware <- TRUE
 
-#' @export
-`[[.Survey` <- function(x, ...) {
-  x$do("[[", capture_dots(...))
-}
-
-#' @export
-`[<-.Survey` <- function(x, ...) {
-  x$do("[<-", capture_dots(...))
-}
-
-#' @export
-`[[<-.Survey` <- function(x, ...) {
-  x$do("[[<-", capture_dots(...))
-}
-
-#' @export
-names.Survey <- function(x) {
-  x$names()
-}
-
-#' @export
-`names<-.Survey` <- function(x, value) {
-  x$set_names(value)
-}
-
-#' @importFrom utils head
-#' @export
-head.Survey <- function(x, ...) {
-  f <- get("head", asNamespace("utils"))
-  x$do(f, list(...))
-}
-
-#' @importFrom utils tail
-#' @export
-tail.Survey <- function(x, ...) {
-  f <- get("tail", asNamespace("utils"))
-  x$do(f, list(...))
-}
-
-#' @export
-dimnames.Survey <- function(x) {
-  # NOTE: Might need to use data.table::copy() here.
-  dimnames(x$data)
-}
-
-#' @export
-dim.Survey <- function(x) {
-  dim(x$data)
-}
-
-#' @export
-length.Survey <- function(x) {
-  length(x$data)
-}
