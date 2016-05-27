@@ -19,7 +19,7 @@ clean_scale <- function(var) {
 
   # Extract first occurrence of a 1-2 digit number and convert to integer.
   var <- stringi::stri_extract_first(var, regex = "[0-9]{1,2}")
-  var <- suppressWarnings(as.integer(var))
+  var <- suppressWarnings(as.numeric(var))
 
   # Set all values other than 1 - 10 as NA. Return
   var[var > 10L | var < 1L] <- NA
@@ -41,8 +41,8 @@ clean_scale <- function(var) {
 #' identical(x, c(0, 100))
 
 rescale_100 <- function(var) {
-  if (!is.integer(var))
-    stop("'var' should be an integer.")
+  if (!is.numeric(var))
+    stop("'var' should be numeric.")
 
   # Rescale from 10 point to 100 point scale
   var <- (var-1L)*(100L/9L)
@@ -56,7 +56,7 @@ rescale_100 <- function(var) {
 #' Rescale 0-100 numeric to 1-10 integer.
 #'
 #' Takes vectors representing 100-point scales and transforms them to
-#' 10-point likert-scales (\code{integer}).
+#' 10-point likert-scales (\code{numeric}).
 #'
 #' @param var A \code{numeric} vector.
 #' @author Kristian D. Olsen
@@ -76,7 +76,7 @@ rescale_10 <- function(var) {
 
   # Set values other than 0 - 100 as NA. Return
   var[var > 10L | var < 1L] <- NA
-  as.integer(var)
+  var
 }
 
 #' Convert variable to scale
@@ -102,8 +102,6 @@ as_scale <- function(var) {
 
 #' @export
 as_scale.numeric <- function(var) {
-  if (!is.integer(var))
-    stop("'var' should be an integer. Use rescale_10() to convert 100-point scales.", call. = FALSE)
   labs <- unique(var)[order(unique(var))]
   factor(as.character(var), levels = as.character(labs))
 }

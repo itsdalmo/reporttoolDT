@@ -11,7 +11,7 @@ rescale_10(var)
 }
 \description{
 Takes vectors representing 100-point scales and transforms them to
-10-point likert-scales (\code{integer}).
+10-point likert-scales (\code{numeric}).
 }
 \examples{
 x <- rescale_100(c(1L, 10L))

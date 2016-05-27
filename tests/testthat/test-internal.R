@@ -17,16 +17,16 @@ test_that("str_just", {
 test_that("clean scale", {
 
   x <- c("1 Not happy", "Very happy 10", "Invalid 11", "Don't know")
-  expect_identical(clean_scale(x), c(1L, 10L, NA, NA))
+  expect_identical(clean_scale(x), c(1, 10, NA, NA))
 
 })
 
 test_that("rescaling scores", {
 
   x <- c("1 Not happy", "Very happy 10", "Invalid 11", "Don't know")
-  expect_identical(clean_scale(x), c(1L, 10L, NA, NA))
+  expect_identical(clean_scale(x), c(1, 10, NA, NA))
   expect_identical(rescale_100(clean_scale(x)), c(0, 100, NA, NA))
-  expect_identical(rescale_10(rescale_100(clean_scale(x))), c(1L, 10L, NA, NA))
+  expect_identical(rescale_10(rescale_100(clean_scale(x))), c(1, 10, NA, NA))
 
 })
 
@@ -39,7 +39,6 @@ test_that("as_scale works", {
 
 test_that("as_scale also works with numerics", {
   x <- c(1L, 3L, 2L)
-  expect_error(as_scale(as.numeric(x)), "should be an integer")
   y <- as_scale(x)
   expect_identical(as.character(y), c("1", "3", "2"))
   expect_identical(levels(y), c("1", "2", "3"))
