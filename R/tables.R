@@ -1,37 +1,25 @@
 #' Latent scores
 #'
-#' \code{manifest_table} is a convenience function similar to \code{\link{manifest_table}},
+#' \code{latent_table} is a convenience function similar to \code{\link{manifest_table}},
 #' and uses \code{\link[tabulR]{qtable}} to generate a table of means (by groups) for
 #' any PLS latents.
 #'
+#' @inheritParams qtable_.Survey
 #' @inheritParams tabulR::qtable_
+#' @seealso \code{\link{latent_plot}} to easily plot the latent scores.
 #' @author Kristian D. Olsen
 #' @export
 #' @examples
 #' NULL
 
 latent_table <- function(df, groups = NULL, weight = NULL, margin = TRUE, wide = TRUE) {
+  stopifnot(is.survey(df))
   # Get variables by name of latents
   vars <- names(df)[stri_trans_tolower(names(df)) %in% default_latents()]
   if (!length(vars)) stop("Latent variables were not found in the data.")
 
-  # Check groups if dplyr is installed.
-  if (requireNamespace("dplyr", quietly = TRUE)) {
-    groups <- groups %||% as.character(dplyr::groups(df))
-  }
-
-  # Get weights in the same way
-  if (margin) {
-    weight <- get_association(df, "weight")
-    if (is.null(weight))
-      warning("'weight' is not specified in associations. Margin is unweighted.")
-  } else {
-    weight <- NULL
-  }
-
   # Make the table and rename vars
   out <- tabulR::qtable_(df, vars, groups = groups, weight = weight, margin = margin, wide = wide)
-  title <- stri_c("Latent scores", if (!is.null(weight)) " (Weighted)" else " (Unweighted)")
 
   # Remove counts.
   if (data.table::is.data.table(out)) {
@@ -40,8 +28,6 @@ latent_table <- function(df, groups = NULL, weight = NULL, margin = TRUE, wide =
     out$n <- NULL
   }
 
-  # Return with title
-  attr(out, "title") <- title
   out
 }
 
@@ -53,32 +39,21 @@ latent_table <- function(df, groups = NULL, weight = NULL, margin = TRUE, wide =
 #' but removes the EM suffix from variable names in the results. Variables in the results are
 #' ordered by their latent association.
 #'
+#' @inheritParams qtable_.Survey
 #' @inheritParams tabulR::qtable_
 #' @author Kristian D. Olsen
+#' @seealso \code{\link{manifest_plot}} to easily plot the manifest scores.
 #' @export
 #' @examples
 #' NULL
 
 manifest_table <- function(df, groups = NULL, weight = NULL, margin = TRUE, wide = TRUE) {
+  stopifnot(is.survey(df))
   # Get variables from associations
   vars <- get_association(df, default_latents())
   if (!length(vars)) stop("Latent associations have not been set yet.")
   vars <- names(df)[match_all(stri_c(tolower(vars), "em"), tolower(names(df)))]
   if (!length(vars)) stop("No 'em' variables found in the data.")
-
-  # Check groups if dplyr is installed.
-  if (requireNamespace("dplyr", quietly = TRUE)) {
-    groups <- groups %||% as.character(dplyr::groups(df))
-  }
-
-  # Get weights in the same way
-  if (margin) {
-    weight <- get_association(df, "weight")
-    if (is.null(weight))
-      warning("'weight' is not specified in associations. Margin is unweighted.")
-  } else {
-    weight <- NULL
-  }
 
   # Make the table and rename vars
   out <- tabulR::qtable_(df, vars, groups = groups, weight = weight, margin = margin, wide = wide)
@@ -90,8 +65,6 @@ manifest_table <- function(df, groups = NULL, weight = NULL, margin = TRUE, wide
     out$variable <- suppressWarnings(recode_(out$variable, dots = as.list(new), add = TRUE))
   }
 
-  title <- stri_c("Manifest scores", if (!is.null(weight)) " (Weighted)" else " (Unweighted)")
-
   # Remove counts.
   if (data.table::is.data.table(out)) {
     out[, n := NULL]
@@ -99,8 +72,6 @@ manifest_table <- function(df, groups = NULL, weight = NULL, margin = TRUE, wide
     out$n <- NULL
   }
 
-  # Return with title
-  attr(out, "title") <- title
   out
 }
 
@@ -117,6 +88,9 @@ manifest_table <- function(df, groups = NULL, weight = NULL, margin = TRUE, wide
 #' instead of \code{qtable(x)}).
 #'
 #' @inheritParams tabulR::qtable_
+#' @param df A \code{Survey}.
+#' @param weight Name of variable to weight by. Set this to \code{TRUE} to use the
+#' 'weight' association in the Survey.
 #' @author Kristian D. Olsen
 #' @importFrom tabulR qtable qtable_
 #' @export
@@ -124,11 +98,16 @@ manifest_table <- function(df, groups = NULL, weight = NULL, margin = TRUE, wide
 #' NULL
 
 qtable_.Survey <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, margin_name = NULL, wide = TRUE) {
-  if (margin) {
-    margin_name <- margin_name %||% unname(get_translation(df, "average"))
-    if (isTRUE(weight))
-      weight <- unname(get_association(df, "weight"))
+  # Check dplyr::groups if groups is NULL and dplyr is installed.
+  if (is.null(groups) && requireNamespace("dplyr", quietly = TRUE)) {
+    groups <- dplyr::groups(df)
+    if (!is.null(groups))
+      groups <- as.character(groups)
   }
+
+  # Get margin and weight variable from associations
+  if (margin) margin_name <- margin_name %||% unname(get_translation(df, "average"))
+  if (margin && isTRUE(weight)) weight <- unname(get_association(df, "weight"))
 
   out <- tabulR::qtable_(df$get_data(copy = TRUE),
                          vars = vars,
@@ -188,7 +167,7 @@ qtable_.Survey <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE
 #' @param x A \code{Survey}.
 #' @param ... Ignored.
 #' @author Kristian D. Olsen
-#' @seealso flow_chart
+#' @seealso \code{\link{flow_chart}}
 #' @export
 #' @examples
 #' NULL
