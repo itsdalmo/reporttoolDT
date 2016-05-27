@@ -25,6 +25,6 @@ NULL
 Kristian D. Olsen
 }
 \seealso{
-latent_table
+\code{\link{latent_table}} to create a table with latent scores.
 }
 

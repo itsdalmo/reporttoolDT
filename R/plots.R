@@ -5,7 +5,7 @@
 #' @param df A \code{Survey}.
 #' @inheritParams tabulR::bar_chart_
 #' @author Kristian D. Olsen
-#' @seealso latent_table
+#' @seealso \code{\link{latent_table}} to create a table with latent scores.
 #' @export
 #' @examples
 #' NULL
@@ -31,7 +31,7 @@ latent_plot <- function(df, groups = NULL, weight = NULL, margin = TRUE) {
 #' @param df A \code{Survey}.
 #' @inheritParams tabulR::bar_chart_
 #' @author Kristian D. Olsen
-#' @seealso manifest_table
+#' @seealso \code{\link{manifest_table}} to create a table with manifest scores.
 #' @export
 #' @examples
 #' NULL
@@ -93,7 +93,7 @@ line_chart_.Survey <- function(df, vars, groups = NULL, weight = NULL, margin = 
 #' @param x A \code{Survey}.
 #' @param ... Ignored.
 #' @author Kristian D. Olsen
-#' @seealso impact_table
+#' @seealso \code{\link{impact_table}}
 #' @export
 #' @examples
 #' NULL

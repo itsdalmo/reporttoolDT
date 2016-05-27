@@ -24,7 +24,7 @@ test_that("manifest table for survey", {
 
   out <- srv
   out[["q3EM"]] <- rescale_100(clean_scale(out[["q3"]]))
-  expect_warning(out <- manifest_table(out), "Margin is unweighted.")
+  out <- manifest_table(out)
   expect_identical(round(out$q3, digits = 1L), 75.6)
 
 })
@@ -33,7 +33,7 @@ test_that("latent table for survey", {
 
   out <- srv
   out[["epsi"]] <- 100L
-  expect_warning(out <- latent_table(out), "Margin is unweighted.")
+  out <- latent_table(out)
   expect_identical(out$epsi, 100)
 
 })

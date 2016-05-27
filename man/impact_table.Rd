@@ -21,6 +21,6 @@ NULL
 Kristian D. Olsen
 }
 \seealso{
-flow_chart
+\code{\link{flow_chart}}
 }
 

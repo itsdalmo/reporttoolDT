@@ -25,6 +25,6 @@ NULL
 Kristian D. Olsen
 }
 \seealso{
-manifest_table
+\code{\link{manifest_table}} to create a table with manifest scores.
 }
 

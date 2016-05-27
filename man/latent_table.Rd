@@ -8,11 +8,12 @@ latent_table(df, groups = NULL, weight = NULL, margin = TRUE,
   wide = TRUE)
 }
 \arguments{
-\item{df}{A \code{data.frame} or \code{data.table}.}
+\item{df}{A \code{Survey}.}
 
 \item{groups}{Variables to group by during aggregation.}
 
-\item{weight}{Name of a variable to weight by. Only used when \code{margin = TRUE}.}
+\item{weight}{Name of variable to weight by. Set this to \code{TRUE} to use the
+'weight' association in the Survey.}
 
 \item{margin}{If \code{TRUE} (the default), the first group will include a "Total".}
 
@@ -21,7 +22,7 @@ latent_table(df, groups = NULL, weight = NULL, margin = TRUE,
 the last group is used, while multiple \code{numeric} will be spread by variable names.}
 }
 \description{
-\code{manifest_table} is a convenience function similar to \code{\link{manifest_table}},
+\code{latent_table} is a convenience function similar to \code{\link{manifest_table}},
 and uses \code{\link[tabulR]{qtable}} to generate a table of means (by groups) for
 any PLS latents.
 }
@@ -30,5 +31,8 @@ NULL
 }
 \author{
 Kristian D. Olsen
+}
+\seealso{
+\code{\link{latent_plot}} to easily plot the latent scores.
 }
 

@@ -21,6 +21,6 @@ NULL
 Kristian D. Olsen
 }
 \seealso{
-impact_table
+\code{\link{impact_table}}
 }
 

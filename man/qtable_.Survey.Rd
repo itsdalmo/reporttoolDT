@@ -8,13 +8,14 @@
   margin = TRUE, margin_name = NULL, wide = TRUE)
 }
 \arguments{
-\item{df}{A \code{data.frame} or \code{data.table}.}
+\item{df}{A \code{Survey}.}
 
 \item{vars}{The variables to aggregate, as a character vector.}
 
 \item{groups}{Variables to group by during aggregation.}
 
-\item{weight}{Name of a variable to weight by. Only used when \code{margin = TRUE}.}
+\item{weight}{Name of variable to weight by. Set this to \code{TRUE} to use the
+'weight' association in the Survey.}
 
 \item{margin}{If \code{TRUE} (the default), the first group will include a "Total".}
 
