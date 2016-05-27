@@ -7,7 +7,7 @@
 rescale_100(var)
 }
 \arguments{
-\item{var}{A numeric vector, \code{integer} and \code{character} will be coerced.}
+\item{var}{An \code{integer} vector.}
 }
 \description{
 Takes vectors representing 10-point likert scales and transforms them to
@@ -19,5 +19,8 @@ identical(x, c(0, 100))
 }
 \author{
 Kristian D. Olsen
+}
+\seealso{
+\code{\link{rescale_10}} for the complement.
 }
 
