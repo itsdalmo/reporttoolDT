@@ -61,9 +61,9 @@ manifest_plot <- function(df, groups = NULL, weight = NULL, margin = TRUE) {
 #' @examples
 #' NULL
 
-bar_chart_.Survey <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wrap = FALSE) {
-  out <- tabulR::qtable_(df, vars = vars, groups = groups, weight = weight, margin = margin, wide = FALSE)
-  out <- tabulR::bar_chart_(out, vars = vars, groups = groups, weight = weight, margin = margin, wrap = wrap)
+bar_chart_.Survey <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, margin_name = NULL, wrap = FALSE) {
+  out <- tabulR::qtable_(df, vars = vars, groups = groups, weight = weight, margin = margin, margin_name = margin_name, wide = FALSE)
+  out <- tabulR::bar_chart_(out, vars = vars, groups = groups, weight = weight, margin = margin, margin_name = margin_name, wrap = wrap)
   out + theme_epsi() + scale_fill_epsi()
 }
 
@@ -80,10 +80,10 @@ bar_chart_.Survey <- function(df, vars, groups = NULL, weight = NULL, margin = T
 #' @examples
 #' NULL
 
-line_chart_.Survey <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wrap = FALSE) {
-  out <- tabulR::qtable_(df, vars = vars, groups = groups, weight = weight, margin = margin, wide = FALSE)
-  out <- tabulR::line_chart_(out, vars = vars, groups = groups, weight = weight, margin = margin, wrap = wrap)
-  out + theme_epsi() + scale_fill_epsi()
+line_chart_.Survey <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, margin_name = NULL, wrap = FALSE) {
+  out <- tabulR::qtable_(df, vars = vars, groups = groups, weight = weight, margin = margin, margin_name = margin_name, wide = FALSE)
+  out <- tabulR::line_chart_(out, vars = vars, groups = groups, weight = weight, margin = margin, margin_name = margin_name, wrap = wrap)
+  out + theme_epsi() + scale_color_epsi()
 }
 
 #' Flow chart

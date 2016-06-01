@@ -5,7 +5,7 @@
 \title{Using line_chart_ with a Survey}
 \usage{
 \method{line_chart_}{Survey}(df, vars, groups = NULL, weight = NULL,
-  margin = TRUE, wrap = FALSE)
+  margin = TRUE, margin_name = NULL, wrap = FALSE)
 }
 \arguments{
 \item{df}{A \code{data.frame} or \code{data.table}.}
@@ -17,6 +17,8 @@
 \item{weight}{Name of a variable to weight by. Only used when \code{margin = TRUE}.}
 
 \item{margin}{If \code{TRUE} (the default), the first group will include a "Total".}
+
+\item{margin_name}{Optional: Give the margin a different name from "Total".}
 
 \item{wrap}{Ignored.}
 }
