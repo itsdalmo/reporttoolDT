@@ -117,7 +117,7 @@ internal_defaults <- list(
     ),
 
     norwegian = stringi::stri_unescape_unicode(
-      c("Image",
+      c("Image/inntrykk",
         "Forventninger",
         "Produktkvalitet",
         "Servicekvalitet",
