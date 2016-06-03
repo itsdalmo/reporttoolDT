@@ -172,8 +172,15 @@ qtable_.Survey <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE
 #' @examples
 #' NULL
 
-impact_table <- function(x, ...) {
-  stopifnot(is.survey(x))
-  # TODO
-  stop("impact_table has not been implemented yet.")
+impact_table <- function(x, entity = NULL, ...) {
+  if (is.survey(x)) {
+    if (is.null(entity)) stop("When 'x' is a survey you must also specify the entity.", call. = FALSE)
+    weight <- x$get_outer_weight(which = entity)
+    if (is.null(weight)) stop("Could not find inner weight for ", entity, call. = FALSE)
+    # Use labels from the survey (in case they have changed)
+    weight$question <- unname(x$get_label(which = weight$manifest))
+    x <- weight
+  }
+
+  x[order(x$effect, decreasing = TRUE), c("latent", "manifest", "question", "effect")]
 }
