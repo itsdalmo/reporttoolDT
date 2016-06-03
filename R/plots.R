@@ -98,8 +98,77 @@ line_chart_.Survey <- function(df, vars, groups = NULL, weight = NULL, margin = 
 #' @examples
 #' NULL
 
-flow_chart <- function(x, ...) {
-  stopifnot(is.survey(x))
-  # TODO
-  stop("flow_chart has not been implemented yet.")
+flow_chart <- function(x, entity = NULL, scores = NULL, width = 1.2, height = 1.1) {
+  boxes <- flow_chart_boxes()
+  palette <- default_palette()
+  labels <- c(default_latents(), "complaints")
+
+  if (is.survey(x)) {
+    if (is.null(entity)) stop("When 'x' is a survey you must also specify the entity.", call. = FALSE)
+    weight <- x$get_inner_weight(which = entity)
+    if (is.null(weight)) stop("Could not find inner weight for ", entity, call. = FALSE)
+    if (is.null(scores)) {
+      me <- unname(x$get_association("mainentity"))
+      scores <- latent_table(x, groups = me, wide = FALSE)
+      scores <- scores[scores[[me]] == entity,]
+      scores$variable <- stri_trans_tolower(scores$variable)
+    }
+    translation <- get_translation(x, which = labels)
+    if (!is.null(translation)) labels <- unname(translation)
+    x <- weight
+  }
+
+  # Convert coordinates to boxes using height and width.
+  min_edges <- lapply(boxes, function(xy) { xy$x <- xy$x - width/2L; xy$y <- xy$y - height/2; xy })
+  max_edges <- lapply(boxes, function(xy) { xy$x <- xy$x + width/2L; xy$y <- xy$y + height/2; xy })
+
+  # Create the canvas with the correct theme -----------------------------------
+  p <- ggplot2::ggplot(xmin = 0, xmax = 10, ymin = 0, ymax = 10) + ggplot2::xlim(0, 10) + ggplot2::ylim(0, 10)
+  p <- p + theme_epsi() + scale_fill_epsi() + scale_color_epsi()
+  p <- p + ggplot2::theme(panel.grid = ggplot2::element_blank(), axis.text = ggplot2::element_blank())
+
+  # Add boxes ------------------------------------------------------------------
+  p <- p + ggplot2::geom_rect(
+    ggplot2::aes_q(xmin = unlist(lapply(min_edges, "[[", "x")),
+                   xmax = unlist(lapply(max_edges, "[[", "x")),
+                   ymin = unlist(lapply(min_edges, "[[", "y")),
+                   ymax = unlist(lapply(max_edges, "[[", "y"))),
+    fill = head(palette, 1L))
+
+  # Add labels -----------------------------------------------------------------
+  p <- p + ggplot2::geom_text(
+    ggplot2::aes_q(label = labels,
+                   x     = unlist(lapply(boxes, "[[", "x")),
+                   y     = unlist(lapply(boxes, "[[", "y"))),
+    colour = "white", size = 3, vjust = -.7, fontface = "bold")
+
+  # Add scores -----------------------------------------------------------------
+  p <- p + ggplot2::geom_text(
+    ggplot2::aes_q(label = c(sprintf("%.1f", scores$value), "-"),
+                   x     = unlist(lapply(boxes, "[[", "x")),
+                   y     = unlist(lapply(boxes, "[[", "y"))),
+    colour = "white", size = 3, vjust = 1.1)
+
+  # Draw arrows/lines ----------------------------------------------------------
+  # associations <- flow_chart_paths()
+  # paths <- list()
+  # for (name in names(associations)) {
+  #   for (latent in associations[[name]]) {
+  #     path <- find_path(from = name, to = latent, boxes, width, height)
+  #     paths <- c(paths, setNames(list(path), stri_c(name, latent, sep = "_")))
+  #     p <- p + ggplot2::geom_path(
+  #       ggplot2::aes_q(
+  #         x = path$x,
+  #         y = path$y
+  #       ),
+  #       size = .45, colour = "#22373b")
+  #   }
+  # }
+
+  # Add inner weights ----------------------------------------------------------
+
+  # Return
+  p
+
 }
+
