@@ -139,6 +139,8 @@ Survey <- R6::R6Class("Survey",
     .associations = NULL,
     .translations = NULL,
     .marketshares = NULL,
+    .inner_weight = NULL,
+    .outer_weight = NULL,
 
     # TODO: Check consistency with data?
     set_fields = function(fields) {
@@ -347,6 +349,35 @@ Survey <- R6::R6Class("Survey",
       if (!is.null(res) && !is.null(which)) {
         res <- res[match_all(which, names(res))]
         if (!length(res)) res <- NULL
+      }
+      res
+    },
+
+    # Access weights -----------------------------------------------------------
+    set_inner_weight = function(x) {
+      private$.inner_weight <- x
+    },
+
+    get_inner_weight = function(which = NULL) {
+      res <- private$.inner_weight
+      if (!is.null(res) && !is.null(which)) {
+        res <- res[which]
+        if (!length(res) > 1L)
+          res <- if (!length(res)) NULL else if (length(res) == 1L) res[[1L]]
+      }
+      res
+    },
+
+    set_outer_weight = function(x) {
+      private$.outer_weight <- x
+    },
+
+    get_outer_weight = function(which = NULL) {
+      res <- private$.outer_weight
+      if (!is.null(res) && !is.null(which)) {
+        res <- res[which]
+        if (!length(res) > 1L)
+          res <- if (!length(res)) NULL else if (length(res) == 1L) res[[1L]]
       }
       res
     },

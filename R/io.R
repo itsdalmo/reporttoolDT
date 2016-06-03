@@ -216,7 +216,7 @@ write_model_input <- function(x, file) {
 #' # TODO
 #' }
 
-read_survey <- function(file, mainentity = "q1") {
+read_survey <- function(file, mainentity = "q1", read_weights = FALSE) {
   file <- clean_path(file)
   if (!file.exists(file)) stop("File does not exist:\n", file)
 
@@ -224,7 +224,7 @@ read_survey <- function(file, mainentity = "q1") {
   ext <- stri_trans_tolower(tools::file_ext(file))
   if (ext == "") {
     # Return early. Reading model output also reads in the data.
-    return(read_model_output(file, mainentity))
+    return(read_model_output(file, mainentity, read_weights))
   } else if (ext != "sav") {
     stop("Expecting a directory or .sav file. Other formats can be read with officeR.")
   }
@@ -262,7 +262,7 @@ read_survey <- function(file, mainentity = "q1") {
 
 # Function to read input to/output from the PLS-wizard.
 # (recursively calls read_survey to read the .sav file.)
-read_model_output <- function(file, mainentity) {
+read_model_output <- function(file, mainentity, read_weights) {
   # Match required folders (case_insensitive.)
   folders <- c("Data", "Input", "Output")
   folders <- require_folders(file, folders, create = FALSE)
@@ -305,9 +305,55 @@ read_model_output <- function(file, mainentity) {
   # Set marketshare based on config
   out$set_marketshare(list = setNames(as.list(cf$marketshare), cf$entity))
 
-  # 4 - Read inner/outer weights -----------------------------------------------
+  # Return early if not reading weights
+  if (!read_weights) return(out)
 
-  # TODO
+  # 4a - Read inner weights ----------------------------------------------------
+  files <- file.path(folders$output, list.files(folders$output))
+  fname <- files[stri_detect(files, regex = "main results.*\\.xlsx$", case_insensitive = TRUE)]
+  if (length(fname) != 1L) {
+    msg <- if (length(fname) > 1L) "Found more than one" else "Could not find any"
+    stop(stri_c(msg, "file matching 'main results.xlsx'", sep = " "))
+  }
+
+  weight <- lapply(cf$entity, function (x) {
+    iw <- read_data(fname, sheet = x, skip = 5)
+    if (is.null(iw) || length(iw) == 0L) {
+      stop("Could not find sheet '", x, "' in '", basename(fname), "'", call. = FALSE)
+    } else if (nrow(iw) == 0L) {
+      stop("Problem reading weights from '", basename(fname), "'. This is often solved by opening the file for editing, selecting each sheet in turn, and saving again without further changes.", call. = FALSE)
+    }
+    iw <- iw[1:7, ]
+    names(iw) <- c("origin", default_latents())
+    iw[, default_latents()] <- lapply(iw[, default_latents()], as.numeric)
+    iw$origin <- stri_trans_tolower(iw$origin)
+    iw
+  })
+
+  out$set_inner_weight(setNames(weight, cf$entity))
+
+  # 4b - Read outer weights ----------------------------------------------------
+  fname <- files[stri_detect(files, regex = "score weights out.*\\.xlsx$", case_insensitive = TRUE)]
+  if (length(fname) != 1L) {
+    msg <- if (length(fname) > 1L) "Found more than one" else "Could not find any"
+    stop(stri_c(msg, "file matching 'score weights out.xlsx'", sep = " "))
+  }
+
+  weight <- lapply(cf$entity, function(x) {
+    ow <- read_data(fname, sheet = x, skip = 3)
+    if (is.null(ow) || length(ow) == 0L) {
+      stop("Could not find sheet '", x, "' in '", fname, "'", call. = FALSE)
+    } else if (nrow(ow) == 0L) {
+      stop("Problem reading weights from '", fname, "'. This is often solved by opening the file for editing, selecting each sheet in turn, and saving again without further changes.", call. = FALSE)
+    }
+    ow <- ow[, c(2:7, 9)]
+    num <- c("score", "weight", "std", "effect")
+    names(ow) <- c("latent", "manifest", "question", num)
+    ow[num] <- suppressWarnings(lapply(ow[num], as.numeric))
+    ow[!is.na(ow$effect) & ow$effect > 0L, ]
+  })
+
+  out$set_outer_weight(setNames(weight, cf$entity))
 
   # Return
   out
