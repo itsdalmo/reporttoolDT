@@ -91,7 +91,7 @@ test_that("spread works with Survey_tbl", {
 
   expect_s3_class(tbl, "Survey")
   expect_identical(names(tbl), c("Q1", "Score1", "Score2"))
-  expect_equal(tbl$data, org)
+  expect_equal(tbl$data, dplyr::tbl_df(org))
 
 })
 
