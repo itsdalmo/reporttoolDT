@@ -4,15 +4,17 @@
 \alias{impact_table}
 \title{Impact table}
 \usage{
-impact_table(x, ...)
+impact_table(x, entity = NULL, ...)
 }
 \arguments{
-\item{x}{A \code{Survey}.}
+\item{x}{A \code{Survey} or a \code{data.frame} with the outer weights.}
+
+\item{entity}{Optional: If \code{x} is a \code{Survey}; the entity to create the flowchart for.}
 
 \item{...}{Ignored.}
 }
 \description{
-summarise inner weights (impacts) for the EPSI model in a table.
+summarise outer weights (impacts) for the EPSI model in a table.
 }
 \examples{
 NULL

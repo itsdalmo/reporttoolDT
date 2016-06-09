@@ -162,9 +162,10 @@ qtable_.Survey <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE
 
 #' Impact table
 #'
-#' summarise inner weights (impacts) for the EPSI model in a table.
+#' summarise outer weights (impacts) for the EPSI model in a table.
 #'
-#' @param x A \code{Survey}.
+#' @param x A \code{Survey} or a \code{data.frame} with the outer weights.
+#' @param entity Optional: If \code{x} is a \code{Survey}; the entity to create the flowchart for.
 #' @param ... Ignored.
 #' @author Kristian D. Olsen
 #' @seealso \code{\link{flow_chart}}
