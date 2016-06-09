@@ -90,15 +90,18 @@ line_chart_.Survey <- function(df, vars, groups = NULL, weight = NULL, margin = 
 #'
 #' Create a flowchart to visualize latent scores and inner weights for the EPSI model.
 #'
-#' @param x A \code{Survey}.
-#' @param ... Ignored.
+#' @param x A \code{Survey} or a \code{data.frame} with the inner weights.
+#' @param entity Optional: If \code{x} is a \code{Survey}; the entity to create the flowchart for.
+#' @param scores Optional: If \code{x} is not a \code{Survey}; the latent scores to plot.
+#' @param width Width of the latent boxes.
+#' @param height Height of the latent boxes.
 #' @author Kristian D. Olsen
 #' @seealso \code{\link{impact_table}}
 #' @export
 #' @examples
 #' NULL
 
-flow_chart <- function(x, entity = NULL, scores = NULL, width = 1.2, height = 1.1) {
+flow_chart <- function(x, entity = NULL, scores = NULL, width = 1.2, height = .8) {
   boxes <- flow_chart_boxes()
   palette <- default_palette()
   labels <- c(default_latents(), "complaints")
@@ -127,6 +130,42 @@ flow_chart <- function(x, entity = NULL, scores = NULL, width = 1.2, height = 1.
   p <- p + theme_epsi() + scale_fill_epsi() + scale_color_epsi()
   p <- p + ggplot2::theme(panel.grid = ggplot2::element_blank(), axis.text = ggplot2::element_blank())
 
+  # Draw arrows/lines ----------------------------------------------------------
+  paths <- flow_chart_paths(boxes, width, height)
+  for (origin in paths) {
+    for (dest in origin) {
+      # Add regular lines ------------------------------------------------------
+      if (length(dest$x) > 2L && length(dest$y) > 2L) {
+        p <- p + ggplot2::geom_path(
+          ggplot2::aes_q(x = head(dest$x, -2L), y = head(dest$y, -2L)),
+          size = .45, colour = "#22373b", linetype = dest$type %||% "solid")
+        dest <- lapply(dest, tail, 2L)
+      }
+      # Add arrow --------------------------------------------------------------
+      p <- p + ggplot2::geom_path(
+        ggplot2::aes_q(x = dest$x, y = dest$y),
+        arrow = grid::arrow(length = grid::unit(0.2, "cm"), type = "closed"),
+        size = .45, colour = "#22373b", linetype = dest$type %||% "solid")
+    }
+
+  }
+
+  # Add inner weights ----------------------------------------------------------
+  wt <- flow_chart_weights()
+  for (origin in names(wt)) {
+    dest <- wt[[origin]]
+    path <- list(x = unlist(lapply(dest, "[[", "x")), y = unlist(lapply(dest, "[[", "y")))
+    weight <- x[x$origin == origin, names(x) %in% names(dest)]
+    weight <- data.frame(w = t(weight)[, 1], x = path$x, y = path$y)
+    weight$w <- stri_replace(sprintf("%.2f", weight$w), ",", fixed = ".")
+
+    p <- p + ggplot2::geom_text(
+      data = weight, ggplot2::aes_string(x = "x", y = "y", label = "w"),
+      size = 3, colour = "#23373b"
+      )
+
+  }
+
   # Add boxes ------------------------------------------------------------------
   p <- p + ggplot2::geom_rect(
     ggplot2::aes_q(xmin = unlist(lapply(min_edges, "[[", "x")),
@@ -142,30 +181,13 @@ flow_chart <- function(x, entity = NULL, scores = NULL, width = 1.2, height = 1.
                    y     = unlist(lapply(boxes, "[[", "y"))),
     colour = "white", size = 3, vjust = -.7, fontface = "bold")
 
-  # Add scores -----------------------------------------------------------------
+  # Add latent scores ----------------------------------------------------------
   p <- p + ggplot2::geom_text(
     ggplot2::aes_q(label = c(sprintf("%.1f", scores$value), "-"),
                    x     = unlist(lapply(boxes, "[[", "x")),
                    y     = unlist(lapply(boxes, "[[", "y"))),
     colour = "white", size = 3, vjust = 1.1)
 
-  # Draw arrows/lines ----------------------------------------------------------
-  # associations <- flow_chart_paths()
-  # paths <- list()
-  # for (name in names(associations)) {
-  #   for (latent in associations[[name]]) {
-  #     path <- find_path(from = name, to = latent, boxes, width, height)
-  #     paths <- c(paths, setNames(list(path), stri_c(name, latent, sep = "_")))
-  #     p <- p + ggplot2::geom_path(
-  #       ggplot2::aes_q(
-  #         x = path$x,
-  #         y = path$y
-  #       ),
-  #       size = .45, colour = "#22373b")
-  #   }
-  # }
-
-  # Add inner weights ----------------------------------------------------------
 
   # Return
   p
