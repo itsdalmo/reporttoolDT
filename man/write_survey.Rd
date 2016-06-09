@@ -37,7 +37,10 @@ df <- survey_df(data.frame("A" = "test", "B" = 2))
 officeR::write_data(df, "test.sav")
 
 # Store everything
-write_survey(df, "test.Rdata")
+officeR::write_data(df, "test.Rdata")
+
+# Write survey as .sav (hidden fields stored as .Rdata)
+write_survey(df, "test.sav")
 }
 }
 \author{

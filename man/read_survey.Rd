@@ -4,12 +4,17 @@
 \alias{read_survey}
 \title{Read a Survey}
 \usage{
-read_survey(file, mainentity = "q1")
+read_survey(file, mainentity = "q1", inner_weight = FALSE,
+  outer_weight = FALSE)
 }
 \arguments{
 \item{file}{Output file or directory.}
 
 \item{mainentity}{Name of the mainentity variable in data.}
+
+\item{inner_weight}{Optional: Read inner weights from output.}
+
+\item{outer_weight}{Optional: Read outer weights from output.}
 }
 \description{
 Read a \code{Survey} that has been written by \code{\link{write_survey}} (or
@@ -17,9 +22,24 @@ created manually using the PLS-wizard). This function also reads output from
 the PLS-wizard, such as inner and outer weights. Hidden fields will be updated
 to reflect changes in input-files when reading a survey directory.
 }
+\details{
+If \code{file} is a directory the following directories and files will be read:
+\itemize{
+ \item data: A single .sav file ending with ...EM.sav
+ \item input: measurement model.txt and config.txt
+ \item output: main results.xlsx (inner weights) and score weights out.xlsx (outer weights).
+}
+}
 \examples{
 \dontrun{
-# TODO
+library(reporttoolDT)
+lnk <- sharepoint_mount("http://domain.com/path/to/dir")
+
+# Read the directory
+srv <- read_survey(lnk, inner_weight = TRUE, outer_weight = TRUE)
+
+# Read just the .sav and hidden fields (.Rdata).
+srv <- read_survey(file.path(lnk, "Data", "Example study EM.sav"))
 }
 }
 \author{
