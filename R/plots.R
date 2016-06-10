@@ -93,15 +93,15 @@ line_chart_.Survey <- function(df, vars, groups = NULL, weight = NULL, margin = 
 #' @param x A \code{Survey} or a \code{data.frame} with the inner weights.
 #' @param entity Optional: If \code{x} is a \code{Survey}; the entity to create the flowchart for.
 #' @param scores Optional: If \code{x} is not a \code{Survey}; the latent scores to plot.
-#' @param width Width of the latent boxes.
-#' @param height Height of the latent boxes.
+#' @param width Width of the latent boxes. Default is \code{1.25}.
+#' @param height Height of the latent boxes. Default is \code{1}.
 #' @author Kristian D. Olsen
 #' @seealso \code{\link{impact_table}}
 #' @export
 #' @examples
 #' NULL
 
-flow_chart <- function(x, entity = NULL, scores = NULL, width = 1.2, height = .8) {
+flow_chart <- function(x, entity = NULL, scores = NULL, width = 1.25, height = 1) {
   boxes <- flow_chart_boxes()
   palette <- default_palette()
   labels <- c(default_latents(), "complaints")

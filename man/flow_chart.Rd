@@ -4,7 +4,7 @@
 \alias{flow_chart}
 \title{Flow chart}
 \usage{
-flow_chart(x, entity = NULL, scores = NULL, width = 1.2, height = 0.8)
+flow_chart(x, entity = NULL, scores = NULL, width = 1.25, height = 1)
 }
 \arguments{
 \item{x}{A \code{Survey} or a \code{data.frame} with the inner weights.}
@@ -13,9 +13,9 @@ flow_chart(x, entity = NULL, scores = NULL, width = 1.2, height = 0.8)
 
 \item{scores}{Optional: If \code{x} is not a \code{Survey}; the latent scores to plot.}
 
-\item{width}{Width of the latent boxes.}
+\item{width}{Width of the latent boxes. Default is \code{1.25}.}
 
-\item{height}{Height of the latent boxes.}
+\item{height}{Height of the latent boxes. Default is \code{1}.}
 }
 \description{
 Create a flowchart to visualize latent scores and inner weights for the EPSI model.
