@@ -14,6 +14,7 @@ latent_plot <- function(df, groups = NULL, weight = NULL, margin = TRUE) {
   vars <- names(df)[stri_trans_tolower(names(df)) %in% default_latents()]
   if (is.null(groups) && requireNamespace("dplyr", quietly = TRUE)) {
     groups <- as.character(dplyr::groups(df))
+    if (!length(groups)) groups <- NULL
   }
   if (!length(vars)) stop("Latent variables were not found in the data.")
   if (is.null(groups)) {
