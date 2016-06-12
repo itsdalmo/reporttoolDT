@@ -1,7 +1,7 @@
 context("Public methods and descriptives for Survey")
 
 org <- data.frame("Q1" = c("Example 1", "Example 2"), "Score" = c(9, 8), stringsAsFactors = FALSE)
-sav <- officeR::read_data(system.file("extdata", "sample.sav", package = "reporttoolDT"))
+sav <- seamless::read_data(system.file("extdata", "sample.sav", package = "reporttoolDT"))
 
 
 # Public methods ---------------------------------------------------------------

@@ -22,7 +22,7 @@ Let's start by reading in the sample data, creating a `Survey` again and looking
 
 ```{r}
 require(reporttoolDT)
-sav <- officeR::read_data(system.file("extdata", "sample.sav", package = "reporttoolDT"))
+sav <- seamless::read_data(system.file("extdata", "sample.sav", package = "reporttoolDT"))
 srv <- survey(sav)
 class(srv)
 ```
@@ -43,7 +43,7 @@ converts from labelled variables to factors, and stores the labels in the `Surve
 instead of in the data. We can recreate this as follows:
 
 ```{r}
-sav_cleaned <- officeR::from_labelled(sav)
+sav_cleaned <- seamless::from_labelled(sav)
 attr(sav_cleaned, "labels") <- NULL
 
 all.equal(srv$data, sav_cleaned)
@@ -177,7 +177,7 @@ all_labels <- get_label(dt)
 ```
 
 The object `dt` already contains labels in this case, because `survey()` has found them
-after reading in the SPSS-file in `officeR`. You can also set one or more labels manually
+after reading in the SPSS-file in `seamless`. You can also set one or more labels manually
 using `set_label()`:
 
 ```{r}

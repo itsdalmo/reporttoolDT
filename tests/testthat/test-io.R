@@ -1,6 +1,6 @@
 context("input/output for Survey's")
 
-sav <- officeR::read_data(system.file("extdata", "raw_data.sav", package = "reporttoolDT"))
+sav <- seamless::read_data(system.file("extdata", "raw_data.sav", package = "reporttoolDT"))
 
 test_that("read/write survey to .sav", {
   df <- survey_tbl(sav)$set_association(common = TRUE)

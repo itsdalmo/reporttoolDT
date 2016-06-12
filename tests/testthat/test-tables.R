@@ -1,6 +1,6 @@
 context("Survey tables")
 
-sav <- officeR::read_data(system.file("extdata", "raw_data.sav", package = "reporttoolDT"))
+sav <- seamless::read_data(system.file("extdata", "raw_data.sav", package = "reporttoolDT"))
 srv <- survey_tbl(sav)$set_association(common = TRUE)
 
 # Merge attributes -------------------------------------------------------------

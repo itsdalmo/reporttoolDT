@@ -27,7 +27,7 @@ See Pandoc's [instructions](http://pandoc.org/installing.html) for installing La
 
 #### 3. Optional: Powerpoint
 
-If you want Powerpoint support (for `officeR::to_ppt` and `generate_ppt`), you also need Java and ReporteRs. Follow the instructions [here](https://github.com/itsdalmo/officeR).
+If you want Powerpoint support (for `seamless::to_ppt` and `generate_ppt`), you also need Java and ReporteRs. Follow the instructions [here](https://github.com/itsdalmo/seamless).
 
 Installation
 ------------

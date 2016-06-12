@@ -7,16 +7,16 @@
 \title{reporttoolDT: Work with Surveys to create reports.}
 \description{
 This is a package created to make it easier to work with Survey data in R,
-to generate (batch) reports. Together with \code{\link[officeR]{officeR}} and
+to generate (batch) reports. Together with \code{\link[seamless]{seamless}} and
 \code{\link[tabulR]{tabulR}} it provides the following functionality:
 }
 \section{Read and write data}{
 
 \itemize{
-\item Get data in and out of R with \code{\link[officeR]{read_data}} and \code{\link[officeR]{write_data}}.
-\item Access sharepoint using \code{\link[officeR]{sharepoint_link}} and/or \code{\link[officeR]{sharepoint_mount}}.
-\item Read/write to the clipboard on Windows and Os X using \code{\link[officeR]{from_clipboard}} and \code{\link[officeR]{to_clipboard}}.
-\item Send data or plots to Excel and Powerpoint with \code{\link[officeR]{to_excel}} and \code{\link[officeR]{to_ppt}}.
+\item Get data in and out of R with \code{\link[seamless]{read_data}} and \code{\link[seamless]{write_data}}.
+\item Access sharepoint using \code{\link[seamless]{sharepoint_link}} and/or \code{\link[seamless]{sharepoint_mount}}.
+\item Read/write to the clipboard on Windows and Os X using \code{\link[seamless]{from_clipboard}} and \code{\link[seamless]{to_clipboard}}.
+\item Send data or plots to Excel and Powerpoint with \code{\link[seamless]{to_excel}} and \code{\link[seamless]{to_ppt}}.
 }
 }
 

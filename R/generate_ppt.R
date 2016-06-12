@@ -18,7 +18,7 @@
 #' }
 
 generate_ppt <- function(rmd, file, env = parent.frame()) {
-  ppt <- officeR::ppt_workbook(template = NULL) # Default template
+  ppt <- seamless::ppt_workbook(template = NULL) # Default template
   pat <- get_default("pat_rmd")
 
   # First entry is always the YAML. Rest is results.
@@ -27,7 +27,7 @@ generate_ppt <- function(rmd, file, env = parent.frame()) {
 
   # Use YAML information in a title slide
   ts <- split_yaml(yaml)
-  ppt <- officeR::add_ts(ppt, ts$title, ts$subtitle, ts$author, ts$date)
+  ppt <- seamless::add_ts(ppt, ts$title, ts$subtitle, ts$author, ts$date)
 
   # Loop through results and add to ppt. (Excluding yaml)
   # (Note that subtitles will be used as titles if there are no sections.)
@@ -54,10 +54,10 @@ generate_ppt <- function(rmd, file, env = parent.frame()) {
       }
     }
     # Add blk to doc with to_ppt.
-    officeR::to_ppt(blk, ppt, title = title %||% subtitle, subtitle = if (!is.null(title)) subtitle)
+    seamless::to_ppt(blk, ppt, title = title %||% subtitle, subtitle = if (!is.null(title)) subtitle)
   }
 
   # Write the finished document.
-  officeR::write_data(ppt, file = file)
+  seamless::write_data(ppt, file = file)
 
 }

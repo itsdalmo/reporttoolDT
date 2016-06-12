@@ -1,26 +1,26 @@
-# S3 methods for officeR -------------------------------------------------------
+# S3 methods for seamless -------------------------------------------------------
 
-#' @importFrom officeR write_data
+#' @importFrom seamless write_data
 #' @export
 write_data.Survey <- function(x, file, ...) {
   ext <- stri_trans_tolower(tools::file_ext(file))
-  # Convert Survey to a format that can be written using officeR.
+  # Convert Survey to a format that can be written using seamless.
   if (ext == "xlsx") {
     x <- list(data = x$get_data(), model = model(x), entities = entities(x))
   } else if (ext == "sav") {
     # S3 method for Survey below.
-    x <- officeR::to_labelled(x)
+    x <- seamless::to_labelled(x)
   } else if (ext %in% c("rda", "rdata")) {
     x <- setNames(list(x), deparse(substitute(x)))
   } else {
     stop("Unrecognized output format (for Survey). See help(write_survey).")
   }
 
-  officeR::write_data(x, file, ...)
+  seamless::write_data(x, file, ...)
 
 }
 
-#' @importFrom officeR to_labelled
+#' @importFrom seamless to_labelled
 #' @export
 to_labelled.Survey <- function(x) {
   out <- x$get_data(copy = TRUE)
@@ -30,33 +30,33 @@ to_labelled.Survey <- function(x) {
     attr(out, "labels") <- x$get_label()
   }
 
-  officeR::to_labelled(out)
+  seamless::to_labelled(out)
 
 }
 
-#' @importFrom officeR to_excel
+#' @importFrom seamless to_excel
 #' @export
 to_excel.Survey <- function(x, ...) {
   # TODO: Automatic labels etc.
-  officeR::to_excel(x$data, ...)
+  seamless::to_excel(x$data, ...)
 }
 
-#' @importFrom officeR to_ppt
+#' @importFrom seamless to_ppt
 #' @export
 to_ppt.Survey <- function(x, ...) {
   # TODO: Automatic labels etc.
-  officeR::to_ppt(x$data, ...)
+  seamless::to_ppt(x$data, ...)
 }
 
 #' Write a Survey
 #'
-#' In contrast to \code{\link[officeR]{write_data}}, \code{write_survey} will store
+#' In contrast to \code{\link[seamless]{write_data}}, \code{write_survey} will store
 #' hidden fields (such as config, translations etc.) which can be retrieved by using
 #' \code{\link{read_survey}}. This means that you don't have to repeatedly set
 #' these options when reading/writing a survey you are working on. Information that
 #' cannot be stored in SPSS will be stored in an associated .Rdata file instead.
 #'
-#' You can also use \code{\link[officeR]{write_data}} to write the \code{Survey}.
+#' You can also use \code{\link[seamless]{write_data}} to write the \code{Survey}.
 #' In this case the information which is persisted depends on the format used:
 #'
 #' \itemize{
@@ -75,17 +75,17 @@ to_ppt.Survey <- function(x, ...) {
 #' df <- survey_df(data.frame("A" = "test", "B" = 2))
 #'
 #' # Store data and labels
-#' officeR::write_data(df, "test.sav")
+#' seamless::write_data(df, "test.sav")
 #'
 #' # Store everything
-#' officeR::write_data(df, "test.Rdata")
+#' seamless::write_data(df, "test.Rdata")
 #'
 #' # Write survey as .sav (hidden fields stored as .Rdata)
 #' write_survey(df, "test.sav")
 #' }
 
 write_survey <- function(x, file) {
-  if (!is.survey(x)) stop("Use officeR::write_data to write data that is not a survey.")
+  if (!is.survey(x)) stop("Use seamless::write_data to write data that is not a survey.")
   file <- clean_path(file)
 
   # Use extension to determine output
@@ -94,14 +94,14 @@ write_survey <- function(x, file) {
     # Return early. Writing model input also writes the data.
     write_model_input(x$clone(deep = TRUE), file)
   } else if (ext != "sav") {
-    stop("Expecting a directory or .sav file. Other formats can be written with officeR.")
+    stop("Expecting a directory or .sav file. Other formats can be written with seamless.")
   } else {
-    # Write .sav file (Long strings backup is created by officeR.)
-    officeR::write_data(x, file)
+    # Write .sav file (Long strings backup is created by seamless.)
+    seamless::write_data(x, file)
 
     # Include hidden fields.
     file <- stri_c(tools::file_path_sans_ext(file), " (survey).Rdata")
-    officeR::write_data(x$get_field(), file)
+    seamless::write_data(x$get_field(), file)
   }
 
   # Make sure nothing is printed
@@ -245,16 +245,16 @@ read_survey <- function(file, mainentity = "q1", inner_weight = FALSE, outer_wei
     # Return early. Reading model output also reads in the data.
     return(read_model_output(file, mainentity, inner_weight, outer_weight))
   } else if (ext != "sav") {
-    stop("Expecting a directory or .sav file. Other formats can be read with officeR.")
+    stop("Expecting a directory or .sav file. Other formats can be read with seamless.")
   }
 
-  # Read .sav file (Long strings are read by officeR.)
-  out <- officeR::read_data(file)
+  # Read .sav file (Long strings are read by seamless.)
+  out <- seamless::read_data(file)
 
   # Include hidden fields if they exist.
   file <- stri_c(tools::file_path_sans_ext(file), " (survey).Rdata")
   if (file.exists(file)) {
-    fields <- officeR::read_data(file)
+    fields <- seamless::read_data(file)
   } else {
     fields <- NULL
   }
@@ -305,7 +305,7 @@ read_model_output <- function(file, mainentity, inner_weight, outer_weight) {
     stop(stri_c(msg, "file matching 'measurement model.txt'", sep = " "))
   }
 
-  mm <- officeR::read_data(fname, encoding = "latin1", col_types = list("Manifest" = readr::col_character()))
+  mm <- seamless::read_data(fname, encoding = "latin1", col_types = list("Manifest" = readr::col_character()))
   mm <- lapply(mm[-1], function(x, vars) {vars[x == -1]}, mm[[1]])
 
   # Set associations specified in measurement model (mainentity is set in read_survey.).
@@ -318,7 +318,7 @@ read_model_output <- function(file, mainentity, inner_weight, outer_weight) {
     stop(stri_c(msg, "file matching 'config.txt'", sep = " "))
   }
 
-  cf <- officeR::read_data(fname, encoding = "latin1", col_names = FALSE, decimal = ",")
+  cf <- seamless::read_data(fname, encoding = "latin1", col_names = FALSE, decimal = ",")
   names(cf) <- c("row", "entity", "valid", "marketshare")
 
   # Set marketshare based on config

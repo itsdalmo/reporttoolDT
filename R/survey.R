@@ -160,7 +160,7 @@ Survey <- R6::R6Class("Survey",
       if (missing(x) || !is.data.frame(x))
         stop("Expecting a data.frame or data.table.", call. = FALSE)
       if (any_labelled(x)) {
-        x <- officeR::from_labelled(x)
+        x <- seamless::from_labelled(x)
       }
       # Copy labels from attr (returns null if they do not exist.)
       private$.labels <- attr(x, "labels")

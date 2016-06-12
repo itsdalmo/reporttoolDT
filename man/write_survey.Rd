@@ -13,14 +13,14 @@ write_survey(x, file)
 will be created. The resulting EM.sav file-name is based on the Survey's config.)}
 }
 \description{
-In contrast to \code{\link[officeR]{write_data}}, \code{write_survey} will store
+In contrast to \code{\link[seamless]{write_data}}, \code{write_survey} will store
 hidden fields (such as config, translations etc.) which can be retrieved by using
 \code{\link{read_survey}}. This means that you don't have to repeatedly set
 these options when reading/writing a survey you are working on. Information that
 cannot be stored in SPSS will be stored in an associated .Rdata file instead.
 }
 \details{
-You can also use \code{\link[officeR]{write_data}} to write the \code{Survey}.
+You can also use \code{\link[seamless]{write_data}} to write the \code{Survey}.
 In this case the information which is persisted depends on the format used:
 
 \itemize{
@@ -34,10 +34,10 @@ In this case the information which is persisted depends on the format used:
 df <- survey_df(data.frame("A" = "test", "B" = 2))
 
 # Store data and labels
-officeR::write_data(df, "test.sav")
+seamless::write_data(df, "test.sav")
 
 # Store everything
-officeR::write_data(df, "test.Rdata")
+seamless::write_data(df, "test.Rdata")
 
 # Write survey as .sav (hidden fields stored as .Rdata)
 write_survey(df, "test.sav")

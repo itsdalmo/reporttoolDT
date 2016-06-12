@@ -15,7 +15,7 @@ This package is meant for a particular use, which is to work with data from surv
 
 To achieve this, `reporttool` provides a `Survey` class which is built using R6, and stuffs some extra information into private (hidden) `fields` inside it. For users, a `Survey` should look and behave pretty much like a normal `data.frame`, `data.table` or `tbl` (dplyr). Internally `Survey`'s helps us keep track of the hidden fields, toward the end goal of automating tables, plots and reports.
 
-*Note* that `reporttool` is meant to be used with `officeR` and `tabulR`.
+*Note* that `reporttool` is meant to be used with `seamless` and `tabulR`.
 
 ## Usage
 
@@ -25,7 +25,7 @@ As an example, let's take some "raw data" from SPSS and complete a Survey to gen
 
 ```{r, warning = FALSE, message = FALSE}
 require(dplyr)
-require(officeR)
+require(seamless)
 require(tabulR)
 require(reporttoolDT)
 

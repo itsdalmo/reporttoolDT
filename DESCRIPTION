@@ -15,9 +15,9 @@ Imports:
     evaluate,
     ggplot2 (>= 2.1),
     lazyeval,
-    officeR,
     R6,
     scales,
+    seamless,
     stringi,
     tabulR,
     utils
@@ -33,7 +33,7 @@ Suggests:
     testthat,
     tidyr
 Remotes:
-    itsdalmo/officeR,
+    itsdalmo/seamless,
     itsdalmo/tabulR
 RoxygenNote: 5.0.1
 VignetteBuilder: knitr
