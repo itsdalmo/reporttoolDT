@@ -65,7 +65,8 @@ add_weight <- function(x) {
   me <- out$get_association("mainentity")
 
   wt <- out$get_association("weight") %||% "w"
-  out[, wt := NA, with = FALSE]  # Set 'w' or weight variable.
+  if (wt %in% names(out)) out[, wt := NULL, with = FALSE]
+  out[, wt := NA_real_, with = FALSE]  # Set 'w' or weight variable.
 
   is_valid <- out[[pm]] <= as.numeric(co)
   for (i in seq_along(ents$entity)) {
@@ -158,6 +159,8 @@ latents_impl <- function(x, type) {
 
   # Set associations, update labels and return.
   out$set_association(percent_missing = "percent_missing")
+  if (type == "mean") out$set_label(auto = TRUE)
+
   out
 
 }
