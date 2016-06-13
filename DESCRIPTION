@@ -9,7 +9,9 @@ License: MIT + file LICENSE
 LazyData: TRUE
 Depends:
     R (>= 3.2),
-    R6Frame
+    R6Frame,
+    seamless,
+    tabulR
 Imports:
     data.table,
     evaluate,
