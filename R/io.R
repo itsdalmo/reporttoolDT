@@ -22,7 +22,7 @@ write_data.Survey <- function(x, file, ...) {
 
 #' @importFrom seamless to_labelled
 #' @export
-to_labelled.Survey <- function(x) {
+to_labelled.Survey <- function(x, ...) {
   out <- x$get_data(copy = TRUE)
   if (data.table::is.data.table(out)) {
     data.table::setattr(out, "labels", x$get_label())
@@ -30,15 +30,15 @@ to_labelled.Survey <- function(x) {
     attr(out, "labels") <- x$get_label()
   }
 
-  seamless::to_labelled(out)
+  seamless::to_labelled(out, ...)
 
 }
 
 #' @importFrom seamless to_excel
 #' @export
-to_excel.Survey <- function(x, ...) {
+to_excel.Survey <- function(df, ...) {
   # TODO: Automatic labels etc.
-  seamless::to_excel(x$data, ...)
+  seamless::to_excel(df$data, ...)
 }
 
 #' @importFrom seamless to_ppt
