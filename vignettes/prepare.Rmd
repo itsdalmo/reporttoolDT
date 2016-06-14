@@ -122,7 +122,7 @@ tail(model(srv_mean))
 With missing percentage calculated, we can check `entities()` again to see the number of valid observations:
 
 ```{r}
-entities(srv)
+entities(srv_mean)
 ```
 
 #### 8. PLS-wizard

@@ -13,7 +13,7 @@ vignette: >
 
 As we saw in the introduction, the `Survey` is essentially a `data.frame` which stores some extra information about the variables and the survey as a whole. To do this, the `Survey` class is built on top of [R6](https://github.com/wch/R6) and [R6Frame](https://github.com/itsdalmo/R6Frame).
 
-Note: Because `Survey` is an R6 class, I have opted to use a capital **S** for the class name, and use a lowercase letters for the constructor functions.
+**Note**: Because `Survey` is an R6 class, I have opted to use a capital **S** for the class name, and use lowercase letters for the constructor functions.
 
 Let's start by reading in the sample data, creating a `Survey` again and looking at it's class:
 
@@ -48,10 +48,7 @@ The last line shows that `sav_cleaned` is equal to the data stored in the survey
 Because a `Survey` is implemented in R6, the `$` operator is reserved for accessing the contents (seen above) and methods (explained below) of the `Survey`, and not columns in the data directly:
 
 ```{r}
-# Fail
 srv$q1
-
-# Success
 head(srv$data$q1, n = 1L)
 ```
 
@@ -81,19 +78,16 @@ However, mutable objects are rather atypical for R objects, and so I have made t
 
 ## Detailed usage
 
-As we can see, simply calling `survey()` on the data will create a `Survey_tbl`, this is because `haven` returns a `tbl_df` by default. If we instead wanted a  `Survey_dt` (i.e., use `data.table`), we have two options:
-
-```{r}
-dtm <- survey(data.table::as.data.table(sav)) # Option 1: Manual.
-dt <- survey_dt(sav) # Option 2: Use the Survey_dt constructor.
-"Survey_dt" %in% class(dt) && "Survey_dt" %in% class(dtm)
-```
-
-That's it. We can either call the generic constructor `survey()`, or a specific  one which coerces the input data, these are: 
+When you create a survey using `survey()`, the type of `data.frame` is not touched. If we also want to convert the data to a `data.table` or `tbl_df`, we can use one of the following functions:
 
 - `survey_df()` 
 - `survey_dt()` 
 - `survey_tbl()`, requires [dplyr](https://github.com/hadley/dplyr).
+
+```{r}
+dtm <- survey(data.table::as.data.table(sav)) # Option 1: Manual.
+dt <- survey_dt(sav) # Option 2: Coerce using a survey constructor.
+```
 
 #### `[` and `[[`
 
@@ -123,7 +117,7 @@ class(dt_slice[, test])
 
 Overall, a `Survey` should behave like the underlying data. The only exception to this, is that `$` is reserved for accessing public fields in R6 objects:
 ```{r}
-identical(df$test, df[["test"]]) # FALSE
+identical(df$test, df[["test"]])
 ```
 
 Because the `Survey` class is implemented in R6, they are mutable and allows the  `Survey_dt` subclass to have hidden fields behave similar to the `data.table` itself.
@@ -137,6 +131,8 @@ As mentioned previously, the `Survey` lets us keep track of extra information to
 - **marketshares**: The marketshare for each entity in the study.
 - **config**: Name of study, segment, missing % cutoff etc.
 - **translations**: A dictionary of common words and their replacement. Used in tables and plots.
+- **inner_weights**: Inner weights (between latents) from PLS.
+- **outer_weights**: Outer weights (question to latent) from PLS.
 
 To retrieve one or more labels, you can use `get_label()`:
 ```{r}
@@ -173,6 +169,8 @@ Get hidden fields:
 - `get_marketshare()`
 - `get_config()`
 - `get_translation()`
+- `get_inner_weight()`
+- `get_outer_weight()`
 
 Set hidden fields:
 
@@ -181,6 +179,8 @@ Set hidden fields:
 - `set_marketshare()`
 - `set_config()`
 - `set_translation()`
+- `set_inner_weight()`
+- `set_outer_weight()`
 
 Having set the labels above, the Survey will keep track of them as the data changes:
 
@@ -219,16 +219,16 @@ get_association(dt, "mainentity")
 After identifying common associations and having Q1 identified as our mainentity variable, we can use `entities()` to get a summary: 
 
 ```{r}
-dt$entities()
+entities(dt)
 ```
 
-If we set a marketshare, rename to "percent_missing" and set cutoff in config:
+If we set a marketshare, associate "Andel_Missing" with missing-% and set cutoff in config:
 
 ```{r}
-names(dt)[names(dt) == "Andel_Missing"] <- "percent_missing"
+dt <- set_association(dt, percent_missing = "Andel_Missing")
 dt <- set_marketshare(dt, reporttool = 1L)
 dt <- set_config(dt, cutoff = .1) # 10%
-dt$entities()
+entities(dt)
 ```
 
 ## More information

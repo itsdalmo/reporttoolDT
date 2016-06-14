@@ -11,18 +11,18 @@ vignette: >
 
 ## Foreword
 
-This package is meant for a particular use, which is to work with data from surveys to generate batch reports. To do so, we need to keep track of the labels (questions) for each variable, in addition to latent associations for use in structural modelling (PLS-PM).
+This package is meant for a particular use, which is to work with data from surveys to generate batch reports. To do so, we need to keep track of the question text and the latent associations used for modelling the data (PLS-PM). 
 
-To achieve this, `reporttool` provides a `Survey` class which is built using R6, and stuffs some extra information into private (hidden) `fields` inside it. For users, a `Survey` should look and behave pretty much like a normal `data.frame`, `data.table` or `tbl` (dplyr). Internally `Survey`'s helps us keep track of the hidden fields, toward the end goal of automating tables, plots and reports.
+To achieve this, `reporttoolDT` provides a new data structure (named `Survey`) which keeps track of the questions and associations, as well as other information. To users, Survey's should look and behave pretty much like a normal `data.frame`, but the internals help us automate tables, plots and reports.
 
-*Note* that `reporttoolDT` is meant to be used with `R6Frame`, `seamless` and `tabulR`. These packages are loaded automatically when you call `library(reporttoolDT)`.
+**Note**: `reporttoolDT` is meant to be used with `R6Frame`, `seamless` and `tabulR`. These packages are loaded automatically when you call `library(reporttoolDT)`.
 
 ## Usage
 
 For these examples, we'll start with some "raw data" from SPSS and go through the steps necessary to create tables, plots and reports. I recommend using `reporttoolDT` with [dplyr](https://github.com/hadley/dplyr):
 
 
-#### Read and prepare
+#### Preparing the data
 
 ```{r, warning = FALSE, message = FALSE}
 require(dplyr)
@@ -37,7 +37,7 @@ srv <- survey_tbl(sav) %>%
   latents_mean() 
 ```
 
-For more information about the steps above, check out the [vignette](https://github.com/itsdalmo/reporttoolDT/blob/master/vignettes/prepare.Rmd) by running `vignette("workflow", package = "reporttoolDT")`. We are now ready to generate output from the `Survey`.
+For more information about the steps above, check out the "prepare" vignette. We are now ready to generate output from the `Survey`.
 
 #### Tables
 
@@ -68,17 +68,17 @@ srv %>%
 
 Creating charts works more or less exactly like `qtable()`, except we have two choices - `bar_chart()` and `line_chart()`:
 
-```{r, warning = FALSE, message = FALSE}
+```{r, warning = FALSE, message = FALSE, fig.height = 5, fig.width = 7}
 srv %>% group_by(q1) %>% bar_chart(epsi, margin = FALSE)
 ```
 
 We can also use `manifest_plot()` and `latent_plot()` to visualize our model variables:
 
-```{r, warning = FALSE, message = FALSE}
+```{r, warning = FALSE, message = FALSE, fight.height = 5, fig.width = 7}
 srv %>% group_by(q1) %>% latent_plot()
 ```
 
-The plots are meant as a baseline, and can be further adjusted using ggplot2 (which was also used to create them).
+The plots are made using [ggplot2](http://github.com/hadley/ggplot2). They are meant as a baseline, and can be further adjusted using ggplot2.
 
 #### Output
 
@@ -117,8 +117,6 @@ if (require(ReporteRs)) {
 #### Reports
 
 Coming soon.
-
-## More information
 
 ## More information
 

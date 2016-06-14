@@ -26,7 +26,7 @@ srv <- survey_tbl(sav) %>%
   latents_mean() 
 ```
 
-#### Adding variables
+## Adding variables
 
 `add_latent_spread()` adds all spread variables to the data: 
 
@@ -42,7 +42,7 @@ out <- srv %>% add_weight()
 out %>% select(w) %>% head()
 ```
 
-#### Cleaning
+## Cleaning
 
 `clean_scale()` helps you convert likert-scales stored as character vectors to numeric by extracting numbers from text:
 
@@ -69,7 +69,7 @@ str_to_numeric("string 1 with many values 9", FUN = mean)
 # Output is 5 because there are two numbers: 1+9/2
 ```
 
-#### Recoding
+## Recoding
 
 `recode()` let's you exchange one or more values for another in a vector:
 
@@ -88,6 +88,38 @@ spread_10(1:10)
 ```{r}
 spread_100(rescale_100(1:10))
 ```
+
+## Tables
+
+`latent_table()` creates a table with latent scores:
+
+```{r}
+srv %>% group_by(q1) %>% latent_table()
+```
+
+`manifest_table()` does the same for manifest variables:
+
+```{r}
+srv %>% group_by(q1) %>% manifest_table()
+```
+
+There is also `impact_table()` for outer weights (sorted by weight), when you have read a survey with argument `outer_weight = TRUE`.
+
+## Charts
+
+`latent_plot()` creates a plot with latent scores:
+
+```{r, fig.height = 5, fig.width = 7}
+srv %>% group_by(q1) %>% latent_plot()
+```
+
+`manifest_plot()` does the same for manifest scores:
+
+```{r, fig.height = 5, fig.width = 7}
+srv %>% group_by(q1) %>% manifest_plot()
+```
+
+You can also use `flow_chart()` after reading outer weights by specifying `inner_weight = TRUE` in `read_survey()`.
 
 ## More information
 
