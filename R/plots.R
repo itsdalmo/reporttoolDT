@@ -18,10 +18,12 @@ latent_plot <- function(df, groups = NULL, weight = NULL, margin = TRUE) {
   }
   if (!length(vars)) stop("Latent variables were not found in the data.")
   if (is.null(groups)) {
-    bar_chart_(df, vars = vars, groups = groups, weight = weight, margin = margin)
+    out <- bar_chart_(df, vars = vars, groups = groups, weight = weight, margin = margin)
   } else {
-    line_chart_(df, vars = vars, groups = groups, weight = weight, margin = margin)
+    out <- line_chart_(df, vars = vars, groups = groups, weight = weight, margin = margin)
   }
+
+  out + theme_epsi() + scale_fill_epsi()
 
 }
 
@@ -46,7 +48,7 @@ manifest_plot <- function(df, groups = NULL, weight = NULL, margin = TRUE) {
   }
   out <- manifest_table(df, groups = groups, weight = weight, margin = margin, wide = FALSE)
   out <- bar_chart_(out, vars = vars, groups = groups, weight = weight, margin = margin)
-  out
+  out + theme_epsi() + scale_fill_epsi()
 }
 
 #' Using bar_chart_ with a Survey
