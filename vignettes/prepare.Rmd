@@ -1,32 +1,22 @@
 ---
-title: "Workflow (reporttool)"
+title: "Preparing data (reporttoolDT)"
 author: "Kristian D. Olsen"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{Preparing data}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-## About
+## Foreword
 
-This package is meant for a particular use, which is to work with data from surveys to generate batch reports. To do so, we need to keep track of the labels (questions) for each variable, in addition to latent associations for use in structural modelling (PLS-PM).
-
-To achieve this, `reporttool` provides a `Survey` class which is built using R6, and stuffs some extra information into private (hidden) `fields` inside it. For users, a `Survey` should look and behave pretty much like a normal `data.frame`, `data.table` or `tbl` (dplyr). Internally `Survey`'s helps us keep track of the hidden fields, toward the end goal of automating tables, plots and reports.
-
-*Note* that `reporttool` is meant to be used with `seamless` and `tabulR`.
-
-## Usage
-
-As an example, let's take some "raw data" from SPSS and complete a Survey for PLS-PM modelling.
+Before we can generate a report, we need to "prepare" the data with the necessary information. This vignette gets into some more detail on the hidden fields in the `Survey` class. In this example, we'll use the same dataset as was shown in the "introduction" vignette and complete a Survey for PLS-PM modelling.
 
 #### 1. Read the data (seamless)
 
 ```{r}
 require(reporttoolDT)
-require(seamless)
-
 sav <- read_data(system.file("extdata", "raw_data.sav", package = "reporttoolDT"))
 class(sav)
 ```
@@ -35,13 +25,13 @@ class(sav)
 
 You can convert any `data.frame` to a `Survey` using `survey()`, or you can use one of the following functions which also coerces the input to a specific type of  `data.frame`:
 
-  - `survey_df()`: A regular R `data.frame`.
+- `survey_df()`: A regular R `data.frame`.
 - `survey_dt()`  A `data.table`. Read more [here](https://github.com/Rdatatable/data.table/wiki).
 - `survey_tbl()`, requires [dplyr](https://github.com/hadley/dplyr).
 
 For this example, we can use a regular `data.frame`:
 
-  ```{r}
+```{r}
 srv <- survey_df(sav)
 class(srv)
 ```
@@ -121,7 +111,7 @@ srv_mean <- latents_mean(srv)
 # model(srv_mean)
 ```
 
-After running `latents_mean()` we see that the labels are empty. To fix this we can use the `auto` argument for `set_label()` (translations have to be set first):
+After running `latents_mean()` we see that the labels are empty. To fix this we could have `set_translation()` before adding the latents, or `set_translation()` and use the `auto` argument for `set_label()`:
 
 ```{r}
 srv_mean <- set_translation(srv_mean, language = "english")
@@ -150,12 +140,21 @@ Here, the EM variables and latents are not included - only `percent_missing` and
 # write_survey(srv, file = getwd())
 ```
 
-The second argument `file` is the path to where you would like to store the `Survey`. `write_survey()` will always write a separate `...(Survey).Rdata` file which contains all the hidden information for the Survey, and which you can get back again by using `read_survey()`. If `file` is a directory, it will create a new directory **Data** and store the SPSS file, as well as **Input** which contains all the input files for the PLS-wizard.
+The second argument `file` is the path to where you would like to store the `Survey`. `write_survey()` will always write a separate `...(Survey).Rdata` file which contains all the hidden information for the Survey, which you can get back again by using `read_survey()`. If `file` is a directory, it will create a new directory **Data** and store the SPSS file, as well as **Input** which contains all the input files for the PLS-wizard.
 
-## Next
+## More information
 
-After doing all of the necessary steps above, we can use the Survey to generate tables and plots. See the vignette for more information:
-
+[Introduction](https://github.com/itsdalmo/reporttoolDT/blob/master/vignettes/introduction.Rmd): 
 ```{r, eval = FALSE}
-vignette("output", package = "reporttoolDT")
+vignette("introduction", package = "reporttoolDT")
+```
+
+[Survey-class](https://github.com/itsdalmo/reporttoolDT/blob/master/vignettes/survey.Rmd): 
+```{r, eval = FALSE}
+vignette("survey", package = "reporttoolDT")
+```
+
+[Other functions](https://github.com/itsdalmo/reporttoolDT/blob/master/vignettes/other.Rmd): 
+```{r, eval = FALSE}
+vignette("other", package = "reporttoolDT")
 ```

@@ -1,32 +1,31 @@
 ---
-title: "Introduction to reporttool"
+title: "Introduction to reporttoolDT"
 author: "Kristian D. Olsen"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{Introduction}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-## About
+## Foreword
 
 This package is meant for a particular use, which is to work with data from surveys to generate batch reports. To do so, we need to keep track of the labels (questions) for each variable, in addition to latent associations for use in structural modelling (PLS-PM).
 
 To achieve this, `reporttool` provides a `Survey` class which is built using R6, and stuffs some extra information into private (hidden) `fields` inside it. For users, a `Survey` should look and behave pretty much like a normal `data.frame`, `data.table` or `tbl` (dplyr). Internally `Survey`'s helps us keep track of the hidden fields, toward the end goal of automating tables, plots and reports.
 
-*Note* that `reporttool` is meant to be used with `seamless` and `tabulR`.
+*Note* that `reporttoolDT` is meant to be used with `R6Frame`, `seamless` and `tabulR`. These packages are loaded automatically when you call `library(reporttoolDT)`.
 
 ## Usage
 
-As an example, let's take some "raw data" from SPSS and complete a Survey to generate various output. I recommend using dplyr, which will be used for this example.
+For these examples, we'll start with some "raw data" from SPSS and go through the steps necessary to create tables, plots and reports. I recommend using `reporttoolDT` with [dplyr](https://github.com/hadley/dplyr):
+
 
 #### Read and prepare
 
 ```{r, warning = FALSE, message = FALSE}
 require(dplyr)
-require(seamless)
-require(tabulR)
 require(reporttoolDT)
 
 sav <- read_data(system.file("extdata", "raw_data.sav", package = "reporttoolDT"))
@@ -35,11 +34,10 @@ srv <- survey_tbl(sav) %>%
   set_config(name = "Example", segment = "B2C", cutoff = .3) %>%
   set_marketshare(CompanyA = .3, CompanyB = .5, CompanyC = .2) %>%
   set_translation(language = "english") %>%
-  latents_mean() %>%
-  set_label(auto = TRUE)
+  latents_mean() 
 ```
 
-For more information about the steps above, check out the [vignette](https://github.com/itsdalmo/reporttoolDT/blob/master/vignettes/workflow.Rmd) by running `vignette("workflow", package = "reporttoolDT")`. We are now ready to generate output from the `Survey`.
+For more information about the steps above, check out the [vignette](https://github.com/itsdalmo/reporttoolDT/blob/master/vignettes/prepare.Rmd) by running `vignette("workflow", package = "reporttoolDT")`. We are now ready to generate output from the `Survey`.
 
 #### Tables
 
@@ -122,5 +120,19 @@ Coming soon.
 
 ## More information
 
-- [Survey-class](https://github.com/itsdalmo/reporttoolDT/blob/master/vignettes/survey.Rmd): `vignette("survey", package = "reporttoolDT")`.
-- [Workflow](https://github.com/itsdalmo/reporttoolDT/blob/master/vignettes/workflow.Rmd): `vignette("workflow", package = "reporttoolDT")`.
+## More information
+
+[Survey-class](https://github.com/itsdalmo/reporttoolDT/blob/master/vignettes/survey.Rmd): 
+```{r, eval = FALSE}
+vignette("survey", package = "reporttoolDT")
+```
+
+[Preparing data](https://github.com/itsdalmo/reporttoolDT/blob/master/vignettes/prepare.Rmd):
+```{r, eval = FALSE}
+vignette("prepare", package = "reporttoolDT")
+```
+
+[Other functions](https://github.com/itsdalmo/reporttoolDT/blob/master/vignettes/other.Rmd): 
+```{r, eval = FALSE}
+vignette("other", package = "reporttoolDT")
+```

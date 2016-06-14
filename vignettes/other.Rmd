@@ -1,0 +1,107 @@
+---
+title: "Other functions (reporttoolDT)"
+author: "Kristian D. Olsen"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Other functions}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Foreword
+
+`reporttoolDT` contains several "convenience"-functions that are made to make ones life easier when working with Survey data. This vignette attempts to provide a list with these functions and a small example to showcase their usage - we'll use the same dataset as in previous vignettes:
+
+```{r, warning = FALSE, message = FALSE}
+require(dplyr)
+require(reporttoolDT)
+
+sav <- read_data(system.file("extdata", "raw_data.sav", package = "reporttoolDT"))
+srv <- survey_tbl(sav) %>%
+  set_association(common = TRUE) %>%
+  set_config(name = "Example", segment = "B2C", cutoff = .3) %>%
+  set_marketshare(CompanyA = .3, CompanyB = .5, CompanyC = .2) %>%
+  set_translation(language = "english") %>%
+  latents_mean() 
+```
+
+#### Adding variables
+
+`add_latent_spread()` adds all spread variables to the data: 
+
+```{r}
+out <- srv %>% add_latent_spread()
+out %>% select(ends_with("_spread")) %>% head()
+```
+
+`add_weight()` creates a weight ("w") based on marketshares for each entity:
+
+```{r}
+out <- srv %>% add_weight()
+out %>% select(w) %>% head()
+```
+
+#### Cleaning
+
+`clean_scale()` helps you convert likert-scales stored as character vectors to numeric by extracting numbers from text:
+
+```{r}
+clean_scale(c("1 Not happy", 2:9, "10 Very happy"))
+```
+
+`rescale_100()` converts a 10-point scale to a 100-point scale:
+
+```{r}
+rescale_100(1:10)
+```
+
+`rescale_10()` does the reverse of `rescale_100`:
+
+```{r}
+rescale_10(rescale_100(1:10))
+```
+
+`str_to_numeric()` lets you convert strings in general to numerics:
+
+```{r}
+str_to_numeric("string 1 with many values 9", FUN = mean)
+# Output is 5 because there are two numbers: 1+9/2
+```
+
+#### Recoding
+
+`recode()` let's you exchange one or more values for another in a vector:
+
+```{r}
+recode(c("A", "B", "C"), GroupA = c("A", "C"), GroupB = "B", factor = TRUE)
+```
+
+`spread_10()` helps you spread a 10-point likert as follows:
+
+```{r}
+spread_10(1:10)
+```
+
+`spread_100()` does the same for 100-point scales:
+
+```{r}
+spread_100(rescale_100(1:10))
+```
+
+## More information
+
+[Introduction](https://github.com/itsdalmo/reporttoolDT/blob/master/vignettes/introduction.Rmd): 
+```{r, eval = FALSE}
+vignette("introduction", package = "reporttoolDT")
+```
+
+[Survey-class](https://github.com/itsdalmo/reporttoolDT/blob/master/vignettes/survey.Rmd): 
+```{r, eval = FALSE}
+vignette("survey", package = "reporttoolDT")
+```
+
+[Preparing data](https://github.com/itsdalmo/reporttoolDT/blob/master/vignettes/prepare.Rmd):
+```{r, eval = FALSE}
+vignette("prepare", package = "reporttoolDT")
+```

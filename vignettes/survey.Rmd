@@ -1,35 +1,30 @@
 ---
-title: "Introduction to reporttool"
+title: "Survey class (reporttoolDT)"
 author: "Kristian D. Olsen"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{Survey class}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 ## What is a Survey?
 
-As we saw in the introduction, the `Survey` is essentially a `data.frame` which
-stores some extra information about the variables and the survey as a whole. To do this,
-the `Survey` class is built on top of [R6](https://github.com/wch/R6). 
+As we saw in the introduction, the `Survey` is essentially a `data.frame` which stores some extra information about the variables and the survey as a whole. To do this, the `Survey` class is built on top of [R6](https://github.com/wch/R6) and [R6Frame](https://github.com/itsdalmo/R6Frame).
 
-Note: Because `Survey` is an R6 class, I have opted to use a capital **S** for
-the class name, and use a lowercase letters for the constructor functions.
+Note: Because `Survey` is an R6 class, I have opted to use a capital **S** for the class name, and use a lowercase letters for the constructor functions.
 
 Let's start by reading in the sample data, creating a `Survey` again and looking at it's class:
 
 ```{r}
 require(reporttoolDT)
-sav <- seamless::read_data(system.file("extdata", "sample.sav", package = "reporttoolDT"))
+sav <- read_data(system.file("extdata", "sample.sav", package = "reporttoolDT"))
 srv <- survey(sav)
 class(srv)
 ```
 
-As we can see from the class of our `srv` object, it inherits from "R6" in addition to
-"Survey". When I say the `Survey` is essentially a `data.frame`, this is because
-the data rests inside the survey itself, and can be accessed using `$`:
+As we can see from the class of our `srv` object, it inherits from "R6" in addition to "Survey". When I say the `Survey` is essentially a `data.frame`, this is because the data rests inside the survey itself, and can be accessed using `$`:
 
 ```{r}
 # Show data/class
@@ -37,13 +32,10 @@ head(srv$data[, 1:5L], n = 3L)
 class(srv$data)
 ```
 
-If we look at the class again, we see that `srv$data` is just the same data that
-was read in and stored in the `sav` object. The difference is that `survey()` 
-converts from labelled variables to factors, and stores the labels in the `Survey`
-instead of in the data. We can recreate this as follows:
+If we look at the class again, we see that `srv$data` is just the same data that was read in and stored in the `sav` object. The difference is that `survey()` converts from labelled variables to factors, and stores the labels in the `Survey` instead of in the data. We can recreate this as follows:
 
 ```{r}
-sav_cleaned <- seamless::from_labelled(sav)
+sav_cleaned <- from_labelled(sav)
 attr(sav_cleaned, "labels") <- NULL
 
 all.equal(srv$data, sav_cleaned)
@@ -53,9 +45,7 @@ The last line shows that `sav_cleaned` is equal to the data stored in the survey
 
 #### Using `$` with a survey
 
-Because a `Survey` is implemented in R6, the `$` operator is reserved for accessing
-the contents (seen above) and methods (explained below) of the `Survey`, and not columns 
-in the data directly:
+Because a `Survey` is implemented in R6, the `$` operator is reserved for accessing the contents (seen above) and methods (explained below) of the `Survey`, and not columns in the data directly:
 
 ```{r}
 # Fail
@@ -67,10 +57,7 @@ head(srv$data$q1, n = 1L)
 
 #### Object oriented
 
-`R6` is a packages which helps us do object orientation in R. In practice this means
-that many functions are defined inside the `Survey` itself, and can be called using 
-`$`. For instance, all **get** and **set** functions are defined inside the `Survey`
-and have S3 wrappers:
+`R6` is a packages which helps us do object orientation in R. In practice this means that many functions are defined inside the `Survey` itself, and can be called using `$`. For instance, all **get** and **set** functions are defined inside the `Survey` and have S3 wrappers:
 
 ```{r}
 # S3 method for setting a label
@@ -80,29 +67,21 @@ srv <- set_label(srv, StartDate = "Date when respondent opened the Survey.")
 srv$set_label(StartDate = "Timestamp when respondent opened the Survey.")
 ```
 
-Both of these functions do the same thing, because the S3 method is just a function
-that calls the R6 method. However, the S3 method returns a copy of the Survey you passed
-to the function, while the R6 method modifies the existing survey (in place). 
+Both of these functions do the same thing, because the S3 method is just a function that calls the R6 method. However, the S3 method returns a copy of the Survey you passed to the function, while the R6 method modifies the existing survey (in place). 
 
 #### Mutable
 
-R6 objects are mutable, and since the `Survey` is built on R6, it is also mutable.
-This means that we can make changes to the `Survey` without having to assign (`<-`) the
-result, like you saw an example of above (R6 method for setting label). Because it is
-mutable, this allows the `Survey` to have hidden fields that behave like the `data.table` itself.
+R6 objects are mutable, and since the `Survey` is built on R6, it is also mutable. This means that we can make changes to the `Survey` without having to assign (`<-`) the result, like you saw an example of above (R6 method for setting label). Because it is mutable, this allows the `Survey` to have hidden fields that behave like the `data.table` itself.
 
 
-However, mutable objects are rather atypical for R objects, and so I have made the following
-decision in order to make methods more predictable: 
+However, mutable objects are rather atypical for R objects, and so I have made the following decision in order to make methods more predictable: 
 
 - All S3 methods (e.g. set_label()) return a copy of the Survey, and must be assigned (`<-`).
 - All R6 methods (accessed with `$`) modify the Survey in place.
 
 ## Detailed usage
 
-As we can see, simply calling `survey()` on the data will create a `Survey_tbl`,
-this is because `haven` returns a `tbl_df` by default. If we instead wanted a 
-`Survey_dt` (i.e., use `data.table`), we have two options:
+As we can see, simply calling `survey()` on the data will create a `Survey_tbl`, this is because `haven` returns a `tbl_df` by default. If we instead wanted a  `Survey_dt` (i.e., use `data.table`), we have two options:
 
 ```{r}
 dtm <- survey(data.table::as.data.table(sav)) # Option 1: Manual.
@@ -110,9 +89,7 @@ dt <- survey_dt(sav) # Option 2: Use the Survey_dt constructor.
 "Survey_dt" %in% class(dt) && "Survey_dt" %in% class(dtm)
 ```
 
-That's it. We have 3 subclasses for `Survey`, these are `Survey_df`, `Survey_dt`
-and `Survey_tbl`. We can either call the generic constructor `survey()`,or a specific 
-one which coerces the input data, these are: 
+That's it. We can either call the generic constructor `survey()`, or a specific  one which coerces the input data, these are: 
 
 - `survey_df()` 
 - `survey_dt()` 
@@ -144,19 +121,16 @@ But only if the operation returns an object that inherits from `data.frame`:
 class(dt_slice[, test])
 ```
 
-Overall, a `Survey` should behave like the underlying data. The only exception to
-this, is that `$` is reserved for accessing public fields in R6 objects:
+Overall, a `Survey` should behave like the underlying data. The only exception to this, is that `$` is reserved for accessing public fields in R6 objects:
 ```{r}
 identical(df$test, df[["test"]]) # FALSE
 ```
 
-Because the `Survey` class is implemented in R6, they are mutable and allows the 
-`Survey_dt` subclass to have hidden fields behave similar to the `data.table` itself.
+Because the `Survey` class is implemented in R6, they are mutable and allows the  `Survey_dt` subclass to have hidden fields behave similar to the `data.table` itself.
 
 #### Hidden fields
 
-As mentioned previously, the `Survey` lets us keep track of extra information to
-automate certain processes - these are kept in the following hidden fields:
+As mentioned previously, the `Survey` lets us keep track of extra information to automate certain processes - these are kept in the following hidden fields:
 
 - **labels**: The question text for each variable.
 - **associations**: Associations, such as latent association in the case of PLS-PM.
@@ -164,7 +138,7 @@ automate certain processes - these are kept in the following hidden fields:
 - **config**: Name of study, segment, missing % cutoff etc.
 - **translations**: A dictionary of common words and their replacement. Used in tables and plots.
 
-To retriee one or more labels, you can use `get_label()`:
+To retrieve one or more labels, you can use `get_label()`:
 ```{r}
 # Get the label for Q1 using the R6 method
 q1_label <- dt$get_label("q1")
@@ -176,9 +150,7 @@ q1_label <- get_label(dt, "q1")
 all_labels <- get_label(dt)
 ```
 
-The object `dt` already contains labels in this case, because `survey()` has found them
-after reading in the SPSS-file in `seamless`. You can also set one or more labels manually
-using `set_label()`:
+The object `dt` already contains labels in this case, because `survey()` has found them after reading in the SPSS-file in `seamless`. You can also set one or more labels manually using `set_label()`:
 
 ```{r}
 # Get the label for Q1 using the R6 method
@@ -220,8 +192,7 @@ get_label(dt_subset) # No second argument, all labels are returned.
 
 #### Model and entities
 
-You can also use the function `model()` to return a list of variables in the data,
-their names, type and label:
+You can also use the function `model()` to return a list of variables in the data, their names, type and label:
 
 ```{r}
 # R6 method
@@ -245,8 +216,7 @@ dt <- set_association(dt, common = TRUE)
 get_association(dt, "mainentity")
 ```
 
-After identifying common associations and having Q1 identified as our mainentity
-variable, we can use `entities()` to get a summary: 
+After identifying common associations and having Q1 identified as our mainentity variable, we can use `entities()` to get a summary: 
 
 ```{r}
 dt$entities()
@@ -261,3 +231,19 @@ dt <- set_config(dt, cutoff = .1) # 10%
 dt$entities()
 ```
 
+## More information
+
+[Introduction](https://github.com/itsdalmo/reporttoolDT/blob/master/vignettes/introduction.Rmd): 
+```{r, eval = FALSE}
+vignette("introduction", package = "reporttoolDT")
+```
+
+[Preparing data](https://github.com/itsdalmo/reporttoolDT/blob/master/vignettes/prepare.Rmd):
+```{r, eval = FALSE}
+vignette("prepare", package = "reporttoolDT")
+```
+
+[Other functions](https://github.com/itsdalmo/reporttoolDT/blob/master/vignettes/other.Rmd): 
+```{r, eval = FALSE}
+vignette("other", package = "reporttoolDT")
+```
