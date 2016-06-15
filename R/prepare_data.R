@@ -1,28 +1,42 @@
-#' Add latent spreads
+#' Add contrast
 #'
-#' This function adds latent-spreads to a \code{Survey}.
+#' This function adds one or more contrast to a \code{Survey}.
 #'
 #' @param x A Survey.
+#' @param ... The contrasts (\code{data.frame} or \code{Survey}) to add.
 #' @author Kristian D. Olsen
 #' @export
 #' @examples
 #' NULL
 
-add_latent_spread <- function(x) {
+add_contrast <- function(x, ...) {
   stopifnot(is.survey(x))
-  out <- x$clone(deep = TRUE)$as_dt()
 
-  # Figure out which latents
-  lats <- names(out)[stri_trans_tolower(names(out)) %in% default_latents()]
-  lats_spread <- stri_c(lats, "spread", sep = "_")
-  out[, lats_spread := lapply(.SD, spread_100), .SDcols = lats, with = FALSE]
+  dots <- list(...)
+  out <- x$clone(deep = TRUE)
 
-  # Coerce back to input format.
-  if (!data.table::is.data.table(x$data))
-    out$as_df()
-  if (inherits(x$data, "tbl"))
-    out$as_tbl()
+  me <- unname(get_association(x, "mainentity"))
+  if (is.null(me)) {
+    stop("'mainentity' must be specified in associations.", call. = FALSE)
+  }
 
+  has_me <- vapply(dots, function(df) me %in% names(df), logical(1))
+  if (!all(has_me)) {
+    stop("'mainentity' must be present in all data.frame's used as contrast.", call. = FALSE)
+  }
+
+  # Extract factor levels
+  levs <- lapply(c(list(out), dots), function(df) {
+    var <- df[[me]]; if (is.factor(var)) levels(droplevels(var)) else unique(var)
+  })
+  levs <- unique(unlist(levs))
+
+  # Bind rows in turn
+  for (df in dots) {
+    out <- R6Frame::rbind(out, df)
+  }
+
+  out[[me]] <- factor(out[[me]], levels = levs)
   out
 
 }
@@ -77,6 +91,35 @@ add_weight <- function(x) {
 
   # Set association
   out$set_association(weight = wt)
+
+  # Coerce back to input format.
+  if (!data.table::is.data.table(x$data))
+    out$as_df()
+  if (inherits(x$data, "tbl"))
+    out$as_tbl()
+
+  out
+
+}
+
+#' Add latent spreads
+#'
+#' This function adds latent-spreads to a \code{Survey}.
+#'
+#' @param x A Survey.
+#' @author Kristian D. Olsen
+#' @export
+#' @examples
+#' NULL
+
+add_latent_spread <- function(x) {
+  stopifnot(is.survey(x))
+  out <- x$clone(deep = TRUE)$as_dt()
+
+  # Figure out which latents
+  lats <- names(out)[stri_trans_tolower(names(out)) %in% default_latents()]
+  lats_spread <- stri_c(lats, "spread", sep = "_")
+  out[, lats_spread := lapply(.SD, spread_100), .SDcols = lats, with = FALSE]
 
   # Coerce back to input format.
   if (!data.table::is.data.table(x$data))
