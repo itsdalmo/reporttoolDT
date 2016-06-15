@@ -8,4 +8,4 @@ srv <- set_association(srv, common = TRUE)
 srv <- latents_mean(srv)
 
 # Add a contrast
-srv <- add_contrast(filter(srv, q1 == "CompanyA"), mutate(srv, q1 = "Average"))
+# srv <- add_contrast(filter(srv, q1 == "CompanyA"), mutate(srv, q1 = "Average"))
