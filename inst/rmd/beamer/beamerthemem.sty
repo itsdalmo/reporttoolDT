@@ -1,0 +1,225 @@
+% Beamer mtheme
+%
+% Copyright 2014 Matthias Vogelgesang
+% Licensed under CC-BY-SA 4.0 International.
+%
+% Adapted for rmarkdown by Kristian D. Olsen
+%
+% The initial template comes from the HSRM beamer theme by Benjamin Weiss, which
+% you can find at https://github.com/hsrmbeamertheme/hsrmbeamertheme.
+%
+
+\ProvidesPackage{beamerthemem}
+
+%{{{ --- Packages ---------------------
+
+\usepackage[no-math]{fontspec}
+\usepackage{etoolbox}
+\usepackage{tikz}
+\usepackage{pgfplots}
+
+\usetikzlibrary{backgrounds}
+
+\usecolortheme{metropolis}
+
+
+%}}}
+%{{{ --- Titlepage --------------------
+
+\def\maketitle{\ifbeamer@inframe\titlepage\else\frame[plain]{\titlepage}\fi}
+
+\def\titlepage{\usebeamertemplate{title page}}
+\setbeamertemplate{title page}
+{
+  \begin{minipage}[b][\paperheight]{\textwidth}
+    \vfill
+    \ifx\inserttitle\@empty%
+    \else%
+    {\raggedright\linespread{1.0}\usebeamerfont{title}\usebeamercolor[fg]{title}\scshape\MakeLowercase{\inserttitle}\par}%
+    \vspace*{0.5em}
+    \fi%
+    \ifx\insertsubtitle\@empty%
+    \else%
+    {\usebeamerfont{subtitle}\usebeamercolor[fg]{subtitle}\insertsubtitle\par}%
+    \vspace*{0.5em}
+    \fi%
+    \begin{tikzpicture}\draw[epsiRed] (0, 0) -- (\textwidth, 0);\end{tikzpicture}%
+    \vspace*{1em}
+    \ifx\insertauthor\@empty%
+    \else%
+    {\usebeamerfont{author}\usebeamercolor[fg]{author}\insertauthor\par}%
+    \vspace*{0.25em}
+    \fi%
+    \ifx\insertdate\@empty%
+    \else%
+    {\usebeamerfont{date}\usebeamercolor[fg]{date}\insertdate\par}%
+    \fi%
+    \ifx\insertinstitut\@empty%
+    \else%
+    \vspace*{3mm}
+    {\usebeamerfont{institute}\usebeamercolor[fg]{institute}\insertinstitute\par}%
+    \fi%
+    \vfill
+    \vspace*{5mm}
+  \end{minipage}
+}
+
+%}}}
+
+%{{{ --- Table of contents --------------------
+
+% Number the sections in ToC
+\setbeamertemplate{section in toc}[sections numbered]
+
+%}}}
+%{{{ --- Commands ---------------------
+
+\newcommand{\insertsectionHEAD}{%
+  \expandafter\insertsectionHEADaux\insertsectionhead}
+  \newcommand{\insertsectionHEADaux}[3]{\textsc{\MakeLowercase{#3}}
+}
+
+\newcommand{\plain}[2][]{%
+  \begingroup
+  \setbeamercolor{background canvas}{bg=mDarkTeal}
+  \begin{frame}{#1}
+    \centering
+    \vfill\vspace{1em}\usebeamerfont{section title}\textcolor{white}{\scshape #2}\vfill
+  \end{frame}
+  \endgroup
+}
+
+%}}}
+%{{{ --- Itemize ----------------------
+
+\setlength{\leftmargini}{1em}
+
+% Actually one level should be enough but ...
+\setlength{\leftmarginii}{1em}
+\setlength{\leftmarginiii}{1em}
+
+\newcommand{\itemBullet}{›}
+\newcommand{\itemSubBullet}{•}
+\newcommand{\itemSubSubBullet}{-}
+
+\setbeamertemplate{itemize/enumerate body begin}{\tiny}
+\setbeamertemplate{itemize/enumerate subbody begin}{\tiny}
+
+\setbeamertemplate{itemize item}{\itemBullet}
+\setbeamertemplate{itemize subitem}{\itemSubBullet}
+\setbeamertemplate{itemize subsubitem}{\itemSubSubBullet}
+\setlength{\parskip}{0.5em}
+
+%}}}
+%{{{ --- Captions ---------------------
+
+\setbeamertemplate{caption}{} 
+\setbeamertemplate{caption label separator}{}
+
+%}}}
+%{{{ --- Footline/footnote ------------
+
+\usenavigationsymbolstemplate{}
+\setbeamertemplate{footline}
+{%
+\begin{beamercolorbox}[wd=\textwidth,ht=3ex,dp=3ex,leftskip=0.3cm,rightskip=0.3cm]{structure}%
+  \hfill\usebeamerfont{page number in head/foot}%
+  \insertframenumber%
+\end{beamercolorbox}%
+}
+
+\setbeamertemplate{footnote}
+{%
+  \parindent 0em\noindent%
+  \raggedright
+  \usebeamercolor{footnote}\hbox to 0.8em{\hfil\insertfootnotemark}\insertfootnotetext\par%
+}
+
+%}}}
+%{{{ --- Frametitle ------------
+
+% Forces title even if it is empty
+\makeatletter
+\patchcmd{\endbeamer@frameslide}{\ifx\beamer@frametitle\@empty}{\iffalse}{}{\errmessage{failed to patch}}
+\makeatother
+
+% For rmarkdown: Lets you use # to set frametitle. ## must still be used to create the frame, 
+% but any text is used as a subtitle instead of title.
+\setbeamertemplate{frametitle}{
+    \nointerlineskip%
+    \ifx\insertframetitle\empty
+      \ifx\insertsection\empty
+      \else
+    		\frametitle{\insertsection}
+        	\begin{beamercolorbox}[wd=\paperwidth,leftskip=0.3cm,rightskip=0.3cm,ht=2.5ex,dp=1.5ex]{section}
+  			\usebeamerfont{frametitle}\MakeLowercase{\protect\insertframetitle}
+  			\end{beamercolorbox}%
+        \begin{beamercolorbox}[wd=\paperwidth,leftskip=0.3cm,rightskip=0.3cm,ht=1ex,dp=1.5ex]{}
+        \end{beamercolorbox}%
+        \vspace{-0.5em} 
+  		\fi
+    \else
+		\begin{beamercolorbox}[wd=\paperwidth,leftskip=0.3cm,rightskip=0.3cm,ht=2.5ex,dp=1.5ex]{section}
+		  \usebeamerfont{frametitle}\MakeLowercase{\protect\insertsection}%
+		\end{beamercolorbox}%
+		\begin{beamercolorbox}[wd=\paperwidth,leftskip=0.3cm,rightskip=0.3cm,ht=1ex,dp=1.5ex]{frame title}
+		  \usebeamerfont{framesubtitle}\MakeLowercase{\protect\insertframetitle}%
+		\end{beamercolorbox}%
+		\vspace{-0.5em} 
+    \fi
+    \nointerlineskip
+}
+
+%}}}
+%{{{ --- Logo (if in a section) ------------
+\addtobeamertemplate{frametitle}{}{%
+\begin{tikzpicture}[remember picture,overlay]
+\ifx\insertframetitle\empty
+  \else
+		\node[anchor=north east,yshift=-1.7pt] at (current page.north east) {\includegraphics[height=0.5cm, keepaspectratio]{logo}};
+	\fi
+\end{tikzpicture}}
+
+%}}}
+
+\mode
+<all>
+
+% {{{ misc
+\let\otp\titlepage
+\renewcommand{\titlepage}{\otp\addtocounter{framenumber}{-1}}
+\newcommand{\mreducelistspacing}{\vspace{-\topsep}}
+
+\linespread{1.15}
+%}}}
+
+%{{{ --- footnote extra -----------
+\makeatletter
+\newcommand\footnoteextra[1]{%
+  \begingroup
+  \renewcommand\thefootnote{}\footnote{#1}%
+  \addtocounter{footnote}{-1}%
+  \endgroup
+}
+\makeatother
+%}}}
+
+%{{{ --- footnote indent -----------
+\makeatletter
+\renewcommand<>\beamer@framefootnotetext[1]{%
+  \global\setbox\beamer@footins\vbox{%
+    \hsize\framewidth
+    \textwidth\hsize
+    \columnwidth\hsize
+    \unvbox\beamer@footins
+    \reset@font\footnotesize
+    \@parboxrestore
+    \protected@edef\@currentlabel
+         {\csname p@footnote\endcsname\@thefnmark}%
+    \color@begingroup
+      \uncover#2{\@makefntext{%
+        \rule\z@\footnotesep\ignorespaces\parbox[t]{.9\textwidth}{#1\@finalstrut\strutbox}\vskip1sp}}%
+    \color@endgroup}%
+}
+\makeatother
+%}}}

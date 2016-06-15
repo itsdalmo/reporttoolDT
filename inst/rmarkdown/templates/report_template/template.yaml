@@ -1,0 +1,4 @@
+name: report template
+description: >
+  Default template for creating PDF/PPT reports using reporttoolDT. Uses dplyr.
+create_dir: true
