@@ -99,7 +99,7 @@ add_weight <- function(x) {
   if (inherits(x$data, "tbl"))
     out$as_tbl()
 
-  out
+  out$update()
 
 }
 
@@ -128,7 +128,8 @@ add_latent_spread <- function(x) {
   if (inherits(x$data, "tbl"))
     out$as_tbl()
 
-  out
+  out$set_label(list = setNames(stri_c(get_label(x, lats), " (spread)"), lats_spread))
+  out$update()
 
 }
 
@@ -206,6 +207,6 @@ latents_impl <- function(x, type) {
   out$set_config(model = type)
   out$set_label(auto = TRUE)
 
-  out
+  out$update()
 
 }
