@@ -2,7 +2,7 @@ context("Internal functions")
 
 test_that("str_list", {
   expect_error(str_list(1))
-  expect_identical(str_list("A"), "A")
+  expect_identical(str_list("A"), "'A'")
   expect_identical(str_list(c("A", "B")), "'A' and 'B'")
 })
 
