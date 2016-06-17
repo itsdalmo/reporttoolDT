@@ -332,7 +332,8 @@ read_model_output <- function(file, mainentity, inner_weight, outer_weight) {
   out$set_marketshare(list = setNames(as.list(cf$marketshare), cf$entity))
 
   # 4a - Read inner weights ----------------------------------------------------
-  files <- file.path(folders$output, list.files(folders$output))
+  if (inner_weight || outer_weight)
+    files <- file.path(folders$output, list.files(folders$output))
   if (inner_weight) {
     fname <- files[stri_detect(files, regex = "main results.*\\.xlsx$", case_insensitive = TRUE)]
     if (length(fname) != 1L) {
