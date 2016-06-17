@@ -164,6 +164,7 @@ Survey <- R6::R6Class("Survey",
       }
       # Copy labels from attr (returns null if they do not exist.)
       private$.labels <- attr(x, "labels")
+      attr(x, "labels") <- NULL
 
       # Set fields if provided
       if (!is.null(fields))
