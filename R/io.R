@@ -160,7 +160,7 @@ write_model_input <- function(x, file) {
   # 5 - Write measurement model ------------------------------------------------
   model <- split(unname(mm), names(mm))
   model <- lapply(model[default_latents()], function(vars) as.integer(mm %in% vars) * -1L)
-  model <- as.data.frame(c(list(manifest = unname(mm), model)), stringsAsFactors = FALSE)
+  model <- as.data.frame(c(list(Manifest = unname(mm), model)), stringsAsFactors = FALSE)
 
   fname <- file.path(folders$input, "measurement model.txt")
   write.table(model, fname, sep = "\t", row.names = FALSE, quote = FALSE, fileEncoding = "latin1")
