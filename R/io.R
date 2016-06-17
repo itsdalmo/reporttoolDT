@@ -113,6 +113,7 @@ write_survey <- function(x, file) {
 # (recursively calls write_survey to write the .sav file.)
 write_model_input <- function(x, file) {
   x <- survey_dt(x)
+  type <- x$get_config("model")
 
   # 1 - Check config and use it to create a filename ---------------------------
   cfg <- x$get_config(c("name", "segment", "timestamp"))
@@ -120,12 +121,12 @@ write_model_input <- function(x, file) {
   cfg[["timestamp"]] <- format(as.Date(cfg[["timestamp"]], "%Y-%m-%d"), "%Y")
 
   co <- as.numeric(x$get_config("cutoff"))
-  if (is.na(co) || !length(co)) {
+  if (is.null(co) || is.na(co)) {
     warning("Cutoff had not been set. Defaulting to 30%.", call. = FALSE)
     co <- .3; x$set_config(cutoff = .3)
   }
 
-  fname <- stri_c(stri_c(cfg[!is.na(cfg)], collapse = " "), ".sav")
+  fname <- stri_c(stri_c(cfg[!is.na(cfg)], collapse = " "), "EM.sav")
 
   # 2 - Check data -------------------------------------------------------------
   # Make sure mainentity is set and that it is a factor variable
@@ -146,12 +147,15 @@ write_model_input <- function(x, file) {
   vars <- c(unname(mm), me, cr)
 
   # 3 - Create required folders ------------------------------------------------
-  folders <- c("Data", "Input")
+  folders <- if (type != "pls") "Data" else c("Data", "Input")
   folders <- require_folders(file, folders, create = TRUE)
 
   # 4 - Write data -------------------------------------------------------------
   fname <- file.path(folders$data, fname)
   write_survey(x, fname)
+
+  # Return early if not writing PLS input
+  if (type != "pls") invisible(return())
 
   # 5 - Write measurement model ------------------------------------------------
   model <- split(unname(mm), names(mm))
@@ -284,7 +288,10 @@ read_survey <- function(file, mainentity = "q1", inner_weight = FALSE, outer_wei
 read_model_output <- function(file, mainentity, inner_weight, outer_weight) {
   # Match required folders (case_insensitive.)
   folders <- c("Data", "Input", "Output")
-  folders <- require_folders(file, folders, create = FALSE)
+  folders <- require_folders(file, folders, optional = "Output", create = FALSE)
+
+  if (!"output" %in% names(folders) && (inner_weight || outer_weight))
+    stop("'Output' folder is required to read inner and/or outer weights.", call. = FALSE)
 
   # 1 - Read the .sav file -----------------------------------------------------
   files <- file.path(folders$data, list.files(folders$data))
@@ -382,13 +389,15 @@ read_model_output <- function(file, mainentity, inner_weight, outer_weight) {
 
 # Match contents from a path to a list of required folders (case insensitive)
 # (Returns a named list with paths to the folders. Optionally creates missing folders.)
-require_folders <- function(path, folders, create = FALSE) {
+require_folders <- function(path, folders, optional = NULL, create = FALSE) {
   if (missing(folders) || !is.character(folders))
     stop("Argument 'folders' should be a character vector.")
 
-  # Check/create required folders (error if create = FALSE)
+  # Check/create required folders
+  # (Files that are not optional will error if create != TRUE)
   existing <- list.files(path)
   missing <- folders[!tolower(folders) %in% tolower(existing)]
+  missing <- missing[!tolower(missing) %in% tolower(optional)]
   if (length(missing)) {
     if (!create) stop("Required folders do not exist:\n", str_list(missing), call. = FALSE)
     for (folder in missing) {
