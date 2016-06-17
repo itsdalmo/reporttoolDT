@@ -37,7 +37,7 @@ add_contrast <- function(x, ...) {
   }
 
   out[[me]] <- factor(out[[me]], levels = levs)
-  out
+  out$update()
 
 }
 
@@ -89,8 +89,9 @@ add_weight <- function(x) {
     data.table::set(out$data, rows, wt, ents$wt[i])
   }
 
-  # Set association
+  # Set association and label
   out$set_association(weight = wt)
+  out$set_label(list = setNames(list("weight"), wt))
 
   # Coerce back to input format.
   if (!data.table::is.data.table(x$data))
@@ -178,7 +179,7 @@ latents_impl <- function(x, type) {
   out[, `:=`(em, lapply(.SD, clean_scale)), .SDcols = vars, with = FALSE]
   out[, `:=`(em, lapply(.SD, rescale_100)), .SDcols = em, with = FALSE]
   out[, percent_missing := rowMeans(is.na(.SD)), .SDcols = em]
-  out[, coderesp := 1:.N]
+  out[, coderesp := as.numeric(1:.N)]
 
   if (type == "pls") {
     out[, em := NULL, with = FALSE]
@@ -200,9 +201,10 @@ latents_impl <- function(x, type) {
   if (inherits(x$data, "tbl"))
     out$as_tbl()
 
-  # Set associations, update labels and return.
+  # Set type in config, associations, update labels and return.
   out$set_association(percent_missing = "percent_missing")
-  if (type == "mean") out$set_label(auto = TRUE)
+  out$set_config(model = type)
+  out$set_label(auto = TRUE)
 
   out
 
