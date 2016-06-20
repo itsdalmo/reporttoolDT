@@ -214,11 +214,12 @@ internal_defaults <- list(
   theme = list(
     beamer = list(
       dir = "rmd/beamer",
-      files = c("beamercolorthememetropolis.sty",
+      files = c("beamer_preamble.tex",
+                "beamer_template.tex",
+                "beamercolorthememetropolis.sty",
                 "beamerfontthememetropolis.sty",
-                "beamerinnerthememetropolis.sty",
-                "beamerouterthememetropolis.sty",
-                "beamerthememetropolis.sty"))),
+                "beamerthemem.sty",
+                "logo.eps"))),
 
   # List (nested) of regex patterns used internally.
   pat_rmd = list(
