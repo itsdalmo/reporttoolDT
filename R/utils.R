@@ -1,8 +1,3 @@
-# Capture dots. Primarily used to pass calls to R6 methods ---------------------
-capture_dots <- function(...) {
-  eval(substitute(alist(...)))
-}
-
 # Check which OS we are on -----------------------------------------------------
 on_windows <- function() {
   Sys.info()["sysname"] == "Windows"

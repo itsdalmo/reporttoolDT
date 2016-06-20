@@ -35,31 +35,3 @@ test_that("basename_sans_ext", {
 test_that("%||%", {
   expect_identical(NULL %||% "test", "test")
 })
-
-# Scoping issues ---------------------------------------------------------------
-org <- data.frame("Q1" = c("Example 1", "Example 2"), "Score" = c(9, 8), stringsAsFactors = FALSE)
-
-test_that("capture_dots can be used inside functions", {
-  df <- survey_df(org)$set_association(mainentity = "Q1")
-  variable <- "Score"
-  f <- function(x) {
-    env <- list2env(list(srv = x, parent = environment()))
-    variable <- "Q1"
-    x[[variable]]
-  }
-  expect_identical(f(df$data), f(df))
-
-})
-
-test_that("capture_dots uses regular scoping", {
-  df <- survey_df(org)$set_association(mainentity = "Q1")
-  f <- function(x) {
-    variable <- "Q1"
-    x[[variable]]
-  }
-  f2 <- function(x) {
-    f(x)
-  }
-  expect_identical(f2(df$data), f2(df))
-
-})
