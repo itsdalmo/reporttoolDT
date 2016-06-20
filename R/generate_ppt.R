@@ -1,8 +1,20 @@
+render_ppt <- function(input, output = NULL, encoding = "UTF-8", env = parent.frame(), ...) {
+  rmarkdown::render(
+    input = input,
+    output_format = beamer_template(...),
+    output_dir = output,
+    clean = TRUE,
+    envir = env,
+    quiet = FALSE,
+    encoding = encoding
+  )
+}
+
 #' Generate PPT from rmarkdown.
 #'
 #' This function takes a rmarkdown file as input and generates a powerpoint as
 #' ouput, using \pkg{ReporteRs}. It is a dumbed down version of \pkg{knitr}, similar
-#' to \code{\link{generate_pdf}} (where \code{#} is a section and \code{##} is a
+#' to \code{\link{render_pdf}} (where \code{#} is a section and \code{##} is a
 #' new slide).
 #'
 #' @param rmd The \code{Rmarkdown} code to convert.
