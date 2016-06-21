@@ -76,6 +76,7 @@ eval_block.markdown <- function(blk, env, yaml = inherits(blk, "yaml")) {
 
   # Return NULL if all lines are empty.
   if (all(lines == "")) return()
+  lines <- lines[lines != ""]
 
   if (!yaml) {
     split_markdown(lines)
