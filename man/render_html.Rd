@@ -22,6 +22,8 @@ html_template(toc = TRUE, keep_md = FALSE)
 \item{...}{Further arguments passed to \code{\link{html_template}}.}
 
 \item{toc}{Include a table of contents.}
+
+\item{keep_md}{Keep intermediary \code{.md} files when generating HTML.}
 }
 \description{
 This function is a wrapper for \code{\link[rmarkdown]{render}} with HTML output.

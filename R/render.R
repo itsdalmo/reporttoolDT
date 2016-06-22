@@ -3,6 +3,7 @@
 #' This function is a wrapper for \code{\link[rmarkdown]{render}} with HTML output.
 #'
 #' @inheritParams render_pdf
+#' @param keep_md Keep intermediary \code{.md} files when generating HTML.
 #' @param ... Further arguments passed to \code{\link{html_template}}.
 #' @author Kristian D. Olsen
 #' @export
@@ -34,7 +35,6 @@ render_html <- function(input, output = NULL, env = parent.frame(), encoding = "
 #' @inheritParams render_pdf
 #' @param template Optional powerpoint template to use for when rendering.
 #' @param ... Unused.
-#' @param keep_md Keep intermediary .md files (for debugging).
 #' @author Kristian D. Olsen
 #' @export
 #' @examples

@@ -18,8 +18,6 @@
 #' \item Read or write an existing survey using \code{\link{read_survey}} and \code{\link{write_survey}}.
 #' \item Adjust and create fleixbile but consistent output from a Survey, using
 #' \code{\link{set_label}}, \code{\link{set_association}} and \code{\link{set_translation}}.
-#' \item Generate reports in PDF or Powerpoint formats using your own, or the included template,
-#' with \code{\link{generate_pdf}} and \code{\link{generate_ppt}}.
 #' }
 #'
 #' @section Create standardized tables and plots:
@@ -30,6 +28,14 @@
 #' as well as \code{\link{latent_table}} and \code{\link{latent_plot}}.
 #' \item \code{\link{impact_table}} and \code{\link{flow_chart}} can be used
 #' when the Survey includes PLS-weights.
+#' }
+#'
+#' @section Generate reports:
+#' \itemize{
+#' Render rmarkdown to PDF (beamer), HTML or Powerpoint using \code{\link{render_pdf}},
+#' \code{\link{render_html}} and \code{\link{render_ppt}}.
+#' Generate reports from rmarkdown using \code{\link{generate_report}} with type
+#' \code{pdf}, \code{html} or \code{ppt}.
 #' }
 #'
 #' @author Kristian D. Olsen

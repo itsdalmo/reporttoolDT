@@ -19,8 +19,6 @@ render_ppt(input, output = NULL, env = parent.frame(), encoding = "UTF-8",
 \item{template}{Optional powerpoint template to use for when rendering.}
 
 \item{...}{Unused.}
-
-\item{keep_md}{Keep intermediary .md files (for debugging).}
 }
 \description{
 This function takes a rmarkdown file as input and generates a powerpoint as
