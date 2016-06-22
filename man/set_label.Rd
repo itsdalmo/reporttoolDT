@@ -8,18 +8,18 @@
 \alias{set_translation}
 \title{Set a private field for a Survey object.}
 \usage{
-set_label(.data, ..., .list = NULL, .auto = FALSE)
+set_label(.srv, ..., .list = NULL, .auto = FALSE)
 
-set_association(.data, ..., .list = NULL, .common = FALSE)
+set_association(.srv, ..., .list = NULL, .common = FALSE)
 
-set_marketshare(.data, ..., .list = NULL)
+set_marketshare(.srv, ..., .list = NULL)
 
-set_config(.data, ..., .list = NULL)
+set_config(.srv, ..., .list = NULL)
 
-set_translation(.data, ..., .list = NULL, .language = NULL)
+set_translation(.srv, ..., .list = NULL, .language = NULL)
 }
 \arguments{
-\item{.data}{A \code{Survey} object.}
+\item{.srv}{A \code{Survey} object.}
 
 \item{...}{Named arguments of the format \code{name = value}, with the exception
 of \code{set_association} which uses \code{value = name}.}

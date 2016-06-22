@@ -3,7 +3,7 @@
 #' The listed functions provide a familiar interface to the hidden fields of
 #' a \code{Survey} object. Each returns a named vector with the corresponding values.
 #'
-#' @param .data A \code{Survey} object.
+#' @param .srv A \code{Survey} object.
 #' @param which If this is specified, the function only returns the elements
 #' which match the criteria. This should be a character vector.
 #' @param invert For \code{get_association} the default output is returned with
@@ -25,44 +25,44 @@
 #' # Should be equivalent
 #' all.equal(x, y)
 
-get_label <- function(.data, which = NULL) {
-  stopifnot(is.survey(.data))
-  .data$get_label(which)
+get_label <- function(.srv, which = NULL) {
+  stopifnot(is.survey(.srv))
+  .srv$get_label(which)
 }
 
 #' @rdname get_label
 #' @export
-get_association <- function(.data, which = NULL, invert = TRUE) {
-  stopifnot(is.survey(.data))
-  .data$get_association(which, invert = invert)
+get_association <- function(.srv, which = NULL, invert = TRUE) {
+  stopifnot(is.survey(.srv))
+  .srv$get_association(which, invert = invert)
 }
 
 #' @rdname get_label
 #' @export
-get_marketshare <- function(.data, which = NULL) {
-  stopifnot(is.survey(.data))
-  .data$get_marketshare(which)
+get_marketshare <- function(.srv, which = NULL) {
+  stopifnot(is.survey(.srv))
+  .srv$get_marketshare(which)
 }
 
 #' @rdname get_label
 #' @export
-get_config <- function(.data, which = NULL) {
-  stopifnot(is.survey(.data))
-  .data$get_config(which)
+get_config <- function(.srv, which = NULL) {
+  stopifnot(is.survey(.srv))
+  .srv$get_config(which)
 }
 
 #' @rdname get_label
 #' @export
-get_translation <- function(.data, which = NULL) {
-  stopifnot(is.survey(.data))
-  .data$get_translation(which)
+get_translation <- function(.srv, which = NULL) {
+  stopifnot(is.survey(.srv))
+  .srv$get_translation(which)
 }
 
 #' @rdname get_label
 #' @export
-get_data <- function(.data) {
-  stopifnot(is.survey(.data))
-  .data$get_data()
+get_data <- function(.srv) {
+  stopifnot(is.survey(.srv))
+  .srv$get_data()
 }
 
 #' Set a private field for a Survey object.
@@ -70,7 +70,7 @@ get_data <- function(.data) {
 #' Like the \code{get_} functions with the same name, these functions provide a
 #' familiar interface to set the hidden fields of a \code{Survey} object.
 #'
-#' @param .data A \code{Survey} object.
+#' @param .srv A \code{Survey} object.
 #' @param ... Named arguments of the format \code{name = value}, with the exception
 #' of \code{set_association} which uses \code{value = name}.
 #' @param .list Optional: A \code{list} (or named character vector) the same format as
@@ -98,45 +98,45 @@ get_data <- function(.data) {
 #' # Should be equivalent
 #' all.equal(x, y)
 
-set_label <- function(.data, ..., .list = NULL, .auto = FALSE) {
-  if (!is.survey(.data))
-    stop("set_label: argument '.data' must be of class 'Survey'.", call. = FALSE)
-  res <- .data$clone(deep = TRUE)$set_label(..., .list = .list, .auto = .auto)
+set_label <- function(.srv, ..., .list = NULL, .auto = FALSE) {
+  if (!is.survey(.srv))
+    stop("set_label: argument '.srv' must be of class 'Survey'.", call. = FALSE)
+  res <- .srv$clone(deep = TRUE)$set_label(..., .list = .list, .auto = .auto)
   res
 }
 
 #' @rdname set_label
 #' @export
-set_association <- function(.data, ..., .list = NULL, .common = FALSE) {
-  if (!is.survey(.data))
-    stop("set_association: argument '.data' must be of class 'Survey'.", call. = FALSE)
-  res <- .data$clone(deep = TRUE)$set_association(..., .list = .list, .common = .common)
+set_association <- function(.srv, ..., .list = NULL, .common = FALSE) {
+  if (!is.survey(.srv))
+    stop("set_association: argument '.srv' must be of class 'Survey'.", call. = FALSE)
+  res <- .srv$clone(deep = TRUE)$set_association(..., .list = .list, .common = .common)
   res
 }
 
 #' @rdname set_label
 #' @export
-set_marketshare <- function(.data, ..., .list = NULL) {
-  if (!is.survey(.data))
-    stop("set_marketshare: argument '.data' must be of class 'Survey'.", call. = FALSE)
-  res <- .data$clone(deep = TRUE)$set_marketshare(..., .list = .list)
+set_marketshare <- function(.srv, ..., .list = NULL) {
+  if (!is.survey(.srv))
+    stop("set_marketshare: argument '.srv' must be of class 'Survey'.", call. = FALSE)
+  res <- .srv$clone(deep = TRUE)$set_marketshare(..., .list = .list)
   res
 }
 
 #' @rdname set_label
 #' @export
-set_config <- function(.data, ..., .list = NULL) {
-  if (!is.survey(.data))
-    stop("set_config: argument '.data' must be of class 'Survey'.", call. = FALSE)
-  res <- .data$clone(deep = TRUE)$set_config(..., .list = .list)
+set_config <- function(.srv, ..., .list = NULL) {
+  if (!is.survey(.srv))
+    stop("set_config: argument '.srv' must be of class 'Survey'.", call. = FALSE)
+  res <- .srv$clone(deep = TRUE)$set_config(..., .list = .list)
   res
 }
 
 #' @rdname set_label
 #' @export
-set_translation <- function(.data, ..., .list = NULL, .language = NULL) {
-  if (!is.survey(.data))
-    stop("set_translation: argument '.data' must be of class 'Survey'.", call. = FALSE)
-  res <- .data$clone(deep = TRUE)$set_translation(..., .list = .list, .language = .language)
+set_translation <- function(.srv, ..., .list = NULL, .language = NULL) {
+  if (!is.survey(.srv))
+    stop("set_translation: argument '.srv' must be of class 'Survey'.", call. = FALSE)
+  res <- .srv$clone(deep = TRUE)$set_translation(..., .list = .list, .language = .language)
   res
 }
