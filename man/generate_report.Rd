@@ -4,11 +4,22 @@
 \alias{generate_report}
 \title{Render .Rmd to HTML}
 \usage{
-generate_report(x, rmd = NULL, entity = NULL, type = c("pdf", "ppt",
-  "html"), path = NULL, ...)
+generate_report(x, input = NULL, group = NULL, output = NULL,
+  type = c("pdf", "ppt", "html"), ...)
 }
 \arguments{
-\item{...}{Further arguments passed to \code{\link{html_template}}.}
+\item{x}{An object to pass to the knitr environment when processing.}
+
+\item{input}{Path to a \code{.Rmd} report template.}
+
+\item{group}{A variable to "group" the reports by. Each entity will get their
+own report.}
+
+\item{output}{Optional directory to use for output files.}
+
+\item{type}{What format should the output be in. PDF, PPT or HTML.}
+
+\item{...}{Further arguments passed to the render functions.}
 }
 \description{
 This function is a wrapper for \code{\link[rmarkdown]{render}} with HTML output.
