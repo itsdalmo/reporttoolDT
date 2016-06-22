@@ -316,7 +316,7 @@ read_model_output <- function(file, mainentity, inner_weight, outer_weight) {
   mm <- lapply(mm[-1], function(x, vars) {vars[x == -1]}, mm[[1]])
 
   # Set associations specified in measurement model (mainentity is set in read_survey.).
-  out$set_association(list = mm)
+  out$set_association(.list = mm)
 
   # 3 - Read config ------------------------------------------------------------
   fname <- files[stri_detect(files, regex = "config.*\\.txt", case_insensitive = TRUE)]
@@ -329,7 +329,7 @@ read_model_output <- function(file, mainentity, inner_weight, outer_weight) {
   names(cf) <- c("row", "entity", "valid", "marketshare")
 
   # Set marketshare based on config
-  out$set_marketshare(list = setNames(as.list(cf$marketshare), cf$entity))
+  out$set_marketshare(.list = setNames(as.list(cf$marketshare), cf$entity))
 
   # 4a - Read inner weights ----------------------------------------------------
   if (inner_weight || outer_weight)
