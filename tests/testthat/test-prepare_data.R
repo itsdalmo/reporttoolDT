@@ -3,10 +3,10 @@ context("Prepare data (mean/pls-latents)")
 sav <- seamless::read_data(system.file("extdata", "raw_data.sav", package = "reporttoolDT"))
 
 srv <- survey(sav)
-srv <- set_association(srv, common = TRUE)
+srv <- set_association(srv, .common = TRUE)
 srv <- set_config(srv, name = "Example", segment = "B2C", cutoff = .3)
 srv <- set_marketshare(srv, CompanyA = .3, CompanyB = .5, CompanyC = .2)
-srv <- set_translation(srv, language = "english")
+srv <- set_translation(srv, .language = "english")
 
 test_that("latents_mean", {
   x <- latents_mean(srv)

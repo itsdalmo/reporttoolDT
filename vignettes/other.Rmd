@@ -19,10 +19,10 @@ require(reporttoolDT)
 
 sav <- read_data(system.file("extdata", "raw_data.sav", package = "reporttoolDT"))
 srv <- survey_tbl(sav) %>%
-  set_association(common = TRUE) %>%
+  set_association(.common = TRUE) %>%
   set_config(name = "Example", segment = "B2C", cutoff = .3) %>%
   set_marketshare(CompanyA = .3, CompanyB = .5, CompanyC = .2) %>%
-  set_translation(language = "english") %>%
+  set_translation(.language = "english") %>%
   latents_mean() 
 ```
 

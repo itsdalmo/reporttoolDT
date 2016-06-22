@@ -1,7 +1,7 @@
 context("Survey tables")
 
 sav <- seamless::read_data(system.file("extdata", "raw_data.sav", package = "reporttoolDT"))
-srv <- survey_tbl(sav)$set_association(common = TRUE)
+srv <- survey_tbl(sav)$set_association(.common = TRUE)
 
 # Merge attributes -------------------------------------------------------------
 test_that("qtable_ method for survey", {

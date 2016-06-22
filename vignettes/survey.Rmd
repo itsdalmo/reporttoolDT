@@ -156,7 +156,7 @@ dt$set_label(q16 = "Ideal")
 dt <- set_label(dt, q6 = "Vs expectations")
 
 # To set several labels, use the list argument.
-dt <- set_label(dt, list = list(q1 = "This is the mainentity", q3 = "Overall"))
+dt <- set_label(dt, .list = list(q1 = "This is the mainentity", q3 = "Overall"))
 ```
 
 This is more or less the pattern used to *get* or *set* all hidden fields in 
@@ -208,10 +208,10 @@ dt_subset <- set_association(dt_subset, epsi = "example1")
 model(dt_subset)
 ```
 
-You can also use `common = TRUE` to guess associations based on variable names:
+You can also use `.common = TRUE` to guess associations based on variable names:
 
 ```{r}
-dt <- set_association(dt, common = TRUE)
+dt <- set_association(dt, .common = TRUE)
 # Call model(dt) to see which variables have been identified.
 get_association(dt, "mainentity")
 ```

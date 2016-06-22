@@ -56,7 +56,7 @@ If we wanted to change the label for several variables, we could also supply a l
 
 ```{r}
 new_labels <- list(q10 = "Loyal 1", q15b = "Loyal 2")
-srv <- set_label(srv, list = new_labels)
+srv <- set_label(srv, .list = new_labels)
 # Same result as above.
 ```
 
@@ -72,7 +72,7 @@ model(srv)
 As you can see from the output, **q4a** and **q4b** have a star next to them which indicates that the variables have an association. `set_association()` can also look for common latent associations, based on the name of the variables:
 
 ```{r}
-srv <- set_association(srv, common = TRUE)
+srv <- set_association(srv, .common = TRUE)
 # Run model(srv) to see the result
 ```
 
@@ -111,11 +111,11 @@ srv_mean <- latents_mean(srv)
 # model(srv_mean)
 ```
 
-After running `latents_mean()` we see that the labels are empty. To fix this we could have `set_translation()` before adding the latents, or `set_translation()` and use the `auto` argument for `set_label()`:
+After running `latents_mean()` we see that the labels are empty. To fix this we could have `set_translation()` before adding the latents, or `set_translation()` and use the `.auto` argument for `set_label()`:
 
 ```{r}
-srv_mean <- set_translation(srv_mean, language = "english")
-srv_mean <- set_label(srv_mean, auto = TRUE)
+srv_mean <- set_translation(srv_mean, .language = "english")
+srv_mean <- set_label(srv_mean, .auto = TRUE)
 tail(model(srv_mean))
 ```
 

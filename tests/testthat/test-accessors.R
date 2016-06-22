@@ -7,11 +7,11 @@ test_that("merge_attributes", {
 
   default <- c("a", "b", "c", "d")
   lst <- c("a" = 1, list(c("b" = 2), "d" = 4))
-  res <- merge_vectors(lst, default = default)
+  res <- merge_vectors(lst, .default = default)
   expect_identical(res, c("a" = 1, "b" = 2, "c" = NA, "d" = 4))
 
   lst[[2]] <- c(lst[[2]], "a" = "test")
-  res <- merge_vectors(lst, default = default) # Mode ends up being character.
+  res <- merge_vectors(lst, .default = default) # Mode ends up being character.
   expect_identical(res, c("a" = "1", "b" = "2", "c" = NA, "d" = "4"))
 
   expect_error(merge_vectors("a", lst = 1))
@@ -85,12 +85,12 @@ test_that("setting/getting config works", {
 test_that("setting/getting translation works", {
   df <- set_translation(survey_df(org))
   expect_identical(unname(get_translation(df)), rep(NA, length(get_default("translation")$required)))
-  df <- set_translation(survey_df(org), language = "norwegian")
+  df <- set_translation(survey_df(org), .language = "norwegian")
   expect_identical(get_translation(df, "epsi"), setNames("Kundetilfredshet", "epsi"))
 })
 
 # Common associations ----------------------------------------------------------
 test_that("setting common associations work", {
-  df <- set_association(survey_df(org), common = TRUE)
+  df <- set_association(survey_df(org), .common = TRUE)
   expect_identical(get_association(df, "mainentity"), setNames("Q1", "mainentity"))
 })

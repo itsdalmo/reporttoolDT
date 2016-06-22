@@ -91,7 +91,7 @@ add_weight <- function(x) {
 
   # Set association and label
   out$set_association(weight = wt)
-  out$set_label(list = setNames(list("weight"), wt))
+  out$set_label(.list = setNames(list("weight"), wt))
 
   # Coerce back to input format.
   if (!data.table::is.data.table(x$data))
@@ -128,7 +128,7 @@ add_latent_spread <- function(x) {
   if (inherits(x$data, "tbl"))
     out$as_tbl()
 
-  out$set_label(list = setNames(stri_c(get_label(x, lats), " (spread)"), lats_spread))
+  out$set_label(.list = setNames(stri_c(get_label(x, lats), " (spread)"), lats_spread))
   out$update()
 
 }
@@ -188,9 +188,9 @@ latents_impl <- function(x, type) {
     for (lat in default_latents()) {
       lat_var <- em[names(vars) == lat]
       if (length(lat_var)) {
-        out[percent_missing <= cutoff,
-          lat := rowMeans(.SD, na.rm = TRUE),
-          .SDcols = lat_var, with = FALSE]
+        out[percent_missing <= cutoff,  lat := rowMeans(.SD, na.rm = TRUE),  .SDcols = lat_var, with = FALSE]
+        # out[is.nan(out[[lat]]), lat := NA, with = FALSE]
+        # data.table::set(out$data, i = is.nan(out$data[[lat]]), j = lat, value = NA)
       }
 
     }
@@ -205,7 +205,7 @@ latents_impl <- function(x, type) {
   # Set type in config, associations, update labels and return.
   out$set_association(percent_missing = "percent_missing")
   out$set_config(model = type)
-  out$set_label(auto = TRUE)
+  out$set_label(.auto = TRUE)
 
   out$update()
 

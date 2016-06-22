@@ -180,8 +180,8 @@ Survey <- R6::R6Class("Survey",
       if (!is.null(renamed)) {
         self$update_field_names(renamed)
       }
-      self$set_association()
-      self$set_label()
+      self$set_association(.check = FALSE)
+      self$set_label(.check = FALSE)
       self
     },
 
@@ -225,10 +225,10 @@ Survey <- R6::R6Class("Survey",
       fields
     },
 
-    set_label = function(..., list = NULL, auto = FALSE) {
+    set_label = function(..., .list = NULL, .auto = FALSE, .check = TRUE) {
       "Set labels."
-      em <- if (auto) auto_label(self$get_field()) else NULL
-      new <- merge_vectors(..., list, em, private$.labels, default = self$names())
+      em <- if (.auto) auto_label(self$get_field()) else NULL
+      new <- merge_vectors(..., .list, em, private$.labels, .default = self$names(), .check = .check)
       private$.labels <- new
       invisible(self)
     },
@@ -243,9 +243,9 @@ Survey <- R6::R6Class("Survey",
       res
     },
 
-    set_association = function(..., list = NULL, common = FALSE) {
+    set_association = function(..., .list = NULL, .common = FALSE, .check = TRUE) {
       "Set associations."
-      new <- c(list(...), list)
+      new <- c(list(...), .list)
       old <- private$.associations
       def <- self$names()
 
@@ -256,13 +256,13 @@ Survey <- R6::R6Class("Survey",
       new[new == "none"] <- NA
 
       # Optionally: Set common latents in defaults.
-      if (common) {
+      if (.common) {
         com <- setNames(common_latents(def), def)
       } else {
         com <- NULL
       }
 
-      private$.associations <- merge_vectors(new, com, old, default = def)
+      private$.associations <- merge_vectors(new, com, old, .default = def, .check = .check)
       invisible(self)
     },
 
@@ -280,7 +280,7 @@ Survey <- R6::R6Class("Survey",
       res
     },
 
-    set_marketshare = function(..., list = NULL) {
+    set_marketshare = function(..., .list = NULL) {
       "Set marketshares."
       ent <- self$get_association("mainentity")
       if (is.null(ent)) {
@@ -292,7 +292,7 @@ Survey <- R6::R6Class("Survey",
         ent <- if (is.factor(ent)) levels(ent) else unique(ent)
       }
 
-      new <- merge_vectors(..., list, private$.marketshares, default = ent)
+      new <- merge_vectors(..., .list, private$.marketshares, .default = ent)
       private$.marketshares <- new
       invisible(self)
     },
@@ -307,11 +307,11 @@ Survey <- R6::R6Class("Survey",
       res
     },
 
-    set_config = function(..., list = NULL) {
+    set_config = function(..., .list = NULL) {
       "Set config."
       def <- get_default("config")
       def <- setNames(def$value, def$required)
-      new <- merge_vectors(..., list, private$.config, default = def)
+      new <- merge_vectors(..., .list, private$.config, .default = def)
       private$.config <- new
       invisible(self)
     },
@@ -326,20 +326,20 @@ Survey <- R6::R6Class("Survey",
       res
     },
 
-    set_translation = function(..., list = NULL, language = NULL) {
+    set_translation = function(..., .list = NULL, .language = NULL) {
       "Set translation."
       def <- get_default("translation")
 
       # Get language from internal_defaults (partial match/case insensitive)
-      if (!is.null(language)) {
-        found <- stri_detect(names(def), fixed = language, ignore_case = TRUE)
+      if (!is.null(.language)) {
+        found <- stri_detect(names(def), fixed = .language, ignore_case = TRUE)
         if (!any(found)) stop("The specified language was not found.")
         lang <- setNames(def[[which(found)]], def$required)
       } else {
         lang <- NULL
       }
 
-      new <- merge_vectors(..., list, lang, private$.translations, default = def$required)
+      new <- merge_vectors(..., .list, lang, private$.translations, .default = def$required)
       private$.translations <- new
       invisible(self)
     },

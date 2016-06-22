@@ -3,7 +3,7 @@ context("Regular dplyr verbs for Survey")
 sav <- seamless::read_data(system.file("extdata", "raw_data.sav", package = "reporttoolDT"))
 srv <- survey_tbl(sav)
 srv <- set_config(srv, cutoff = .3)
-srv <- set_association(srv, common = TRUE)
+srv <- set_association(srv, .common = TRUE)
 srv <- latents_mean(srv)
 
 # Simple tests just to see that the code runs without errors.

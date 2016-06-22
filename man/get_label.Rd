@@ -9,20 +9,20 @@
 \alias{get_translation}
 \title{Get a private field from a Survey object.}
 \usage{
-get_label(x, which = NULL)
+get_label(.data, which = NULL)
 
-get_association(x, which = NULL, invert = TRUE)
+get_association(.data, which = NULL, invert = TRUE)
 
-get_marketshare(x, which = NULL)
+get_marketshare(.data, which = NULL)
 
-get_config(x, which = NULL)
+get_config(.data, which = NULL)
 
-get_translation(x, which = NULL)
+get_translation(.data, which = NULL)
 
-get_data(x)
+get_data(.data)
 }
 \arguments{
-\item{x}{A \code{Survey} object.}
+\item{.data}{A \code{Survey} object.}
 
 \item{which}{If this is specified, the function only returns the elements
 which match the criteria. This should be a character vector.}
