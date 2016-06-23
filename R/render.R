@@ -14,6 +14,10 @@
 #' }
 
 render_html <- function(input, output = NULL, env = parent.frame(), encoding = "UTF-8", ...) {
+  if (!requireNamespace("knitr", quietly = TRUE))
+    stop("'knitr' is required for generating PDF's.", quietly = TRUE)
+  if (!requireNamespace("rmarkdown", quietly = TRUE))
+    stop("'rmarkdown' is required for generating PDF's.", quietly = TRUE)
   rmarkdown::render(
     input = clean_path(input),
     output_format = html_template(...),
@@ -44,6 +48,8 @@ render_html <- function(input, output = NULL, env = parent.frame(), encoding = "
 #' }
 
 render_ppt <- function(input, output = NULL, env = parent.frame(), encoding = "UTF-8", template = NULL, ...) {
+  if (!requireNamespace("ReporteRs", quietly = TRUE))
+    stop("'ReporteRs' is required for generating PPT's.", quietly = TRUE)
   input <- clean_path(input)
   rmd <- readLines(input, encoding = encoding)
 
@@ -114,6 +120,10 @@ render_ppt <- function(input, output = NULL, env = parent.frame(), encoding = "U
 #' }
 
 render_pdf <- function(input, output = NULL, env = parent.frame(), encoding = "UTF-8", keep_sty = FALSE, ...) {
+  if (!requireNamespace("knitr", quietly = TRUE))
+    stop("'knitr' is required for generating PDF's.", quietly = TRUE)
+  if (!requireNamespace("rmarkdown", quietly = TRUE))
+    stop("'rmarkdown' is required for generating PDF's.", quietly = TRUE)
   input <- clean_path(input)
   path <- dirname(input)
 

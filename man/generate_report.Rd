@@ -2,10 +2,22 @@
 % Please edit documentation in R/report.R
 \name{generate_report}
 \alias{generate_report}
+\alias{report_html}
+\alias{report_pdf}
+\alias{report_ppt}
 \title{Render .Rmd to HTML}
 \usage{
 generate_report(x, input = NULL, group = NULL, output = NULL,
-  type = c("pdf", "ppt", "html"), ...)
+  type = c("pdf", "ppt", "html"), encoding = "UTF-8", ...)
+
+report_pdf(x, input = NULL, group = NULL, output = NULL,
+  encoding = "UTF-8", ...)
+
+report_ppt(x, input = NULL, group = NULL, output = NULL,
+  encoding = "UTF-8", ...)
+
+report_html(x, input = NULL, group = NULL, output = NULL,
+  encoding = "UTF-8", ...)
 }
 \arguments{
 \item{x}{An object to pass to the knitr environment when processing.}
@@ -19,6 +31,8 @@ own report.}
 
 \item{type}{What format should the output be in. PDF, PPT or HTML.}
 
+\item{encoding}{Encoding of the input file.}
+
 \item{...}{Further arguments passed to the render functions.}
 }
 \description{
@@ -27,7 +41,7 @@ This function is a wrapper for \code{\link[rmarkdown]{render}} with HTML output.
 \examples{
 \dontrun{
   # TODO
-  render_html("example.Rmd")
+  generate_report(input = "example.Rmd")
 }
 }
 \author{
