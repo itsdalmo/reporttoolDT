@@ -16,15 +16,33 @@ library(tidyr)
 library(stringi)
 library(reporttoolDT)
 
-# Check input
-if (!exists("data") || !is.survey(data)) {
+# Check input ------------------------------------------------------------------
+if (!exists("srv") || !is.survey(srv)) {
   stop("This template is meant to be used with a Survey.", call. = FALSE)
-} else {
-  srv <- data$clone(deep = TRUE)
 }
 
-# Get entity name and case-insensitive latent names ---------------------------
-mainentity <- unname(get_association(srv, "mainentity"))
+if (!exists("mainentity")) {
+  stop("This template requires a 'mainentity' or group passed to generate_report().", call. = FALSE)
+}
+
+if (!exists("entity")) {
+  stop("Could not find 'entity' variable. Are you using generate_report or report_?", call. = FALSE)
+}
+
+# Optional slides --------------------------------------------------------------
+if (exists("historic")) {
+  if (!mainentity %in% names(historical)) {
+    stop("Could not find '", mainentity, "' (group) in 'historic' data.", call. = FALSE)
+  }
+  historical <- entity %in% historic[[mainentity]]
+} else {
+  historical <- FALSE
+}
+
+flowchart <- !is.null(srv$get_inner_weight(entity))
+impacttab <- !is.null(srv$get_outer_weight(entity))
+
+# Get case-insensitive latent names ---------------------------
 latents <- names(srv)[stri_trans_tolower(names(srv)) %in% default_latents()]
 
 # Workbook (create and add open answers etc if needed) -------------------------
@@ -36,7 +54,6 @@ excel_only <- FALSE
 ## Gjennomføring
 
 - Målgruppen for denne undersøkelsen er foreldre med barn i `r entity`.
-- Svarene er avgitt på web (Research.net[^1]) i perioden xx til yy.
 - Respondentene (de som er invitert til å delta) kan motta inntil 3 e-poster - hvorav den første er en standard utsendelse, samt 2 påminnelser til de som ikke svarte på den første utsendelsen og evt. den første påminnelsen.
 - Totalt antall gyldige svar som ligger til grunn for denne rapporten: xx.
 - Det er hentet inn svar på xx spørsmål som bygger opp under hovedanalysen. I tillegg til dette så har det vært stilt bakgrunnsspørsmål som bidrar med ytterligere innsikt i forhold til kundeopplevelsen. 
@@ -80,104 +97,12 @@ excel_only <- FALSE
 
 - **NB:** I spørsmålsteksten er {XX} benyttet som en plassholder. Da foreldrene svarte på undersøkelsen ble dette feltet byttet ut med navnet på barnehagen (altså `r entity`).
 
-# Kundeprofil for `r entity`
-
 ```{r}
 srv %>% latent_plot(groups = mainentity)
 ```
 
-```{r, eval = subentity}
-# Title and subtitle -----------------------------------------------------------
-cat("#", "Kundeprofil per", get_translation(srv, "subentity"), "\n", sep = " ")
-cat("##", "","\n", sep=" ")
-
-# Use survey_table to collect the data
-pd <- srv %>%
-  filter(mainentity %in% entity, !is.na(subentity)) %>%
-  mutate(subentity = factor(subentity)) %>%
-  group_by(subentity) %>%
-  survey_table(one_of(get_default("latents")), wide = FALSE, contrast = FALSE) %>%
-  mutate(subentity = ifelse(subentity %in% get_translation(srv, "study_average"), "Snitt", as.character(subentity))) %>%
-  mutate(subentity = factor(stri_trans_totitle(subentity), levels = stri_trans_totitle(unique(subentity)))) %>%
-  select(-n, -manifest) 
-
-# Get the vertical justification for geom text ---------------------------------
-vjust <- pd %>% spread(subentity, answer)
-vjust$overlap <- if (ncol(vjust) > 3) rowMeans(vjust[, 2:ncol(vjust)]) else vjust[[ncol(vjust)]]
-vjust <- ifelse(vjust[["Snitt"]] < vjust[["overlap"]], -1.5, 1.5)
-
-# Calculate appropriate range for y-axis ---------------------------------------
-y_max <- ifelse(max(pd[["answer"]]) < 90, round(max(pd[["answer"]])+10, -1), 100)
-y_min <- ifelse(min(pd[["answer"]]) > 10, round(min(pd[["answer"]])-10, -1), 0)
-
-# Add linetypes
-pd <- pd %>% mutate(line = ifelse(subentity == "Snitt", "solid", "dashed"))
-
-# Create the profile-plot ------------------------------------------------------
-p <- ggplot(data=pd, aes(x=question, y=answer, group=subentity, colour=subentity, linetype = line))
-p + geom_line(size=1) +
-  geom_point(size=3) +
-  scale_color_manual(values = fixed_colors(setNames(palette, c(entity, "Snitt")), pd$subentity)) +
-  geom_text(data = filter(pd, subentity == "Snitt"), 
-            aes(label=sprintf("%.1f", answer)),  
-            size=4, colour="#23373b", vjust=.5, nudge_y=vjust) + 
-  ylim(y_min, y_max) + 
-  guides(linetype=FALSE, color=guide_legend(nrow=2, byrow=TRUE)) +
-  plot_theme()
-
-```
-
-```{r, eval = historical}
-# Frametitle -------------------------------------------------------------------
-cat("# Historikk\n")
-cat("##", "","\n", sep=" ")
-csemester <- "fall"; cyear <- 2015
-
-# Use survey_table to collect the data
-pd <- latent_scores %>%
-  filter(mainentity %in% entity) %>%
-  select(-n, -question) %>%
-  spread(manifest, answer) %>% 
-  mutate(year = cyear, semester = csemester)
-
-# Add the historical data
-transl <- setNames(c("spring", "fall"), get_translation(srv, c("spring", "fall")))
-pd <- bind_rows(pd, srv$hd %>% filter(mainentity == entity)) %>%
-  arrange(desc(year), semester) %>%
-  mutate(semester = ordered_replace(semester, transl), mainentity = stri_c(semester, year, sep = " "))
-
-# Convert to long format and replace names
-transl <- setNames(get_default("latents"), get_translation(srv, get_default("latents")))
-pd <- pd %>%
-  select(-semester, -year) %>%
-  gather(question, answer, -mainentity) %>%
-  filter(question %in% c("epsi", "loyal")) %>%
-  mutate(question = ordered_replace(as.character(question), transl)) %>%
-  mutate(question = factor(question, names(transl), ordered = TRUE)) %>%
-  mutate(mainentity = factor(mainentity, levels = unique(mainentity), ordered = TRUE))
-
-# Calculate appropriate range for y-axis ---------------------------------------
-y_max <- ifelse(max(pd[["answer"]]) < 90, round(max(pd[["answer"]])+10, -1), 100)
-y_min <- ifelse(min(pd[["answer"]]) > 10, round(min(pd[["answer"]])-10, -1), 0)
-
-# Create the profile-plot ------------------------------------------------------
-p <- ggplot(data=pd, aes(x=question, y=answer, group=mainentity, fill=mainentity))
-p + geom_bar(stat="identity", width=0.5, position=position_dodge(width=0.6)) +
-  scale_y_continuous(limits=c(y_min, y_max), oob = rescale_none) +
-  #coord_cartesian(ylim = c(y_min, y_max)) + 
-  scale_fill_manual(values = setNames(palette, unique(pd$mainentity))) +
-  geom_text(aes(label=sprintf("%.1f", answer)),  
-            size=3, colour="#23373b", position=position_dodge(width=0.6), vjust=-1.1, hjust=.35) +
-  guides(fill = guide_legend(keywidth = .5, keyheight = .5)) +
-  plot_theme() + 
-  theme(title = element_text(hjust = -.1))
-
-
-```
-
-# GAP-analyse
-
-```{r}
+```{r, eval = FALSE}
+cat("# GAP-analyse\n")
 # Frametitle -------------------------------------------------------------------
 if (get_translation(srv, "contrast_average") %in% model_scores$mainentity) {
   cat("##", "Differansen mellom", entity, "og", get_translation(srv, "contrast_average"),"\n", sep=" ")
@@ -229,199 +154,53 @@ p + geom_bar(stat="identity", width=0.5, position="dodge") +
 
 ```
 
-# Resultat per spørsmål
-
 ```{r}
-# Frametitle -------------------------------------------------------------------
+cat("# Resultat per spørsmål\n")
+cat("## \n")
+
+var <- get_association(srv, default_latents())
+
+out <- srv %>%
+  group_by_(mainentity) %>%
+  manifest_table(wide = FALSE) %>%
+  filter(q1 %in% c(entity, "Average")) %>%
+  tidyr::separate(variable, c("variable", "question"), sep = " - ") %>%
+  mutate(latent = var) %>%
+  select(latent, variable, question, everything()) %>%
+  tidyr::spread(q1, value)
+
+
+t1 <- knitr::kable(filter(out, latent %in% c("image", "expect", "prodq")))
+t1 <- knitr::kable(filter(out, latent %in% c("servq", "value", "epsi", "loyal")))
+
+cat(t1, sep="\n")
 cat("##", "","\n", sep=" ")
-
-# Gather the data
-pd <- model_scores %>%
-  filter(mainentity %in% c(entity, get_translation(srv, c("contrast_average", "study_average"))))
-
-# Calculate the difference between the entity and the average ------------------
-if (length(levels(pd$mainentity)) > 1L) {
-  pd <- pd %>% spread(mainentity, answer) %>% arrange(manifest)
-  pd$difference <- pd[[4]] - pd[[5]] 
-}
-
-# Replace headers with the translation from config -----------------------------
-names(pd) <- ordered_replace(names(pd), setNames(srv$tr$original, srv$tr$replacement))
-
-# Get length of column headers for the table, and truncate manifest text if needed:
-max_length <- 110 - 2*length(names(pd)) - sum(stri_length(names(pd)[-2]))
-max_length <- floor(max_length/5)*5
-
-min_length <- stri_length(get_translation(srv, "question"))
-max_length <- if (max_length < min_length)  min_length else max_length
-
-# Shorten the strings and insert them into the data ----------------------------
-text <- as.character(pd[[get_translation(srv, "question")]])
-text <- ifelse(stri_length(text) >= max_length, stri_c(stri_sub(text, to = max_length-3), "..."), text)
-pd[[get_translation(srv, "question")]] <- text
-
-# Divide the data for the two tables -------------------------------------------
-first_table <- filter(pd, latent %in% latents[1:3]) %>% select(-latent) %>% xtable(digits=1)
-second_table <- filter(pd, latent %in% latents[4:length(latents)]) %>% select(-latent) %>% xtable(digits=1)
-
-# Capture output and alter to color negative values in red ---------------------
-first_table <- capture.output(print.xtable(first_table, size="\\tiny", comment=F, include.rownames=F))
-second_table <- capture.output(print.xtable(second_table, size="\\tiny", comment=F, include.rownames=F))
-
-first_table <- stri_replace_all(first_table, "$1\\\\textcolor[HTML]{D2232B}{$2}", regex = "(\\s|^)(-\\d?\\d\\.\\d*)")
-second_table <-  stri_replace_all(second_table, "$1\\\\textcolor[HTML]{D2232B}{$2}", regex = "(\\s|^)(-\\d?\\d\\.\\d*)")
-
-# Print the first table --------------------------------------------------------
-cat(first_table, sep="\n")
+cat(t2, sep="\n")
 ```
 
+```{r, eval = flowchart}
+cat("# Flowchart\n")
+cat("## \n")
 
-```{r}
-# Frametitle -------------------------------------------------------------------
-cat("##", "","\n", sep=" ")
+srv %>% flow_chart(entity)
 
-cat(second_table, sep="\n")
-```
-
-# Flowchart
-
-```{r}
-# Frametitle -------------------------------------------------------------------
-cat("##", "\n", sep=" ")
-
-weights <- srv$inner_weights %>%
-  mutate(origin = stri_trans_tolower(origin)) %>%
-  filter(mainentity == entity, !origin %in% "loyal") %>%
-  select(-image) %>%
-  gather(target, weight, -mainentity, -origin) %>%
-  filter(!(origin == target),
-         !(origin == "image" & target %in% c("value", "loyal")), 
-         !(origin == "expect" & target %in% c("value", "epsi", "loyal")), 
-         !(origin == "prodq" & target %in% c("expect", "loyal")), 
-         !(origin == "servq" & target %in% c("expect", "prodq", "loyal")), 
-         !(origin == "value" & target %in% c("expect", "prodq", "servq", "loyal")),
-         !(origin == "epsi" & target != "loyal")) %>%
-  mutate(origin = factor(origin, levels = get_default("latents"), ordered = TRUE)) %>%
-  arrange(origin) %>%
-  mutate(latent = stri_c(stri_c(origin, "_"), target)) %>%
-  select(latent, weight)
-
-scores <- latent_scores %>% filter(mainentity == entity)
-
-nms <- get_translation(srv, get_default("latents"))
-
-p <- flowchart(scores$answer, weights$weight, nms)
-p + annotate("rect", xmin = .3, xmax = 5.25, ymin = 0, ymax = 10, alpha = .1, fill = palette[1]) +
-    annotate("text", x = 4.93, y = 0.2, label = "Drivere", size = 3, colour = "#23373b", fontface = "bold")
-  
 # Add footnote -----------------------------------------------------------------
-footnote <- stri_c("Pilene i flytdiagrammet viser sammenhengen mellom aspektene vi har målt, og deres effekt på hverandre.
-                   Effekten beskrives med et tall mellom 0 og 1, og jo høyere verdi (nærmere 1) dess tettere sammenheng.")
+footnote <- "Pilene i flytdiagrammet viser sammenhengen mellom aspektene vi har målt, og deres effekt på hverandre. Effekten beskrives med et tall mellom 0 og 1, og jo høyere verdi (nærmere 1) dess tettere sammenheng."
 cat("\\footnoteextra{", footnote, "}", sep = "")
 ```
 
-# Effekt på kundetilfredshet
+```{r, eval = impacttab}
+cat("# Effekt på kundetilfredshet\n")
+cat("## \n")
 
-```{r}
-# Frametitle -------------------------------------------------------------------
-cat("##", "", "\n", sep=" ")
-
-# Gather the data for the table ------------------------------------------------
-pd <- srv$outer_weights %>%
-  filter(mainentity == entity) %>%
-  select(latent, manifest, question, epsi_effect) %>%
-  arrange(desc(epsi_effect)) %>%
-  mutate(manifest = stri_trans_totitle(manifest), latent = stri_trans_totitle(latent)) 
-  
-# Replace headers with the translation from config -----------------------------
-names(pd) <- ordered_replace(names(pd), setNames(srv$tr$original, srv$tr$replacement))
-names(pd)[c(1, 4)] <- c("Aspekt", "Effekt")
-
-# Get length of column headers for the table, and truncate manifest text if needed:
-max_length <- 110 - 2*length(names(pd)) - sum(stri_length(names(pd)[-2]))
-max_length <- floor(max_length/5)*5
-
-min_length <- stri_length(get_translation(srv, "question"))
-max_length <- if (max_length < min_length)  min_length else max_length
-
-# Shorten the strings and insert them into the data ----------------------------
-text <- as.character(pd[[get_translation(srv, "question")]])
-text <- ifelse(stri_length(text) >= max_length, stri_c(stri_sub(text, to = max_length-3), "..."), text)
-pd[[get_translation(srv, "question")]] <- text
-
-# Divide the data for the two tables -------------------------------------------
-first_table <- pd %>% xtable(digits=2)
-
-# Capture output and alter to color negative values in red ---------------------
-first_table <- capture.output(print.xtable(first_table, size="\\tiny", comment=F, include.rownames=F))
-
-# Print the first table --------------------------------------------------------
-cat(first_table, sep="\n")
+srv %>% impact_table(entity)
 
 # Add footnote -----------------------------------------------------------------
 footnote <- "Spørsmålene i tabellen over er sortert etter viktighet. Tabellen leses slik at dersom resultatet på ett enkelt spørsmål øker med 0,5 enhet på en 1-10 skala, så vil kundetilfredsheten øke med det som står i 'effekt' (på en 100 punkts skala)."
 cat("\\footnoteextra{", footnote, "}", sep = "")
-
 ```
 
-# Kontakt og service
-
-```{r}
-# Frametitle -------------------------------------------------------------------
-cat("##", get_question(srv, "q7_service"), "\n", sep = " ")
-
-# Gather the data for the table ------------------------------------------------
-pd <- srv %>%
-  group_by(mainentity) %>%
-  survey_table(q7_service, wide = FALSE) %>%
-  filter(mainentity %in% c(entity, get_translation(srv, c("contrast_average", "study_average")))) %>%
-  mutate(mainentity = factor(mainentity))
-
- 
-# Create the plot --------------------------------------------------------------
-p <- ggplot(pd, aes(x=answer, y=proportion, fill=mainentity, group=mainentity, ymin=0, ymax=1))
-p + geom_bar(stat="identity", width=0.5, position=position_dodge(width=0.6)) +
-  scale_fill_manual(values=fixed_colors(palette, pd$mainentity), drop=FALSE) +
-  scale_x_discrete(labels = function(x) simple_wrap(x, 15)) + 
-  scale_y_continuous(labels=percent) +
-  geom_text(aes(label=sprintf("%.0f%%", proportion*100)),  
-            size=3, colour="#23373b", position=position_dodge(width=0.6), vjust=-1.1, hjust=.35) +
-  guides(fill = guide_legend(keywidth = .5, keyheight = .5)) +
-  plot_theme() + 
-  theme(title = element_text(hjust = -.1))
-
-```
-
-```{r}
-cat("##", "Sist du kontaktet {XX}, hvordan opplevde du...", "\n", sep = " ")
-
-# Gather the data
-pd <- srv %>%
-  mutate_each(funs(rescale_score(clean_score(.))), q7sd:q7sf) %>%
-  group_by(mainentity) %>%
-  survey_table(q7sd:q7sf, wide = FALSE) %>%
-  select(-n) %>%
-  filter(mainentity %in% c(entity, get_translation(srv, c("contrast_average", "study_average")))) %>%
-  mutate(mainentity = factor(mainentity)) # Drop unused levels
-
-# Calculate appropriate range for y-axis ---------------------------------------
-y_max <- ifelse(max(pd[["answer"]]) < 90, round(max(pd[["answer"]])+10, -1), 100)
-y_min <- ifelse(min(pd[["answer"]]) > 10, round(min(pd[["answer"]])-10, -1), 0)
-
-# Plot the data
-p <- ggplot(pd, aes(x=question, y=answer, fill=mainentity, group=mainentity, ymin=0, ymax=100))
-p + geom_bar(stat="identity", width=0.5, position=position_dodge(width=0.6)) +
-    scale_fill_manual(values=fixed_colors(palette, pd$mainentity), drop=FALSE) +
-    scale_y_continuous(limits=c(y_min, y_max), oob = rescale_none) +
-    scale_x_discrete(labels = function(x) simple_wrap(x, 25)) + 
-    geom_text(aes(label=sprintf("%.1f", answer)), 
-              size=3, colour="#23373b", position=position_dodge(width=0.6), vjust=-1.1, hjust=.35) +
-    guides(fill = guide_legend(keywidth = .5, keyheight = .5)) +
-    plot_theme() + 
-    theme(panel.margin = unit(2, "lines"))
-```
-
-```{r, eval = complaint}
+```{r, eval = FALSE}
 # Frametitle -------------------------------------------------------------------
 cat("# Klager\n")
 cat("##", "\n", sep = " ")
@@ -477,7 +256,7 @@ plot_shared_legend(p1, p2)
 
 # Åpne svar
 
-```{r, eval = open_answers}
+```{r, eval = FALSE}
 # Frametitle -------------------------------------------------------------------
 mvar <- get_association(srv, c("open_complaint", "open_answer"))
 frametitle <- stri_c("##", get_question(srv, mvar), "(uredigerte svar)", sep = " ")
