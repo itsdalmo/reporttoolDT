@@ -1,6 +1,6 @@
 # Utility function that merges named vectors for private fields in Survey's.
 # Duplicates are dropped from the end of the named vector (after unlisting).
-merge_vectors <- function(..., .default = NULL, .check = TRUE) {
+merge_vectors <- function(..., .current = NULL, .default = NULL, .check = TRUE) {
   vals <- unlist(list(...))
   if (!length(vals) && is.null(.default)) {
     stop("No vectors supplied.")
@@ -19,7 +19,7 @@ merge_vectors <- function(..., .default = NULL, .check = TRUE) {
     }
   }
 
-  out <- c(vals, .default)
+  out <- c(vals, .current, .default)
   if (!is_named(out)) stop("All elements must be named.")
   out <- out[!duplicated(names(out), fromLast = FALSE)]
 

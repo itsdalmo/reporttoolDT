@@ -228,7 +228,7 @@ Survey <- R6::R6Class("Survey",
     set_label = function(..., .list = NULL, .auto = FALSE, .check = TRUE) {
       "Set labels."
       em <- if (.auto) auto_label(self$get_field()) else NULL
-      new <- merge_vectors(..., .list, em, private$.labels, .default = self$names(), .check = .check)
+      new <- merge_vectors(..., .list, em, .current = private$.labels, .default = self$names(), .check = .check)
       private$.labels <- new
       invisible(self)
     },
@@ -262,7 +262,7 @@ Survey <- R6::R6Class("Survey",
         com <- NULL
       }
 
-      private$.associations <- merge_vectors(new, com, old, .default = def, .check = .check)
+      private$.associations <- merge_vectors(new, com, .current = old, .default = def, .check = .check)
       invisible(self)
     },
 
@@ -292,7 +292,7 @@ Survey <- R6::R6Class("Survey",
         ent <- if (is.factor(ent)) levels(ent) else unique(ent)
       }
 
-      new <- merge_vectors(..., .list, private$.marketshares, .default = ent)
+      new <- merge_vectors(..., .list, .current = private$.marketshares, .default = ent)
       private$.marketshares <- new
       invisible(self)
     },
@@ -311,7 +311,7 @@ Survey <- R6::R6Class("Survey",
       "Set config."
       def <- get_default("config")
       def <- setNames(def$value, def$required)
-      new <- merge_vectors(..., .list, private$.config, .default = def)
+      new <- merge_vectors(..., .list, .current = private$.config, .default = def)
       private$.config <- new
       invisible(self)
     },
@@ -339,7 +339,7 @@ Survey <- R6::R6Class("Survey",
         lang <- NULL
       }
 
-      new <- merge_vectors(..., .list, lang, private$.translations, .default = def$required)
+      new <- merge_vectors(..., .list, lang, .current = private$.translations, .default = def$required)
       private$.translations <- new
       invisible(self)
     },
