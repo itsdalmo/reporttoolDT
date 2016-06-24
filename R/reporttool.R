@@ -35,7 +35,8 @@
 #' Render rmarkdown to PDF (beamer), HTML or Powerpoint using \code{\link{render_pdf}},
 #' \code{\link{render_html}} and \code{\link{render_ppt}}.
 #' Generate reports from rmarkdown using \code{\link{generate_report}} with type
-#' \code{pdf}, \code{html} or \code{ppt}.
+#' \code{pdf}, \code{html} or \code{ppt} - or directly using \code{\link{report_pdf}},
+#' \code{\link{report_html}} or \code{\link{report_ppt}}.
 #' }
 #'
 #' @author Kristian D. Olsen

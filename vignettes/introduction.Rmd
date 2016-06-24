@@ -116,7 +116,9 @@ if (require(ReporteRs)) {
 
 #### Reports
 
-Coming soon.
+To generate a report we can use `generate_report()` with one of `type = c("pdf", "ppt", "html")`. To skip specifying the type, we can also use `report_pdf()`, `report_ppt()` or `report_html()` directly. Each of these functions expect a dataset as the first argument, which is then passed to the knit-environment when evaluating the .Rmd-template.
+
+If a group is specified (or data is already grouped using `group_by()`), one report will be generated for each unique value in the grouping variable. The current group is made available as `entity` in the knit-environment. 
 
 ## More information
 
