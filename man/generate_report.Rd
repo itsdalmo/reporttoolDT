@@ -5,7 +5,7 @@
 \alias{report_html}
 \alias{report_pdf}
 \alias{report_ppt}
-\title{Render .Rmd to HTML}
+\title{Generate report from Rmarkdown}
 \usage{
 generate_report(x, input = NULL, group = NULL, output = NULL,
   type = c("pdf", "ppt", "html"), encoding = "UTF-8", ...)
@@ -36,12 +36,22 @@ own report.}
 \item{...}{Further arguments passed to the render functions.}
 }
 \description{
-This function is a wrapper for \code{\link[rmarkdown]{render}} with HTML output.
+The following functions allow you to generate PDF, PPT or HTML reports based
+on .Rmd-templates. Data passed to \code{x} is made available in the knit-environment,
+and can be referenced inside the .Rmd-template.
+}
+\details{
+If a grouping variable is specified in \code{group}, one report is generated
+for each unique group. The current group is made available in the knit-environment
+as \code{entity}, and can be used the filter the data to make results unique
+for that specific entity. In addition, you can use REPLACE_ENTITY as a placeholder
+inside the .Rmd template to get the current group directly.
 }
 \examples{
 \dontrun{
   # TODO
-  generate_report(input = "example.Rmd")
+  generate_report(data.frame(A = 1), input = "example.Rmd", type = "pdf")
+  report_pdf(data.frame(A = 1), input = "example.Rmd")
 }
 }
 \author{

@@ -1,13 +1,21 @@
-#' Render .Rmd to HTML
+#' Generate report from Rmarkdown
 #'
-#' This function is a wrapper for \code{\link[rmarkdown]{render}} with HTML output.
+#' The following functions allow you to generate PDF, PPT or HTML reports based
+#' on .Rmd-templates. Data passed to \code{x} is made available in the knit-environment,
+#' and can be referenced inside the .Rmd-template.
+#'
+#' If a grouping variable is specified in \code{group}, one report is generated
+#' for each unique group. The current group is made available in the knit-environment
+#' as \code{entity}, and can be used the filter the data to make results unique
+#' for that specific entity. In addition, you can use REPLACE_ENTITY as a placeholder
+#' inside the .Rmd template to get the current group directly.
 #'
 #' @param x An object to pass to the knitr environment when processing.
 #' @param input Path to a \code{.Rmd} report template.
 #' @param group A variable to "group" the reports by. Each entity will get their
 #' own report.
-#' @param type What format should the output be in. PDF, PPT or HTML.
 #' @param output Optional directory to use for output files.
+#' @param type What format should the output be in. PDF, PPT or HTML.
 #' @param encoding Encoding of the input file.
 #' @param ... Further arguments passed to the render functions.
 #' @author Kristian D. Olsen
@@ -15,7 +23,8 @@
 #' @examples
 #' \dontrun{
 #'   # TODO
-#'   generate_report(input = "example.Rmd")
+#'   generate_report(data.frame(A = 1), input = "example.Rmd", type = "pdf")
+#'   report_pdf(data.frame(A = 1), input = "example.Rmd")
 #' }
 
 generate_report <- function(x, input = NULL, group = NULL, output = NULL, type = c("pdf", "ppt", "html"), encoding = "UTF-8", ...) {
