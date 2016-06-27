@@ -59,8 +59,8 @@ as_scale.factor <- function(var) {
 #' @author Kristian D. Olsen
 #' @export
 #' @examples
-#' x <- clean_scale(c("1 Not happy", "10 Very happy"))
-#' identical(x, c(1, 10))
+#' x <- clean_scale(c("1 Not happy", "10 Very happy", "11 Don't know"))
+#' identical(x, c(1, 10, NA))
 
 clean_scale <- function(var) {
   if (is.factor(var))
