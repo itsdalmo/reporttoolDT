@@ -25,6 +25,7 @@ Suggests:
     dplyr,
     gridExtra,
     knitr,
+    openxlsx,
     readr,
     ReporteRs,
     reshape2,
