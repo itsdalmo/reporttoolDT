@@ -15,8 +15,8 @@ E.g. "10 Very happy" becomes "10", and the value is converted to \code{numeric}
 (without warning).
 }
 \examples{
-x <- clean_scale(c("1 Not happy", "10 Very happy"))
-identical(x, c(1, 10))
+x <- clean_scale(c("1 Not happy", "10 Very happy", "11 Don't know"))
+identical(x, c(1, 10, NA))
 }
 \author{
 Kristian D. Olsen

@@ -19,7 +19,7 @@ write_questionnaire(x, file, study = NULL, segment = NULL, year = NULL,
 \item{year}{Optional: Filter the annual edition of the questionnaire. Defaults
 to current year.}
 
-\item{entity}{Optional: Replace {XX} with something else.}
+\item{entity}{Optional: Replace \{XX\} with something else.}
 }
 \description{
 This function creates a .xlsx file with a "pretty print" of a questionnaire

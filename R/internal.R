@@ -1,3 +1,44 @@
+#' Export to netigate
+#'
+#' This function loops through the specified questionnaire and passes each question
+#' to the clipboard, with the correct formatting for Netigate's magic import.
+#'
+#' @inheritParams write_questionnaire
+#' @author Kristian D. Olsen
+#' @export
+#' @examples
+#' \dontrun{
+#'   q <- read_data("master questionnaire.xlsx", sheet = "questionnaires")
+#'   export_netigate(q, study = "Banking", segment = "B2C", year = 2016)
+#' }
+
+export_netigate <- function(x, study = NULL, segment = NULL, year = NULL, entity = NULL) {
+  blocks <- split_questionnaire(x, study, segment, year, entity, short_scale = FALSE)
+  for (i in seq_along(blocks)) {
+    x <- blocks[[i]]
+    if (nrow(x) == 1L) {
+      if (x$type[1] == "character") {
+        res <- x$question
+      } else {
+        res <- stri_c(x$question, "\n", x$values, collapse = "\n")
+      }
+    } else {
+      vals <- stringi::stri_replace_all(x$values[1], "\t", fixed = "\n")
+      res <- stri_c(stri_c(x$primer[1], "\n", vals, "\n"), stri_c(x$question, collapse = "\n"), collapse = "\n")
+    }
+
+    cat("Current questions", stri_c("(", str_list(x$manifest), ")"))
+    rdy <- FALSE
+    to_clipboard(res)
+    while (!rdy) {
+      n <- readline("Press N when ready for next question:")
+      if (n == "N")
+        rdy <- TRUE
+    }
+  }
+  invisible()
+}
+
 #' Print questionnaire
 #'
 #' This function creates a .xlsx file with a "pretty print" of a questionnaire
@@ -11,7 +52,7 @@
 #' @param segment Filter by segment (B2B/B2C).
 #' @param year Optional: Filter the annual edition of the questionnaire. Defaults
 #' to current year.
-#' @param entity Optional: Replace {XX} with something else.
+#' @param entity Optional: Replace \{XX\} with something else.
 #' @author Kristian D. Olsen
 #' @export
 #' @examples
@@ -21,6 +62,46 @@
 #' }
 
 write_questionnaire <- function(x, file, study = NULL, segment = NULL, year = NULL, entity = NULL) {
+  blocks <- split_questionnaire(x, study, segment, year, entity, short_scale = TRUE)
+  wb <- seamless::excel_workbook()
+
+  # Write the data and retain rows that have been written to
+  block_index <- lapply(blocks, function(q) {
+    df <- q[, c("latent", "manifest", "question", "values")]
+    # Set either the primer or question as title
+    if (nrow(q) == 1L && is.na(q$primer)) {
+      title <- q$question
+    } else {
+      title <- stri_c(unique(q$primer), collapse = "\n")
+    }
+    # Write the question
+    seamless::to_excel(df, wb, title = title, sheet = study)
+  })
+
+  lapply(block_index, function(x) {
+    rows <- x$rows["start"]:x$rows["end"]
+    # Merge values for question matrix
+    if (length(rows) > 3L) {
+      openxlsx::mergeCells(wb, sheet = study, cols = 4, rows = tail(rows, -2L))
+    }
+    # Always wrap text on values
+    openxlsx::addStyle(
+      wb, sheet = study, style = openxlsx::createStyle(wrapText = TRUE),
+      rows = tail(rows, -2L), cols = 4, gridExpand = TRUE, stack = TRUE)
+
+  })
+
+  # Widen the columns containing the question text and values
+  openxlsx::setColWidths(wb, sheet = study, cols = 3, widths = 100)
+  openxlsx::setColWidths(wb, sheet = study, cols = 4, widths = 50)
+
+  # Save and make sure nothing is printed
+  seamless::write_data(wb, file, overwrite = TRUE)
+  invisible()
+
+}
+
+split_questionnaire <- function(x, study = NULL, segment = NULL, year = NULL, entity = NULL, short_scale = TRUE) {
   # Check input ----------------------------------------------------------------
   if (!is.data.frame(x)) {
     stop("'x' (the questionnaire) should be a data.frame.", call. = FALSE)
@@ -58,7 +139,7 @@ write_questionnaire <- function(x, file, study = NULL, segment = NULL, year = NU
   # Filter study
   if (is.null(study) && length(unique(x$study)) > 1L) {
     stop("'study' cannot be NULL when 'x' contains more than one study.", call. = FALSE)
-  } else if (!study %in% x$study) {
+  } else if (!is.null(study) && !stri_trans_tolower(study) %in% x$study) {
     stop("The following 'study' was not found in the data:\n", str_list(study), call. = FALSE)
   } else if (!is.null(study)) {
     x <- x[x$study == stri_trans_tolower(study), ]
@@ -67,7 +148,7 @@ write_questionnaire <- function(x, file, study = NULL, segment = NULL, year = NU
   # Segment
   if (is.null(segment) && length(unique(x$segment)) > 1L) {
     stop("'segment' cannot be NULL when the study contains more than one segment.", call. = FALSE)
-  } else if (!stri_trans_tolower(segment) %in% x$segment) {
+  } else if (!is.null(segment) && !stri_trans_tolower(segment) %in% x$segment) {
     stop("The following 'segment' was not found for the current study:\n", str_list(segment), call. = FALSE)
   } else if (!is.null(segment)) {
     x <- x[x$segment == stri_trans_tolower(segment), ]
@@ -82,19 +163,18 @@ write_questionnaire <- function(x, file, study = NULL, segment = NULL, year = NU
   # Fix question order according to "order".
   x <- x[order(x$order), ]
 
-  # Write ----------------------------------------------------------------------
-
   # Remove all \r newlines before writing and add an index.
-  x[] <- lapply(x, stri_replace_all, replacement = "", fixed = "\r")
+  x[] <- lapply(x, stringi::stri_replace_all, replacement = "", fixed = "\r")
 
   # Expand scale variable levels
   is_scale <- stri_trans_tolower(x$type) == "scale"
   x$values[is_scale] <-  vapply(x$values[is_scale], function(v) {
-    v <- unlist(stri_split(v, fixed = "\n"))
+    v <- unlist(stringi::stri_split(v, fixed = "\n"))
     if (length(v) == 1L) {
       v
     } else {
-      stri_c(v[1], "...", v[2], if (length(v) > 2L) v[3] else "", sep = "\n")
+      dot <- if (short_scale) "..." else stri_c(2:9, collapse = "\n")
+      stri_c(v[1], dot, v[2], if (length(v) > 2L) v[3] else "", sep = "\n")
     }
   }, character(1))
 
@@ -114,47 +194,11 @@ write_questionnaire <- function(x, file, study = NULL, segment = NULL, year = NU
     # If index and primer are NA - use the rownumber as index
     if (is.na(x$primer[i]) && is.na(x$index[i])) {
       x$index[i] <- index_value
-    # If only the index is NA - give the same index to all identical primers
+      # If only the index is NA - give the same index to all identical primers
     } else if (is.na(x$index[i])) {
       x$index[x$primer %in% x$primer[i]] <- index_value
     }
   }
 
-  blocks <- split(x, x$index)
-  wb <- seamless::excel_workbook()
-
-  # Write the data and retain rows that have been written to
-  block_index <- lapply(blocks, function(q) {
-    df <- q[, c("latent", "manifest", "question", "values")]
-    # Set either the primer or question as title
-    if (nrow(q) == 1L && is.na(q$primer)) {
-      title <- q$question
-    } else {
-      title <- stri_c(unique(q$primer), collapse = "\n")
-    }
-    # Write the question
-    seamless::to_excel(df, wb, title = title, sheet = study)
-  })
-
-  lapply(block_index, function(x) {
-    rows <- x$rows["start"]:x$rows["end"]
-    # Merge values for question matrix
-    if (length(rows) > 3L) {
-      openxlsx::mergeCells(wb, sheet = study, cols = 4, rows = tail(rows, -2L))
-    }
-    # Always wrap text on values
-    openxlsx::addStyle(
-      wb, sheet = study, style = openxlsx::createStyle(wrapText = TRUE),
-      rows = tail(rows, -2L), cols = 4, gridExpand = TRUE, stack = TRUE)
-
-  })
-
-  # Widen the columns containing the question text and values
-  openxlsx::setColWidths(wb, sheet = study, cols = 3, widths = 100)
-  openxlsx::setColWidths(wb, sheet = study, cols = 4, widths = 50)
-
-  # Save and make sure nothing is printed
-  seamless::write_data(wb, file, overwrite = TRUE)
-  invisible()
-
+  split(x, x$index)
 }
